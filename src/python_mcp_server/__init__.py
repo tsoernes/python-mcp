@@ -282,7 +282,7 @@ def _exec_with_dependencies_sync(
 
 
 @mcp.tool(tags=["execution", "sync"])
-def run_script_in_dir(
+def py_run_script_in_dir(
     directory: Path,
     script_path: Path | None = None,
     script_content: str | None = None,
@@ -295,7 +295,7 @@ def run_script_in_dir(
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
 
     This is the synchronous variant. For asynchronous/background execution with optional streaming,
-    use run_script_in_dir_async.
+    use py_run_script_in_dir_async.
 
     Parameters:
         directory: Base directory; must exist.
@@ -410,7 +410,7 @@ def run_script_in_dir(
 
 
 @mcp.tool(tags=["execution", "dependencies", "sync"])
-def run_script_with_dependencies(
+def py_run_script_with_dependencies(
     script_content: str | None = None,
     script_path: Path | None = None,
     python_version: str = "3.12",
@@ -422,7 +422,7 @@ def run_script_with_dependencies(
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
 
-    This is the synchronous variant. For asynchronous/background execution use run_script_with_dependencies_async.
+    This is the synchronous variant. For asynchronous/background execution use py_run_script_with_dependencies_async.
 
     Parameters:
         script_content: Inline code (mutually exclusive with script_path).
@@ -568,7 +568,7 @@ def run_script_with_dependencies(
 
 
 @mcp.tool(tags=["execution", "async", "stream"])
-def run_script_in_dir_async(
+def py_run_script_in_dir_async(
     directory: Path,
     script_path: Path | None = None,
     script_content: str | None = None,
@@ -578,7 +578,7 @@ def run_script_in_dir_async(
     stream: bool = False,
 ) -> AsyncJobStart:
     """
-    Asynchronously execute a Python script (existing file or inline content) inside a target directory.
+    Asynchronously execute a Python script (existing file or inline content) inside a target directory. (Tool name: py_run_script_in_dir_async)
 
     Streaming:
         If stream=True, incremental stdout/stderr snapshots can be polled via resource job-stream://{job_id}
@@ -662,7 +662,7 @@ def run_script_in_dir_async(
     )
     JOBS[job_id] = rec
     logger.info(
-        "run_script_in_dir_async started job_id=%s strategy=%s cwd=%s stream=%s",
+        "py_run_script_in_dir_async started job_id=%s strategy=%s cwd=%s stream=%s",
         job_id,
         execution_strategy,
         workdir,
@@ -680,7 +680,7 @@ def run_script_in_dir_async(
 
 
 @mcp.tool(tags=["execution", "dependencies", "async", "stream"])
-def run_script_with_dependencies_async(
+def py_run_script_with_dependencies_async(
     script_content: str | None = None,
     script_path: Path | None = None,
     python_version: str = "3.12",
@@ -690,7 +690,7 @@ def run_script_with_dependencies_async(
     auto_parse_imports: bool = True,
 ) -> AsyncDepsJobStart:
     """
-    Asynchronously execute inline code or an existing script in a transient uv environment with dependencies.
+    Asynchronously execute inline code or an existing script in a transient uv environment with dependencies. (Tool name: py_run_script_with_dependencies_async)
 
     Mutual Exclusivity:
         Provide exactly one of script_content or script_path.
@@ -819,7 +819,7 @@ def run_script_with_dependencies_async(
     )
     JOBS[job_id] = rec
     logger.info(
-        "run_script_with_dependencies_async started job_id=%s python=%s deps=%s stream=%s auto_parse_imports=%s",
+        "py_run_script_with_dependencies_async started job_id=%s python=%s deps=%s stream=%s auto_parse_imports=%s",
         job_id,
         python_version,
         resolved_dependencies,
@@ -839,7 +839,7 @@ def run_script_with_dependencies_async(
 
 
 @mcp.tool(tags=["jobs", "introspection"])
-def list_running_jobs() -> list[dict[str, str]]:
+def py_list_running_jobs() -> list[dict[str, str]]:
     """
     List currently registered jobs (running or finished but not yet cleaned).
 
@@ -874,7 +874,7 @@ def list_running_jobs() -> list[dict[str, str]]:
 
 
 @mcp.tool(tags=["jobs", "introspection"])
-def get_job_output(job_id: str) -> dict[str, str]:
+def py_get_job_output(job_id: str) -> dict[str, str]:
     """
     Retrieve (and finalize if completed) a job's output.
 
@@ -913,7 +913,7 @@ def get_job_output(job_id: str) -> dict[str, str]:
 
 
 @mcp.tool(tags=["jobs", "control"])
-def kill_job(job_id: str) -> dict[str, str]:
+def py_kill_job(job_id: str) -> dict[str, str]:
     """
     Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
 
@@ -952,7 +952,7 @@ def kill_job(job_id: str) -> dict[str, str]:
 
 
 @mcp.tool(tags=["jobs", "maintenance"])
-def cleanup_jobs(
+def py_cleanup_jobs(
     remove_inline: bool = True,
     only_finished: bool = True,
 ) -> dict[str, int]:
@@ -1001,7 +1001,7 @@ def cleanup_jobs(
 
 
 @mcp.tool(tags=["benchmark", "performance", "sync"])
-def benchmark_script(
+def py_benchmark_script(
     script_content: str | None = None,
     script_path: Path | None = None,
     python_version: str = "3.12",
@@ -1013,7 +1013,7 @@ def benchmark_script(
     """
     Execute code or script with dependency resolution (uv) while collecting basic benchmark metrics.
 
-    Metrics:
+    (py_benchmark_script) Metrics:
         - wall_time_seconds
         - peak_rss_mb
         - cpu_time_seconds (user+system)
@@ -1219,7 +1219,7 @@ def main() -> None:
 
 
 @mcp.tool(tags=["scripts", "save"])
-def save_script(
+def py_save_script(
     script_name: str,
     source: str,
     dependencies: list[str] | None = None,
@@ -1276,7 +1276,7 @@ def save_script(
 
 
 @mcp.tool(tags=["scripts", "run", "sync"])
-def run_saved_script(
+def py_run_saved_script(
     script_name: str,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
@@ -1322,7 +1322,7 @@ def run_saved_script(
 
 
 @mcp.tool(tags=["scripts", "introspection"])
-def list_scripts() -> list[dict[str, str]]:
+def py_list_scripts() -> list[dict[str, str]]:
     """
     List scripts in 'scripts/' and show their name, path, top docstring preview, and script header metadata.
     """
