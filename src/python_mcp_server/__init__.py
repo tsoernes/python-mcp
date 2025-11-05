@@ -48,6 +48,8 @@ class JobRecord:
     benchmark: dict[str, float] | None = None
     script_path: Optional[Path] = None
     stream: bool = False
+    finalized_elapsed: Optional[float] = None  # Frozen elapsed time set at finalization
+    is_inline_temp: bool = False  # Mark if script_path points to a temp inline file for cleanup
 
 
 # ---------------------------
@@ -82,6 +84,140 @@ class AsyncDepsJobStart(BaseModel):
 
 JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
+
+# ---------------------------
+# Internal execution helpers
+# ---------------------------
+
+def _exec_script_in_dir_sync(
+    directory: Path,
+    script_path: Path | None,
+    script_content: str | None,
+    args: list[str] | None,
+    use_uv: bool,
+    python_version: str | None,
+    timeout_seconds: int,
+) -> RunScriptResult:
+    workdir = Path(directory).expanduser().resolve()
+    if not workdir.is_dir():
+        raise FileNotFoundError(f"Directory not found: {workdir}")
+    if script_content:
+        tmp_name = f"inline_{uuid.uuid4().hex}.py"
+        script_path_local = workdir / tmp_name
+        script_path_local.write_text(script_content)
+        is_inline = True
+    else:
+        if not script_path:
+            raise ValueError("Either 'script_path' or 'script_content' must be provided.")
+        candidate = script_path.expanduser()
+        if not candidate.is_absolute():
+            candidate = (workdir / candidate).resolve()
+        script_path_local = candidate.resolve()
+        if not script_path_local.is_file():
+            raise FileNotFoundError(f"Script file not found: {script_path_local}")
+        is_inline = False
+    command: list[str]
+    execution_strategy = "system-python"
+    if use_uv:
+        command = ["uv", "run"]
+        if python_version:
+            command += ["--python", python_version]
+        execution_strategy = "uv-run"
+    else:
+        command = ["python"]
+    command.append(str(script_path_local))
+    if args:
+        command.extend(args)
+    start = time.time()
+    try:
+        proc = subprocess.Popen(
+            command,
+            cwd=str(workdir),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            stdout, stderr = proc.communicate(
+                timeout=None if timeout_seconds == 0 else timeout_seconds
+            )
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            stderr += "\n[TIMEOUT]"
+    finally:
+        if is_inline and script_path_local.exists():
+            try:
+                script_path_local.unlink()
+            except Exception:
+                pass
+    return RunScriptResult(
+        stdout=stdout,
+        stderr=stderr,
+        exit_code=proc.returncode,
+        execution_strategy=execution_strategy,
+        elapsed_seconds=time.time() - start,
+    )
+
+def _exec_with_dependencies_sync(
+    script_content: str | None,
+    script_path: Path | None,
+    python_version: str,
+    dependencies: list[str] | None,
+    args: list[str] | None,
+    timeout_seconds: int,
+) -> RunWithDepsResult:
+    if not script_content and not script_path:
+        raise ValueError("Provide either 'script_content' or 'script_path'.")
+    if script_content and script_path:
+        raise ValueError("Provide only one of 'script_content' or 'script_path'.")
+    if script_path:
+        spath = Path(script_path).expanduser().resolve()
+        if not spath.is_file():
+            raise FileNotFoundError(f"Script not found: {spath}")
+        is_inline = False
+    else:
+        spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
+        spath.write_text(script_content or "")
+        is_inline = True
+    command: list[str] = ["uv", "run", "--python", python_version]
+    resolved_dependencies = dependencies[:] if dependencies else []
+    for dep in resolved_dependencies:
+        command += ["--with", dep]
+    command.append(str(spath))
+    if args:
+        command.extend(args)
+    start = time.time()
+    try:
+        proc = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            stdout, stderr = proc.communicate(
+                timeout=None if timeout_seconds == 0 else timeout_seconds
+            )
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            stderr += "\n[TIMEOUT]"
+    finally:
+        if is_inline and spath.exists():
+            try:
+                spath.unlink()
+            except Exception:
+                pass
+    return RunWithDepsResult(
+        stdout=stdout,
+        stderr=stderr,
+        exit_code=proc.returncode,
+        execution_strategy="uv-run",
+        elapsed_seconds=time.time() - start,
+        resolved_dependencies=resolved_dependencies,
+        python_version_used=python_version,
+    )
 
 
 @mcp.tool(tags=["execution", "sync"])
@@ -585,7 +721,7 @@ def get_job_output(job_id: str) -> dict[str, str]:
 @mcp.tool(tags=["jobs", "control"])
 def kill_job(job_id: str) -> dict[str, str]:
     """
-    Terminate a running job.
+    Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
 
     Parameters:
         job_id: Job identifier.
@@ -598,16 +734,23 @@ def kill_job(job_id: str) -> dict[str, str]:
         logger.info("Killing running job_id=%s pid=%s", job_id, rec.process.pid)
         rec.process.kill()
         time.sleep(0.05)
-    _finalize_capture(rec)
+        _finalize_capture(rec)
+        status = "killed"
+    else:
+        # Already finished
+        if not rec.finished:
+            _finalize_capture(rec)
+        status = "already-finished"
     logger.info(
-        "Job killed job_id=%s exit_code=%s elapsed=%.2fs",
+        "Job kill request processed job_id=%s status=%s exit_code=%s frozen_elapsed=%.2fs",
         job_id,
+        status,
         rec.process.returncode,
-        time.time() - rec.start_time,
+        rec.finalized_elapsed if rec.finalized_elapsed is not None else (time.time() - rec.start_time),
     )
     return {
         "job_id": job_id,
-        "status": "killed",
+        "status": status,
         "exit_code": str(rec.process.returncode),
     }
 
@@ -634,22 +777,40 @@ def benchmark_script(
     Parameters mirror run_script_with_dependencies plus:
         sample_interval: Polling interval for memory usage sampling.
     """
-    result = run_script_with_dependencies(
-        script_content=script_content,
-        script_path=script_path,
-        python_version=python_version,
-        dependencies=dependencies,
-        args=args,
-        async_run=True,
-        stream=False,
-        timeout_seconds=timeout_seconds,
+    # Use internal helper to start process manually (avoid calling decorated tool object)
+    if not script_content and not script_path:
+        raise ValueError("Provide either 'script_content' or 'script_path'.")
+    if script_content and script_path:
+        raise ValueError("Provide only one of 'script_content' or 'script_path'.")
+    if script_path:
+        spath = Path(script_path).expanduser().resolve()
+        if not spath.is_file():
+            raise FileNotFoundError(f"Script not found: {spath}")
+        is_inline = False
+    else:
+        spath = Path(f"inline_bench_{uuid.uuid4().hex}.py").resolve()
+        spath.write_text(script_content or "")
+        is_inline = True
+    command: list[str] = ["uv", "run", "--python", python_version]
+    resolved_dependencies = dependencies[:] if dependencies else []
+    for dep in resolved_dependencies:
+        command += ["--with", dep]
+    command.append(str(spath))
+    if args:
+        command.extend(args)
+    proc = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        bufsize=1,
     )
-    job_id = result["job_id"]
-    rec = JOBS[job_id]
-    proc = rec.process
+    start_time = time.time()
     ps_proc = psutil.Process(proc.pid)
     peak_rss = 0
     start_cpu = ps_proc.cpu_times()
+    stdout_chunks: list[str] = []
+    stderr_chunks: list[str] = []
     while proc.poll() is None:
         try:
             rss = ps_proc.memory_info().rss
@@ -657,17 +818,39 @@ def benchmark_script(
                 peak_rss = rss
         except psutil.Error:
             break
+        # Non-blocking reads
+        if proc.stdout:
+            line = proc.stdout.readline()
+            while line:
+                stdout_chunks.append(line)
+                line = proc.stdout.readline()
+        if proc.stderr:
+            line = proc.stderr.readline()
+            while line:
+                stderr_chunks.append(line)
+                line = proc.stderr.readline()
         time.sleep(sample_interval)
+    # Capture any trailing output
+    if proc.stdout:
+        for line in proc.stdout.readlines():
+            stdout_chunks.append(line)
+    if proc.stderr:
+        for line in proc.stderr.readlines():
+            stderr_chunks.append(line)
     end_cpu = ps_proc.cpu_times()
-    wall = time.time() - rec.start_time
-    _finalize_capture(rec)
+    wall = time.time() - start_time
+    if is_inline and spath.exists():
+        try:
+            spath.unlink()
+        except Exception:
+            pass
     return BenchmarkResult(
-        stdout="".join(rec.stdout_chunks),
-        stderr="".join(rec.stderr_chunks),
+        stdout="".join(stdout_chunks),
+        stderr="".join(stderr_chunks),
         exit_code=proc.returncode,
         execution_strategy="uv-run",
         elapsed_seconds=wall,
-        resolved_dependencies=list(dependencies or []),
+        resolved_dependencies=list(resolved_dependencies),
         python_version_used=python_version,
         wall_time_seconds=wall,
         cpu_time_seconds=(end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system),
@@ -709,18 +892,19 @@ def _nonblocking_capture(rec: JobRecord) -> None:
 
 def _finalize_capture(rec: JobRecord) -> None:
     """
-    Capture any remaining output and mark job finished.
+    Capture any remaining output and mark job finished. Freeze elapsed time.
     """
     if rec.finished:
         return
     _nonblocking_capture(rec)
     rec.exit_code = rec.process.returncode
     rec.finished = True
+    rec.finalized_elapsed = time.time() - rec.start_time
     logger.info(
-        "Job finalized job_id=%s exit_code=%s elapsed=%.2fs stdout_len=%d stderr_len=%d",
+        "Job finalized job_id=%s exit_code=%s frozen_elapsed=%.2fs stdout_len=%d stderr_len=%d",
         rec.job_id,
         rec.exit_code,
-        time.time() - rec.start_time,
+        rec.finalized_elapsed,
         sum(len(c) for c in rec.stdout_chunks),
         sum(len(c) for c in rec.stderr_chunks),
     )
