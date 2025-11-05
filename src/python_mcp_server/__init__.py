@@ -6,12 +6,26 @@ import sys
 import textwrap
 import time
 import uuid
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
 import psutil
 from fastmcp import FastMCP
+
+# Logging configuration: file + stderr console
+LOG_PATH = Path(__file__).resolve().parent.parent / "python_mcp_server.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
+logger = logging.getLogger("python_mcp_server")
+logger.info("Logger initialized; log file at %s", LOG_PATH)
 
 mcp = FastMCP(name="Python Script Executor")
 
@@ -144,10 +158,17 @@ def run_script_in_dir(
             stream=stream,
         )
         JOBS[job_id] = rec
+        logger.info(
+            "run_script_in_dir async job started job_id=%s strategy=%s cwd=%s",
+            job_id,
+            execution_strategy,
+            workdir,
+        )
 
         if stream:
             # Launch background poller
             asyncio.get_event_loop().create_task(_poll_stream(job_id))
+            logger.info("Streaming poller launched for job_id=%s", job_id)
 
         return {
             "job_id": job_id,
@@ -402,11 +423,19 @@ def kill_job(job_id: str) -> dict[str, str]:
     """
     rec = JOBS.get(job_id)
     if not rec:
+        logger.warning("kill_job requested for missing job_id=%s", job_id)
         raise ValueError(f"No such job: {job_id}")
     if rec.process.poll() is None:
+        logger.info("Killing running job_id=%s pid=%s", job_id, rec.process.pid)
         rec.process.kill()
         time.sleep(0.05)
     _finalize_capture(rec)
+    logger.info(
+        "Job killed job_id=%s exit_code=%s elapsed=%.2fs",
+        job_id,
+        rec.process.returncode,
+        time.time() - rec.start_time,
+    )
     return {
         "job_id": job_id,
         "status": "killed",
@@ -516,6 +545,14 @@ def _finalize_capture(rec: JobRecord) -> None:
     _nonblocking_capture(rec)
     rec.exit_code = rec.process.returncode
     rec.finished = True
+    logger.info(
+        "Job finalized job_id=%s exit_code=%s elapsed=%.2fs stdout_len=%d stderr_len=%d",
+        rec.job_id,
+        rec.exit_code,
+        time.time() - rec.start_time,
+        sum(len(c) for c in rec.stdout_chunks),
+        sum(len(c) for c in rec.stderr_chunks),
+    )
 
 
 @mcp.resource("job-stream://{job_id}")
@@ -554,6 +591,7 @@ def get_job_output_stream(job_id: str) -> str:
 
 def main() -> None:
     # Entry point kept for script invocation compatibility; prefer mcp.run() when used as an MCP server.
+    logger.info("Starting MCP server (transport=stdio)")
     mcp.run(transport="stdio")
 
 
