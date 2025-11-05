@@ -85,6 +85,32 @@ class AsyncDepsJobStart(BaseModel):
 JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
 
+def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
+    """
+    Infer an exact minor python version (e.g. '3.13') from the project's pyproject.toml
+    requires-python field if present. Returns None if not found or parsing fails.
+
+    Strategy:
+      - Look for project.requires-python (PEP 621)
+      - Extract first occurrence of \d+.\d+ from the version spec (e.g. '>=3.13' -> '3.13')
+    """
+    pyproject = workdir / "pyproject.toml"
+    if not pyproject.is_file():
+        return None
+    try:
+        import tomllib
+        import re
+        data = tomllib.loads(pyproject.read_text())
+        requires = data.get("project", {}).get("requires-python")
+        if not requires:
+            return None
+        match = re.search(r"(\\d+\\.\\d+)", requires)
+        if match:
+            return match.group(1)
+    except Exception:
+        return None
+    return None
+
 # ---------------------------
 # Internal execution helpers
 # ---------------------------
@@ -120,6 +146,9 @@ def _exec_script_in_dir_sync(
     execution_strategy = "system-python"
     if use_uv:
         command = ["uv", "run"]
+        # Infer python version from pyproject.toml if not explicitly provided.
+        if not python_version:
+            python_version = _infer_python_version_from_pyproject(workdir)
         if python_version:
             command += ["--python", python_version]
         execution_strategy = "uv-run"
@@ -292,6 +321,8 @@ def run_script_in_dir(
     execution_strategy = "system-python"
     if use_uv:
         command = ["uv", "run"]
+        if not python_version:
+            python_version = _infer_python_version_from_pyproject(workdir)
         if python_version:
             command += ["--python", python_version]
         execution_strategy = "uv-run"
@@ -354,6 +385,7 @@ def run_script_with_dependencies(
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
+    auto_parse_imports: bool = True,
 ) -> RunWithDepsResult:
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
@@ -364,9 +396,11 @@ def run_script_with_dependencies(
         script_content: Inline code (mutually exclusive with script_path).
         script_path: Existing script file path.
         python_version: Exact minor version (e.g. '3.12').
-        dependencies: List of package specifiers (PEP 440).
+        dependencies: List[str] | None - explicit package specifiers (PEP 440). May be supplemented automatically.
         args: Optional CLI arguments.
         timeout_seconds: 0 disables timeout.
+        auto_parse_imports: When True, parse script source for import statements and append missing top-level modules
+                           to dependency list (best-effort heuristic; does not guarantee install success).
 
     Returns (RunWithDepsResult):
         Extends RunScriptResult with:
@@ -380,9 +414,10 @@ def run_script_with_dependencies(
 
     Notes:
         - Uses 'uv run --with <dep>' for each dependency.
+        - Auto-import parsing is heuristic: it treats 'from pkg.sub import X' and 'import pkg.sub' both as 'pkg'.
+        - Built-in / stdlib modules are not filtered exhaustively; a small skip list is applied.
         - Future: environment caching keyed by hash(deps+python_version).
     """
-
 
     if not script_content and not script_path:
         raise ValueError("Provide either 'script_content' or 'script_path'.")
@@ -393,20 +428,53 @@ def run_script_with_dependencies(
         spath = Path(script_path).expanduser().resolve()
         if not spath.is_file():
             raise FileNotFoundError(f"Script not found: {spath}")
+        source_text = spath.read_text()
     else:
         # Inline code -> temp file in cwd of process (use current working directory)
         spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
-        spath.write_text(script_content or "")
+        source_text = script_content or ""
+        spath.write_text(source_text)
+
+    # Build initial dependency list
+    resolved_dependencies = dependencies[:] if dependencies else []
+
+    if auto_parse_imports:
+        # Simple heuristic import parser
+        import re
+        lines = source_text.splitlines()
+        detected: set[str] = set()
+        import_pattern = re.compile(r"^(?:from|import)\\s+([a-zA-Z0-9_\\.]+)")
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            m = import_pattern.match(line)
+            if not m:
+                continue
+            raw = m.group(1)
+            # Take top-level package name (segment before dot)
+            top = raw.split(".")[0]
+            detected.add(top)
+
+        # Basic skip list for common stdlib / internal modules to reduce noise
+        skip = {
+            "sys", "os", "re", "time", "uuid", "json", "math", "pathlib", "subprocess",
+            "typing", "dataclasses", "logging", "asyncio", "shutil", "itertools",
+            "functools", "collections", "statistics", "pprint", "enum"
+        }
+
+        for pkg in sorted(detected):
+            if pkg in skip:
+                continue
+            if pkg not in resolved_dependencies:
+                resolved_dependencies.append(pkg)
 
     command: list[str] = ["uv", "run", "--python", python_version]
-    resolved_dependencies = dependencies[:] if dependencies else []
     for dep in resolved_dependencies:
         command += ["--with", dep]
     command.append(str(spath))
     if args:
         command.extend(args)
-
-    # (Async mode removed from this function; see run_script_with_dependencies_async.)
 
     start = time.time()
     try:
@@ -529,6 +597,7 @@ def run_script_in_dir_async(
         directory=workdir,
         script_path=script_path_local,
         stream=stream,
+        is_inline_temp=bool(script_content),
     )
     JOBS[job_id] = rec
     logger.info(
@@ -557,6 +626,7 @@ def run_script_with_dependencies_async(
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
     stream: bool = False,
+    auto_parse_imports: bool = True,
 ) -> AsyncDepsJobStart:
     """
     Asynchronously execute inline code or an existing script in a transient uv environment with dependencies.
@@ -574,6 +644,8 @@ def run_script_with_dependencies_async(
         dependencies: List of package specifiers (PEP 440).
         args: Optional CLI arguments.
         stream: Enable periodic harvesting of stdout/stderr.
+        auto_parse_imports: When True, parse script source for import statements and append missing top-level modules
+                            to dependency list (heuristic; applies skip list of common stdlib modules).
 
     Returns (AsyncDepsJobStart):
         job_id, status, python_version_used, resolved_dependencies.
@@ -583,7 +655,11 @@ def run_script_with_dependencies_async(
         ValueError: Exclusivity violated.
 
     Notes:
-        - Uses 'uv run --with <dep>' for each dependency.
+        - Uses 'uv run --with <dep>' for each dependency (explicit + inferred).
+        - Auto-import parsing heuristics:
+            * Extracts top-level package from lines matching ^(from|import) <name>
+            * Skip list filters common stdlib modules
+            * Does not resolve version pins automatically
         - Future enhancement: environment caching to reduce cold start latency.
     """
     if not script_content and not script_path:
@@ -595,12 +671,41 @@ def run_script_with_dependencies_async(
         spath = Path(script_path).expanduser().resolve()
         if not spath.is_file():
             raise FileNotFoundError(f"Script not found: {spath}")
+        source_text = spath.read_text()
     else:
         spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
         spath.write_text(script_content or "")
+        source_text = script_content or ""
+
+    resolved_dependencies = dependencies[:] if dependencies else []
+
+    if auto_parse_imports:
+        import re
+        lines = source_text.splitlines()
+        detected: set[str] = set()
+        pattern = re.compile(r"^(?:from|import)\s+([a-zA-Z0-9_\.]+)")
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            m = pattern.match(line)
+            if not m:
+                continue
+            raw = m.group(1)
+            top = raw.split(".")[0]
+            detected.add(top)
+        skip = {
+            "sys", "os", "re", "time", "uuid", "json", "math", "pathlib", "subprocess",
+            "typing", "dataclasses", "logging", "asyncio", "shutil", "itertools",
+            "functools", "collections", "statistics", "pprint", "enum"
+        }
+        for pkg in sorted(detected):
+            if pkg in skip:
+                continue
+            if pkg not in resolved_dependencies:
+                resolved_dependencies.append(pkg)
 
     command: list[str] = ["uv", "run", "--python", python_version]
-    resolved_dependencies = dependencies[:] if dependencies else []
     for dep in resolved_dependencies:
         command += ["--with", dep]
     command.append(str(spath))
@@ -626,11 +731,12 @@ def run_script_with_dependencies_async(
     )
     JOBS[job_id] = rec
     logger.info(
-        "run_script_with_dependencies_async started job_id=%s python=%s deps=%s stream=%s",
+        "run_script_with_dependencies_async started job_id=%s python=%s deps=%s stream=%s auto_parse_imports=%s",
         job_id,
         python_version,
         resolved_dependencies,
         stream,
+        auto_parse_imports,
     )
     if stream:
         asyncio.get_event_loop().create_task(_poll_stream(job_id))
@@ -752,6 +858,49 @@ def kill_job(job_id: str) -> dict[str, str]:
         "job_id": job_id,
         "status": status,
         "exit_code": str(rec.process.returncode),
+    }
+
+@mcp.tool(tags=["jobs", "maintenance"])
+def cleanup_jobs(
+    remove_inline: bool = True,
+    only_finished: bool = True,
+) -> dict[str, int]:
+    """
+    Remove jobs from the registry and optionally delete their temporary inline script files.
+
+    Parameters:
+        remove_inline: When True, delete temp inline script files created from script_content.
+        only_finished: When True, only remove finished jobs; when False remove all jobs.
+
+    Returns:
+        {
+          "removed": int,          # Number of jobs removed
+          "remaining": int,        # Jobs still in registry
+          "inline_deleted": int    # Temp inline script files deleted
+        }
+
+    Notes:
+        - Inline temp scripts are marked via JobRecord.is_inline_temp.
+        - Safe to call repeatedly; missing files ignored.
+    """
+    removed = 0
+    inline_deleted = 0
+    for jid in list(JOBS.keys()):
+        rec = JOBS[jid]
+        if only_finished and not rec.finished:
+            continue
+        if remove_inline and rec.is_inline_temp and rec.script_path and rec.script_path.exists():
+            try:
+                rec.script_path.unlink()
+                inline_deleted += 1
+            except Exception:
+                pass
+        del JOBS[jid]
+        removed += 1
+    return {
+        "removed": removed,
+        "remaining": len(JOBS),
+        "inline_deleted": inline_deleted,
     }
 
 
