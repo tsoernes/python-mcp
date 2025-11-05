@@ -49,7 +49,9 @@ class JobRecord:
     script_path: Optional[Path] = None
     stream: bool = False
     finalized_elapsed: Optional[float] = None  # Frozen elapsed time set at finalization
-    is_inline_temp: bool = False  # Mark if script_path points to a temp inline file for cleanup
+    is_inline_temp: bool = (
+        False  # Mark if script_path points to a temp inline file for cleanup
+    )
 
 
 # ---------------------------
@@ -59,31 +61,53 @@ class RunScriptResult(BaseModel):
     stdout: str = Field(description="Full captured stdout.")
     stderr: str = Field(description="Full captured stderr.")
     exit_code: int = Field(description="Process exit code.")
-    execution_strategy: Literal["uv-run", "system-python"] = Field(description="Interpreter strategy chosen.")
+    execution_strategy: Literal["uv-run", "system-python"] = Field(
+        description="Interpreter strategy chosen."
+    )
     elapsed_seconds: float = Field(description="Wall time in seconds.")
+
 
 class AsyncJobStart(BaseModel):
     job_id: str = Field(description="Opaque job identifier.")
-    status: Literal["started"] = Field(description="Always 'started' for a newly created job.")
-    execution_strategy: Literal["uv-run", "system-python"] = Field(description="Interpreter strategy chosen.")
+    status: Literal["started"] = Field(
+        description="Always 'started' for a newly created job."
+    )
+    execution_strategy: Literal["uv-run", "system-python"] = Field(
+        description="Interpreter strategy chosen."
+    )
+
 
 class RunWithDepsResult(RunScriptResult):
-    resolved_dependencies: List[str] = Field(description="Dependencies requested (after normalization).")
-    python_version_used: str = Field(description="Interpreter version used (exact minor).")
+    resolved_dependencies: List[str] = Field(
+        description="Dependencies requested (after normalization)."
+    )
+    python_version_used: str = Field(
+        description="Interpreter version used (exact minor)."
+    )
+
 
 class BenchmarkResult(RunWithDepsResult):
     wall_time_seconds: float = Field(description="Wall clock time.")
     cpu_time_seconds: float = Field(description="User+system CPU time.")
     peak_rss_mb: float = Field(description="Peak resident memory usage in MB.")
 
+
 class AsyncDepsJobStart(BaseModel):
     job_id: str = Field(description="Opaque job identifier.")
-    status: Literal["started"] = Field(description="Always 'started' for a newly created job.")
-    python_version_used: str = Field(description="Interpreter version used (exact minor).")
-    resolved_dependencies: List[str] = Field(description="Dependencies requested (after normalization).")
+    status: Literal["started"] = Field(
+        description="Always 'started' for a newly created job."
+    )
+    python_version_used: str = Field(
+        description="Interpreter version used (exact minor)."
+    )
+    resolved_dependencies: List[str] = Field(
+        description="Dependencies requested (after normalization)."
+    )
+
 
 JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
+
 
 def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
     """
@@ -100,6 +124,7 @@ def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
     try:
         import tomllib
         import re
+
         data = tomllib.loads(pyproject.read_text())
         requires = data.get("project", {}).get("requires-python")
         if not requires:
@@ -111,9 +136,11 @@ def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
         return None
     return None
 
+
 # ---------------------------
 # Internal execution helpers
 # ---------------------------
+
 
 def _exec_script_in_dir_sync(
     directory: Path,
@@ -128,13 +155,17 @@ def _exec_script_in_dir_sync(
     if not workdir.is_dir():
         raise FileNotFoundError(f"Directory not found: {workdir}")
     if script_content:
+        inline_dir = workdir / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = workdir / tmp_name
+        script_path_local = inline_dir / tmp_name
         script_path_local.write_text(script_content)
         is_inline = True
     else:
         if not script_path:
-            raise ValueError("Either 'script_path' or 'script_content' must be provided.")
+            raise ValueError(
+                "Either 'script_path' or 'script_content' must be provided."
+            )
         candidate = script_path.expanduser()
         if not candidate.is_absolute():
             candidate = (workdir / candidate).resolve()
@@ -187,6 +218,7 @@ def _exec_script_in_dir_sync(
         execution_strategy=execution_strategy,
         elapsed_seconds=time.time() - start,
     )
+
 
 def _exec_with_dependencies_sync(
     script_content: str | None,
@@ -294,15 +326,15 @@ def run_script_in_dir(
         - Temporary inline file removed after synchronous completion.
     """
 
-
     workdir = Path(directory).expanduser().resolve()
     if not workdir.is_dir():
         raise FileNotFoundError(f"Directory not found: {workdir}")
 
     if script_content:
-        # Create a temp script file
+        inline_dir = workdir / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = workdir / tmp_name
+        script_path_local = inline_dir / tmp_name
         script_path_local.write_text(script_content)
     else:
         if not script_path:
@@ -430,8 +462,9 @@ def run_script_with_dependencies(
             raise FileNotFoundError(f"Script not found: {spath}")
         source_text = spath.read_text()
     else:
-        # Inline code -> temp file in cwd of process (use current working directory)
-        spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
+        inline_dir = Path.cwd() / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
+        spath = (inline_dir / f"inline_dep_{uuid.uuid4().hex}.py").resolve()
         source_text = script_content or ""
         spath.write_text(source_text)
 
@@ -441,6 +474,7 @@ def run_script_with_dependencies(
     if auto_parse_imports:
         # Simple heuristic import parser
         import re
+
         lines = source_text.splitlines()
         detected: set[str] = set()
         import_pattern = re.compile(r"^(?:from|import)\\s+([a-zA-Z0-9_\\.]+)")
@@ -458,9 +492,26 @@ def run_script_with_dependencies(
 
         # Basic skip list for common stdlib / internal modules to reduce noise
         skip = {
-            "sys", "os", "re", "time", "uuid", "json", "math", "pathlib", "subprocess",
-            "typing", "dataclasses", "logging", "asyncio", "shutil", "itertools",
-            "functools", "collections", "statistics", "pprint", "enum"
+            "sys",
+            "os",
+            "re",
+            "time",
+            "uuid",
+            "json",
+            "math",
+            "pathlib",
+            "subprocess",
+            "typing",
+            "dataclasses",
+            "logging",
+            "asyncio",
+            "shutil",
+            "itertools",
+            "functools",
+            "collections",
+            "statistics",
+            "pprint",
+            "enum",
         }
 
         for pkg in sorted(detected):
@@ -560,12 +611,16 @@ def run_script_in_dir_async(
         raise FileNotFoundError(f"Directory not found: {workdir}")
 
     if script_content:
+        inline_dir = workdir / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = workdir / tmp_name
+        script_path_local = inline_dir / tmp_name
         script_path_local.write_text(script_content)
     else:
         if not script_path:
-            raise ValueError("Either 'script_path' or 'script_content' must be provided.")
+            raise ValueError(
+                "Either 'script_path' or 'script_content' must be provided."
+            )
         candidate = script_path.expanduser()
         if not candidate.is_absolute():
             candidate = (workdir / candidate).resolve()
@@ -679,7 +734,9 @@ def run_script_with_dependencies_async(
             raise FileNotFoundError(f"Script not found: {spath}")
         source_text = spath.read_text()
     else:
-        spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
+        inline_dir = Path.cwd() / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
+        spath = (inline_dir / f"inline_dep_{uuid.uuid4().hex}.py").resolve()
         spath.write_text(script_content or "")
         source_text = script_content or ""
 
@@ -687,6 +744,7 @@ def run_script_with_dependencies_async(
 
     if auto_parse_imports:
         import re
+
         lines = source_text.splitlines()
         detected: set[str] = set()
         pattern = re.compile(r"^(?:from|import)\s+([a-zA-Z0-9_\.]+)")
@@ -701,9 +759,26 @@ def run_script_with_dependencies_async(
             top = raw.split(".")[0]
             detected.add(top)
         skip = {
-            "sys", "os", "re", "time", "uuid", "json", "math", "pathlib", "subprocess",
-            "typing", "dataclasses", "logging", "asyncio", "shutil", "itertools",
-            "functools", "collections", "statistics", "pprint", "enum"
+            "sys",
+            "os",
+            "re",
+            "time",
+            "uuid",
+            "json",
+            "math",
+            "pathlib",
+            "subprocess",
+            "typing",
+            "dataclasses",
+            "logging",
+            "asyncio",
+            "shutil",
+            "itertools",
+            "functools",
+            "collections",
+            "statistics",
+            "pprint",
+            "enum",
         }
         for pkg in sorted(detected):
             if pkg in skip:
@@ -740,6 +815,7 @@ def run_script_with_dependencies_async(
         directory=Path(".").resolve(),
         script_path=spath,
         stream=stream,
+        is_inline_temp=bool(script_content),
     )
     JOBS[job_id] = rec
     logger.info(
@@ -864,13 +940,16 @@ def kill_job(job_id: str) -> dict[str, str]:
         job_id,
         status,
         rec.process.returncode,
-        rec.finalized_elapsed if rec.finalized_elapsed is not None else (time.time() - rec.start_time),
+        rec.finalized_elapsed
+        if rec.finalized_elapsed is not None
+        else (time.time() - rec.start_time),
     )
     return {
         "job_id": job_id,
         "status": status,
         "exit_code": str(rec.process.returncode),
     }
+
 
 @mcp.tool(tags=["jobs", "maintenance"])
 def cleanup_jobs(
@@ -901,7 +980,12 @@ def cleanup_jobs(
         rec = JOBS[jid]
         if only_finished and not rec.finished:
             continue
-        if remove_inline and rec.is_inline_temp and rec.script_path and rec.script_path.exists():
+        if (
+            remove_inline
+            and rec.is_inline_temp
+            and rec.script_path
+            and rec.script_path.exists()
+        ):
             try:
                 rec.script_path.unlink()
                 inline_deleted += 1
@@ -949,7 +1033,9 @@ def benchmark_script(
             raise FileNotFoundError(f"Script not found: {spath}")
         is_inline = False
     else:
-        spath = Path(f"inline_bench_{uuid.uuid4().hex}.py").resolve()
+        inline_dir = Path.cwd() / "inline_scripts"
+        inline_dir.mkdir(parents=True, exist_ok=True)
+        spath = (inline_dir / f"inline_bench_{uuid.uuid4().hex}.py").resolve()
         spath.write_text(script_content or "")
         is_inline = True
     command: list[str] = ["uv", "run", "--python", python_version]
@@ -1014,7 +1100,8 @@ def benchmark_script(
         resolved_dependencies=list(resolved_dependencies),
         python_version_used=python_version,
         wall_time_seconds=wall,
-        cpu_time_seconds=(end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system),
+        cpu_time_seconds=(end_cpu.user - start_cpu.user)
+        + (end_cpu.system - start_cpu.system),
         peak_rss_mb=peak_rss / (1024 * 1024),
     )
 
@@ -1109,15 +1196,21 @@ def main() -> None:
     # Startup diagnostics
     cwd = Path.cwd()
     py_exec = sys.executable
-    py_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    py_version = (
+        f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    )
     logger.info("Starting MCP server (transport=stdio)")
-    logger.info("Diagnostics: cwd=%s executable=%s python_version=%s uv_present=%s",
-                cwd,
-                py_exec,
-                py_version,
-                shutil.which("uv") is not None)
+    logger.info(
+        "Diagnostics: cwd=%s executable=%s python_version=%s uv_present=%s",
+        cwd,
+        py_exec,
+        py_version,
+        shutil.which("uv") is not None,
+    )
     # List key environment variables that might affect execution
-    interesting_env = {k: v for k, v in os.environ.items() if k.startswith(("PYTHON", "UV", "FASTMCP"))}
+    interesting_env = {
+        k: v for k, v in os.environ.items() if k.startswith(("PYTHON", "UV", "FASTMCP"))
+    }
     if interesting_env:
         logger.info("Environment (filtered): %s", interesting_env)
     else:

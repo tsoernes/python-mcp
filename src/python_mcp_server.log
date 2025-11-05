@@ -1,0 +1,41 @@
+2025-11-05 13:04:05,789 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:04:05,799 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:04:45,943 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:04:45,951 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:34,425 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:34,447 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:35,116 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:35,128 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:35,212 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:35,232 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:35,593 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:35,604 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:35,621 INFO Processing request of type ListToolsRequest
+2025-11-05 13:09:35,622 INFO Processing request of type ListPromptsRequest
+2025-11-05 13:09:35,623 INFO Processing request of type ListToolsRequest
+2025-11-05 13:09:36,079 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:36,090 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:36,105 INFO Processing request of type ListToolsRequest
+2025-11-05 13:09:36,106 INFO Processing request of type ListPromptsRequest
+2025-11-05 13:09:36,107 INFO Processing request of type ListToolsRequest
+2025-11-05 13:09:36,185 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server.log
+2025-11-05 13:09:36,206 INFO Starting MCP server (transport=stdio)
+2025-11-05 13:09:36,233 INFO Processing request of type ListToolsRequest
+2025-11-05 13:09:36,234 INFO Processing request of type ListPromptsRequest
+2025-11-05 13:09:36,235 INFO Processing request of type ListToolsRequest
+2025-11-05 13:10:09,604 INFO Processing request of type CallToolRequest
+2025-11-05 13:10:32,266 INFO Processing request of type CallToolRequest
+2025-11-05 13:10:46,983 INFO Processing request of type CallToolRequest
+2025-11-05 13:10:59,781 INFO Processing request of type CallToolRequest
+2025-11-05 13:10:59,827 INFO Processing request of type CallToolRequest
+2025-11-05 13:11:51,442 INFO Processing request of type CallToolRequest
+2025-11-05 13:11:51,477 INFO Processing request of type CallToolRequest
+2025-11-05 13:11:51,478 INFO run_script_in_dir async job started job_id=3cfdf732cc8c4fa5aecaa137aa1acb8b strategy=uv-run cwd=/home/torstein.sornes/code/python-mcp
+2025-11-05 13:11:51,478 INFO Streaming poller launched for job_id=3cfdf732cc8c4fa5aecaa137aa1acb8b
+2025-11-05 13:11:54,010 INFO Processing request of type CallToolRequest
+2025-11-05 13:11:54,242 INFO Job finalized job_id=3cfdf732cc8c4fa5aecaa137aa1acb8b exit_code=0 elapsed=2.76s stdout_len=70 stderr_len=0
+2025-11-05 13:11:54,243 INFO Processing request of type CallToolRequest
+2025-11-05 13:12:18,471 INFO Processing request of type CallToolRequest
+2025-11-05 13:12:21,156 INFO Processing request of type CallToolRequest
+2025-11-05 13:12:24,055 INFO Processing request of type CallToolRequest
+2025-11-05 13:12:26,519 INFO Processing request of type CallToolRequest
