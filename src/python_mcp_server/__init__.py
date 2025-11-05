@@ -114,42 +114,7 @@ def run_script_in_dir(
         - Temporary inline file removed after synchronous completion.
     """
 
-    Parameters:
-        directory: Directory path where the script resides (or will be written).
-        script_path: Path to an existing script (absolute or relative to 'directory') (ignored if script_content provided).
-        script_content: Optional inline Python source; if provided a temp file is created.
-        args: Optional list of arguments passed to the script.
-        use_uv: Prefer invoking via `uv run` if True; else fall back to system python.
-        python_version: Exact minor version (e.g. '3.12'). If provided and using uv, enforce interpreter.
-        async_run: When True return immediately with job_id.
-        stream: When True (and async_run=True) enable incremental output collection (polling).
-        timeout_seconds: Maximum runtime; 0 means no enforced timeout (run arbitrarily long).
-    Returns (sync):
-        {
-          stdout, stderr, exit_code, execution_strategy, elapsed_seconds
-        }
-    Returns (async):
-        {
-          job_id, status, execution_strategy
-        }
 
-    Environment Resolution Strategy:
-        - If use_uv True: base command starts with ['uv', 'run']
-          - Append '--python', python_version if provided.
-        - Else: ['python']
-        - Append script path then args.
-
-    Timeout Handling:
-        - If timeout_seconds > 0 and process exceeds limit, it is terminated and marked timed_out.
-
-    Streaming:
-        - When stream=True and async_run=True, stdout/stderr chunks are accumulated and retrievable via list_running_jobs
-          (future improvement: dedicated get_job_output tool).
-
-    Notes:
-        - No security constraints (per user instruction). Full filesystem & network access.
-        - Exact minor Python version required if specified (no range parsing).
-    """
     workdir = Path(directory).expanduser().resolve()
     if not workdir.is_dir():
         raise FileNotFoundError(f"Directory not found: {workdir}")
@@ -267,30 +232,7 @@ def run_script_with_dependencies(
         - Future: environment caching keyed by hash(deps+python_version).
     """
 
-    Parameters:
-        script_content: Inline Python source (ignored if script_path provided).
-        script_path: Path to an existing script file.
-        python_version: Exact minor version (e.g. '3.12').
-        dependencies: List of package specifiers.
-        args: Optional CLI arguments.
-        async_run: Return immediately with job_id.
-        stream: Enable streaming polling (async only).
-        timeout_seconds: Max runtime; 0 disables timeout.
 
-    Returns (sync):
-        {
-          stdout, stderr, exit_code, resolved_dependencies, python_version_used, elapsed_seconds
-        }
-    Returns (async):
-        {
-          job_id, status, python_version_used, resolved_dependencies
-        }
-
-    Implementation Notes:
-        - Uses `uv run` with optional `--python` and repeated '--with' specifiers for dependencies.
-        - Writes inline code to a temp file when 'code' provided.
-        - Future improvement: caching environments by dependency hash.
-    """
     if not script_content and not script_path:
         raise ValueError("Provide either 'script_content' or 'script_path'.")
     if script_content and script_path:
