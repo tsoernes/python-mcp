@@ -554,7 +554,7 @@ def get_job_output_stream(job_id: str) -> str:
 
 def main() -> None:
     # Entry point kept for script invocation compatibility; prefer mcp.run() when used as an MCP server.
-    mcp.run()
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":
