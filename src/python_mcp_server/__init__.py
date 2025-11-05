@@ -54,7 +54,7 @@ def run_script_in_dir(
 
     Parameters:
         directory: Directory path where the script resides (or will be written).
-        script_path: Path to an existing script (ignored if script_content provided).
+        script_path: Path to an existing script (absolute or relative to 'directory') (ignored if script_content provided).
         script_content: Optional inline Python source; if provided a temp file is created.
         args: Optional list of arguments passed to the script.
         use_uv: Prefer invoking via `uv run` if True; else fall back to system python.
@@ -102,7 +102,11 @@ def run_script_in_dir(
             raise ValueError(
                 "Either 'script_path' or 'script_content' must be provided."
             )
-        script_path_local = script_path.expanduser().resolve()
+        # Allow relative paths (to the provided directory) as well as absolute.
+        candidate = script_path.expanduser()
+        if not candidate.is_absolute():
+            candidate = (workdir / candidate).resolve()
+        script_path_local = candidate.resolve()
         if not script_path_local.is_file():
             raise FileNotFoundError(f"Script file not found: {script_path_local}")
 
@@ -136,7 +140,7 @@ def run_script_in_dir(
             start_time=time.time(),
             process=proc,
             directory=workdir,
-            script_path=script_path,
+            script_path=script_path_local,
             stream=stream,
         )
         JOBS[job_id] = rec
