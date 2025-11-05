@@ -1,0 +1,6 @@
+# Ignore generated inline temp scripts
+inline_scripts/
+
+# Ensure scripts directory remains tracked (explicit unignore in case of broad ignores elsewhere)
+!scripts/
+!scripts/**

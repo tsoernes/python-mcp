@@ -1218,5 +1218,178 @@ def main() -> None:
     mcp.run(transport="stdio")
 
 
+@mcp.tool(tags=["scripts", "save"])
+def save_script(
+    script_name: str,
+    source: str,
+    dependencies: list[str] | None = None,
+    requires_python: str | None = None,
+    overwrite: bool = False,
+) -> dict[str, str]:
+    """
+    Save a Python script under the 'scripts/' folder.
+
+    Guidance:
+    - Prefer saving useful snippets and reusable automation scripts here.
+    - Include a top-level docstring explaining what the script does and how to use it.
+    - Optionally include a uv-style TOML script header to declare dependencies and Python version.
+
+    Header format example:
+        # /// script
+        # dependencies = ["requests<3", "rich"]
+        # requires-python = ">=3.12"
+        # ///
+    """
+    scripts_dir = Path.cwd() / "scripts"
+    scripts_dir.mkdir(parents=True, exist_ok=True)
+
+    # Prevent path traversal; ensure .py suffix.
+    base = Path(script_name).name
+    if not base.endswith(".py"):
+        base += ".py"
+    target = scripts_dir / base
+
+    if target.exists() and not overwrite:
+        return {
+            "written": "false",
+            "path": str(target),
+            "message": "File exists; set overwrite=True to replace",
+        }
+
+    head_present = source.lstrip().startswith("# /// script")
+    header_lines: list[str] = []
+    if (dependencies or requires_python) and not head_present:
+        header_lines.append("# /// script")
+        if dependencies is not None:
+            header_lines.append("# dependencies = [")
+            for dep in dependencies:
+                header_lines.append(f'#   "{dep}",')
+            header_lines.append("# ]")
+        if requires_python is not None:
+            header_lines.append(f'# requires-python = "{requires_python}"')
+        header_lines.append("# ///")
+        header_lines.append("")
+
+    final_text = ("\n".join(header_lines) + source) if header_lines else source
+    target.write_text(final_text, encoding="utf-8")
+    return {"written": "true", "path": str(target), "message": "Script saved"}
+
+
+@mcp.tool(tags=["scripts", "run", "sync"])
+def run_saved_script(
+    script_name: str,
+    args: list[str] | None = None,
+    timeout_seconds: int = 300,
+) -> RunScriptResult:
+    """
+    Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
+    """
+    scripts_dir = Path.cwd() / "scripts"
+    name = Path(script_name).name
+    spath = scripts_dir / (name if name.endswith(".py") else f"{name}.py")
+    if not spath.is_file():
+        raise FileNotFoundError(f"Script not found: {spath}")
+
+    command: list[str] = ["uv", "run", "--script", str(spath)]
+    if args:
+        command.extend(args)
+
+    start = time.time()
+    try:
+        proc = subprocess.Popen(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            stdout, stderr = proc.communicate(
+                timeout=None if timeout_seconds == 0 else timeout_seconds
+            )
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            stdout, stderr = proc.communicate()
+            stderr += "\n[TIMEOUT]"
+    except Exception as e:
+        raise RuntimeError(f"Execution failed: {e}")  # noqa: TRY003
+    return RunScriptResult(
+        stdout=stdout,
+        stderr=stderr,
+        exit_code=proc.returncode,
+        execution_strategy="uv-run",
+        elapsed_seconds=time.time() - start,
+    )
+
+
+@mcp.tool(tags=["scripts", "introspection"])
+def list_scripts() -> list[dict[str, str]]:
+    """
+    List scripts in 'scripts/' and show their name, path, top docstring preview, and script header metadata.
+    """
+    scripts_dir = Path.cwd() / "scripts"
+    out: list[dict[str, str]] = []
+    if not scripts_dir.is_dir():
+        return out
+
+    for p in sorted(scripts_dir.glob("*.py")):
+        text = p.read_text(encoding="utf-8", errors="replace")
+
+        # Extract top docstring preview (first triple-quoted block at file start).
+        doc = ""
+        t = text.lstrip()
+        if t.startswith('"""') or t.startswith("'''"):
+            q = t[:3]
+            end = t.find(q, 3)
+            if end != -1:
+                doc = t[3:end].strip()
+
+        # Extract uv script header metadata
+        header_meta: dict[str, str] = {}
+        lines = text.splitlines()
+        start_idx: int | None = None
+        end_idx: int | None = None
+        for i, line in enumerate(lines):
+            if line.startswith("# /// script"):
+                start_idx = i
+                break
+        if start_idx is not None:
+            for j in range(start_idx + 1, len(lines)):
+                if lines[j].startswith("# ///"):
+                    end_idx = j
+                    break
+            body_lines: list[str] = []
+            for k in range(start_idx + 1, (end_idx or start_idx + 1)):
+                line = lines[k]
+                if line.startswith("#"):
+                    body_lines.append(line.lstrip("# ").rstrip())
+            toml_text = "\n".join(body_lines)
+            if toml_text:
+                try:
+                    import tomllib
+
+                    data = tomllib.loads(toml_text)
+                    if "requires-python" in data:
+                        header_meta["requires-python"] = str(
+                            data.get("requires-python")
+                        )
+                    if "dependencies" in data:
+                        deps = data.get("dependencies") or []
+                        header_meta["dependencies"] = ", ".join(deps)
+                except Exception:
+                    header_meta["parse_error"] = "true"
+
+        out.append(
+            {
+                "name": p.name,
+                "path": str(p),
+                "docstring": doc[:300],
+                "header": "; ".join(f"{k}={v}" for k, v in header_meta.items())
+                if header_meta
+                else "",
+            }
+        )
+    return out
+
+
 if __name__ == "__main__":
     main()

@@ -32,43 +32,46 @@ OPENERS = set(PAIRS.values())
 CLOSERS = set(PAIRS.keys())
 
 
-def iter_sources(paths: list[str]) -> Iterable[tuple[str, str]]:
+def iter_sources(paths: list[str]) -> Iterable[tuple[str, str | None]]:
     if not paths:
-        yield "<stdin>", sys.stdin.read()
+        try:
+            yield "<stdin>", sys.stdin.read()
+        except Exception as e:  # noqa: BLE001
+            print(f"READ_ERROR <stdin>: {e}", file=sys.stderr)
+            yield "<stdin>", None
         return
     for p in paths:
         path = Path(p)
         try:
             data = path.read_text(encoding="utf-8", errors="replace")
+            yield str(path), data
         except Exception as e:  # noqa: BLE001
             print(f"READ_ERROR {path}: {e}", file=sys.stderr)
+            # Yield marker to allow exit code 3
+            yield str(path), None
             continue
-            # Allow processing remaining files.
-        yield str(path), data
 
 
-def check_balance(src: str) -> tuple[bool, str]:
+def check_balance(src: str, pairs: dict[str, str]) -> tuple[bool, list[str]]:
+    OPENERS = set(pairs.values())
+    CLOSERS = set(pairs.keys())
     stack: list[tuple[str, int, int]] = []
     in_string = False
     string_delim = ""
     string_start_line = 0
     string_start_col = 0
+    errors: list[str] = []
 
     lines = src.splitlines()
     for line_no, line in enumerate(lines, 1):
         i = 0
-        length = len(line)
-        # Strip single-line comment (Python-style)
-        comment_pos = line.find("#")
-        # Only treat as comment if not in a string currently
-        effective = (
-            line if in_string else (line[:comment_pos] if comment_pos != -1 else line)
-        )
+        # Comments only apply when not currently in a string
+        effective = line if in_string else line.split("#", 1)[0]
 
         while i < len(effective):
             ch = effective[i]
 
-            # Handle string starts/ends
+            # String handling
             if not in_string:
                 if ch in ("'", '"'):
                     # Detect triple quotes
@@ -80,43 +83,52 @@ def check_balance(src: str) -> tuple[bool, str]:
                     i += 3 if triple else 1
                     continue
             else:
-                # Inside string: look for closing delimiter
                 if string_delim in ("'''", '"""'):
                     if effective[i : i + 3] == string_delim:
                         in_string = False
                         string_delim = ""
                         i += 3
                         continue
+                    # Skip escaped character inside triple-quoted string
+                    if effective[i] == "\\":
+                        i += 2
+                        continue
+                    i += 1
+                    continue
                 else:
+                    # Handle escapes in single/double-quoted strings
+                    if ch == "\\":
+                        i += 2
+                        continue
                     if ch == string_delim:
                         in_string = False
                         string_delim = ""
                         i += 1
                         continue
-                i += 1
-                continue
+                    i += 1
+                    continue
 
-            # Outside strings: track braces
+            # Delimiter tracking outside strings
             if ch in OPENERS:
                 stack.append((ch, line_no, i + 1))
             elif ch in CLOSERS:
-                if not stack or stack[-1][0] != PAIRS[ch]:
-                    return False, f"Unmatched '{ch}' at {line_no}:{i + 1}"
-                stack.pop()
-
+                expected_open = pairs.get(ch)
+                if not stack or stack[-1][0] != expected_open:
+                    errors.append(f"Unmatched '{ch}' at {line_no}:{i + 1}")
+                else:
+                    stack.pop()
             i += 1
 
     if in_string:
-        return (
-            False,
-            f"Unclosed string starting at {string_start_line}:{string_start_col}",
+        errors.append(
+            f"Unclosed string starting at {string_start_line}:{string_start_col}"
         )
 
     if stack:
-        opener, line_no, col = stack[-1]
-        return False, f"Unclosed '{opener}' opened at {line_no}:{col}"
+        for opener, lno, col in stack:
+            errors.append(f"Unclosed '{opener}' opened at {lno}:{col}")
 
-    return True, "OK"
+    return (len(errors) == 0), errors
 
 
 def main(argv: list[str]) -> int:
@@ -131,23 +143,60 @@ def main(argv: list[str]) -> int:
         action="store_true",
         help="Stop after the first file with errors.",
     )
+    parser.add_argument(
+        "--pairs",
+        default="()[]{}",
+        help="Delimiter pairs as a flat string (default: ()[]{}). Example: '()[]{}<>'",
+    )
     args = parser.parse_args(argv)
 
+    # Parse pairs spec into closer->opener mapping
+    spec = "".join(args.pairs.split())
+    if len(spec) % 2 != 0:
+        print(f"Invalid --pairs spec (odd length): {args.pairs}", file=sys.stderr)
+        return 3
+    pairs: dict[str, str] = {}
+    for i in range(0, len(spec), 2):
+        open_ch = spec[i]
+        close_ch = spec[i + 1]
+        pairs[close_ch] = open_ch
+
+    any_unmatched = False
+    any_unclosed = False
+    read_error = False
     overall_ok = True
+
     for path, content in iter_sources(args.paths):
-        ok, msg = check_balance(content)
-        status = "OK" if ok else "ERR"
-        print(f"{status}\t{path}\t{msg}")
-        if not ok:
+        if content is None:
+            read_error = True
+            print(f"ERR\t{path}\tREAD_ERROR")
+            if args.fail_fast:
+                break
+            continue
+
+        ok, errors = check_balance(content, pairs)
+        if ok:
+            print(f"OK\t{path}\tOK")
+        else:
             overall_ok = False
+            for msg in errors:
+                print(f"ERR\t{path}\t{msg}")
+                if msg.startswith("Unmatched"):
+                    any_unmatched = True
+                elif msg.startswith("Unclosed"):
+                    any_unclosed = True
             if args.fail_fast:
                 break
 
-    if overall_ok:
-        return 0
-    # Distinguish unmatched vs unclosed via message prefix.
-    # Simplified: both treated as generic imbalance (exit 1).
-    return 1
+    if read_error:
+        return 3
+    if not overall_ok:
+        if any_unmatched:
+            return 1
+        if any_unclosed:
+            return 2
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
