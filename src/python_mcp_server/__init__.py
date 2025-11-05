@@ -7,6 +7,8 @@ import textwrap
 import time
 import uuid
 import logging
+import os
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Literal, List
@@ -14,6 +16,19 @@ from typing import Optional, Literal, List
 import psutil
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
+
+# Configure logging (file + stderr console)
+LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.FileHandler(LOG_PATH, encoding="utf-8"),
+        logging.StreamHandler(sys.stderr),
+    ],
+)
+logger = logging.getLogger("python_mcp_server")
+logger.info("Logger initialized; log file at %s", LOG_PATH)
 
 mcp = FastMCP(name="Python Script Executor")
 
@@ -746,7 +761,22 @@ def get_job_output_stream(job_id: str) -> str:
 
 
 def main() -> None:
+    # Startup diagnostics
+    cwd = Path.cwd()
+    py_exec = sys.executable
+    py_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     logger.info("Starting MCP server (transport=stdio)")
+    logger.info("Diagnostics: cwd=%s executable=%s python_version=%s uv_present=%s",
+                cwd,
+                py_exec,
+                py_version,
+                shutil.which("uv") is not None)
+    # List key environment variables that might affect execution
+    interesting_env = {k: v for k, v in os.environ.items() if k.startswith(("PYTHON", "UV", "FASTMCP"))}
+    if interesting_env:
+        logger.info("Environment (filtered): %s", interesting_env)
+    else:
+        logger.info("No filtered environment variables detected.")
     mcp.run(transport="stdio")
 
 
