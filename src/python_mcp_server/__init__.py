@@ -39,8 +39,8 @@ STREAM_POLL_INTERVAL = 0.2  # seconds
 
 @mcp.tool
 def run_script_in_dir(
-    directory: str,
-    script: str | None = None,
+    directory: Path,
+    script_path: Path | None = None,
     script_content: str | None = None,
     args: list[str] | None = None,
     use_uv: bool = True,
@@ -54,7 +54,7 @@ def run_script_in_dir(
 
     Parameters:
         directory: Directory path where the script resides (or will be written).
-        script: Filename of existing script (ignored if script_content provided).
+        script_path: Path to an existing script (ignored if script_content provided).
         script_content: Optional inline Python source; if provided a temp file is created.
         args: Optional list of arguments passed to the script.
         use_uv: Prefer invoking via `uv run` if True; else fall back to system python.
@@ -95,14 +95,16 @@ def run_script_in_dir(
     if script_content:
         # Create a temp script file
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path = workdir / tmp_name
-        script_path.write_text(script_content)
+        script_path_local = workdir / tmp_name
+        script_path_local.write_text(script_content)
     else:
-        if not script:
-            raise ValueError("Either 'script' or 'script_content' must be provided.")
-        script_path = workdir / script
-        if not script_path.is_file():
-            raise FileNotFoundError(f"Script file not found: {script_path}")
+        if not script_path:
+            raise ValueError(
+                "Either 'script_path' or 'script_content' must be provided."
+            )
+        script_path_local = script_path.expanduser().resolve()
+        if not script_path_local.is_file():
+            raise FileNotFoundError(f"Script file not found: {script_path_local}")
 
     command: list[str]
     execution_strategy = "system-python"
@@ -114,7 +116,7 @@ def run_script_in_dir(
     else:
         command = ["python"]
 
-    command.append(str(script_path))
+    command.append(str(script_path_local))
     if args:
         command.extend(args)
 
@@ -176,9 +178,9 @@ def run_script_in_dir(
     finally:
         if script_content:
             # Clean up temp script file for sync mode
-            if script_path.exists():
+            if script_path_local.exists():
                 try:
-                    script_path.unlink()
+                    script_path_local.unlink()
                 except Exception:
                     pass
 
@@ -193,8 +195,8 @@ def run_script_in_dir(
 
 @mcp.tool
 def run_script_with_dependencies(
-    code: str | None = None,
-    script_path: str | None = None,
+    script_content: str | None = None,
+    script_path: Path | None = None,
     python_version: str = "3.12",
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
@@ -206,7 +208,7 @@ def run_script_with_dependencies(
     Execute code or a script path inside a transient uv-managed environment with dependency resolution.
 
     Parameters:
-        code: Inline Python source (ignored if script_path provided).
+        script_content: Inline Python source (ignored if script_path provided).
         script_path: Path to an existing script file.
         python_version: Exact minor version (e.g. '3.12').
         dependencies: List of package specifiers.
@@ -229,10 +231,10 @@ def run_script_with_dependencies(
         - Writes inline code to a temp file when 'code' provided.
         - Future improvement: caching environments by dependency hash.
     """
-    if not code and not script_path:
-        raise ValueError("Provide either 'code' or 'script_path'.")
-    if code and script_path:
-        raise ValueError("Provide only one of 'code' or 'script_path'.")
+    if not script_content and not script_path:
+        raise ValueError("Provide either 'script_content' or 'script_path'.")
+    if script_content and script_path:
+        raise ValueError("Provide only one of 'script_content' or 'script_path'.")
 
     if script_path:
         spath = Path(script_path).expanduser().resolve()
@@ -241,7 +243,7 @@ def run_script_with_dependencies(
     else:
         # Inline code -> temp file in cwd of process (use current working directory)
         spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
-        spath.write_text(code or "")
+        spath.write_text(script_content or "")
 
     command: list[str] = ["uv", "run", "--python", python_version]
     resolved_dependencies = dependencies[:] if dependencies else []
@@ -296,7 +298,7 @@ def run_script_with_dependencies(
             stdout, stderr = proc.communicate()
             stderr += "\n[TIMEOUT]"
     finally:
-        if code and spath.exists():
+        if script_content and spath.exists():
             try:
                 spath.unlink()
             except Exception:
@@ -410,8 +412,8 @@ def kill_job(job_id: str) -> dict[str, str]:
 
 @mcp.tool
 def benchmark_script(
-    code: str | None = None,
-    script_path: str | None = None,
+    script_content: str | None = None,
+    script_path: Path | None = None,
     python_version: str = "3.12",
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
@@ -431,7 +433,7 @@ def benchmark_script(
         sample_interval: Polling interval for memory usage sampling.
     """
     result = run_script_with_dependencies(
-        code=code,
+        script_content=script_content,
         script_path=script_path,
         python_version=python_version,
         dependencies=dependencies,
