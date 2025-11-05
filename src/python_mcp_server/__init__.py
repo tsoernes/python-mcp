@@ -468,6 +468,12 @@ def run_script_with_dependencies(
                 continue
             if pkg not in resolved_dependencies:
                 resolved_dependencies.append(pkg)
+        # Logging auto-import detection for sync dependency execution
+        logger.info(
+            "auto_parse_imports sync detected=%s final_deps=%s",
+            sorted(detected),
+            resolved_dependencies,
+        )
 
     command: list[str] = ["uv", "run", "--python", python_version]
     for dep in resolved_dependencies:
@@ -704,6 +710,12 @@ def run_script_with_dependencies_async(
                 continue
             if pkg not in resolved_dependencies:
                 resolved_dependencies.append(pkg)
+        # Logging auto-import detection for async dependency execution
+        logger.info(
+            "auto_parse_imports async detected=%s final_deps=%s",
+            sorted(detected),
+            resolved_dependencies,
+        )
 
     command: list[str] = ["uv", "run", "--python", python_version]
     for dep in resolved_dependencies:
