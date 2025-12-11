@@ -4,8 +4,10 @@ An MCP (Model Context Protocol) server for executing Python scripts and inline c
 - uv-managed transient environments
 - explicit dependency resolution
 - environment variable support (dict or .env file)
+- **smart async pattern** - automatic timeout switching to background
 - synchronous or asynchronous (background) execution
 - optional streaming of stdout/stderr
+- job tracking with progress updates
 - benchmarking (wall time, CPU time, peak memory)
 - job lifecycle introspection and control
 
@@ -15,16 +17,17 @@ This README documents the server’s tools, resource patterns, data models, usag
 
 ## 1. Features at a Glance
 
-| Capability | Sync | Async | Streaming | Dependencies | Benchmarking | Env Vars |
-|------------|------|-------|-----------|--------------|--------------|----------|
-| Run existing script in directory | ✅ | ✅ (async variant) | ✅ (when stream=True) | ❌ | ❌ | ✅ |
-| Run inline script in directory | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
-| Run code with dependencies | ✅ | ✅ | ✅ | ✅ | ✅ (benchmark_script) | ✅ |
-| Benchmark transient execution | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| List running jobs | ✅ | N/A | N/A | N/A | N/A | N/A |
-| Get job output (partial / final) | ✅ | N/A | Works with async jobs | N/A | N/A | N/A |
-| Kill running job | ✅ | N/A | N/A | N/A | N/A | N/A |
-| Stream snapshot via resource | ✅ | N/A | Works with async jobs | N/A | N/A | N/A |
+| Capability | Sync | Async | Smart Async | Streaming | Dependencies | Benchmarking | Env Vars | Progress |
+|------------|------|-------|-------------|-----------|--------------|--------------|----------|----------|
+| Run existing script in directory | ✅ | ✅ (async variant) | ❌ | ✅ (when stream=True) | ❌ | ❌ | ✅ | ❌ |
+| Run inline script in directory | ✅ | ✅ | ❌ | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Run code with dependencies | ✅ | ✅ | ❌ | ✅ | ✅ | ✅ (benchmark_script) | ✅ | ❌ |
+| Benchmark transient execution | ✅ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ❌ |
+| Smart async job management | N/A | N/A | ✅ | N/A | N/A | N/A | N/A | ✅ |
+| List jobs with filtering | ✅ | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| Get job status & progress | ✅ | N/A | Works with smart async | N/A | N/A | N/A | N/A | ✅ |
+| Cancel running job | ✅ | N/A | Works with smart async | N/A | N/A | N/A | N/A | N/A |
+| Prune old jobs | ✅ | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
 
 ---
 
@@ -262,7 +265,111 @@ These models allow clients to infer precise JSON schema (names, types, optionali
 
 ---
 
-## 6. Environment Variables
+## 6. Smart Async Pattern
+
+The server implements the **smart async pattern** from the mcp-builder skill for intelligent background job execution with automatic timeout handling.
+
+### 6.1 How It Works
+
+**Automatic Timeout Switching:**
+- Tools decorated with `@smart_async` attempt synchronous completion within a timeout budget
+- If the operation exceeds the timeout, it automatically switches to background execution
+- The underlying task is **shielded** to prevent cancellation - it continues running seamlessly
+- Fast operations complete inline with no overhead
+- Slow operations return immediately with a job_id for tracking
+
+**Explicit Async Mode:**
+- Use `async_mode=True` parameter to launch jobs in background immediately
+- Useful for known long-running operations
+- Skips timeout attempt and returns job_id instantly
+
+**Progress Tracking:**
+- Background jobs can report progress updates
+- Progress stored in job metadata and persisted to disk
+- Use `create_progress_callback()` in smart async tools
+
+### 6.2 Job Management Tools
+
+**Get Job Status:**
+```python
+py_job_status(job_id="abc-123")
+# Returns: {"job": {"status": "running", "progress": {"current": 5, "total": 10}}}
+```
+
+**List Jobs:**
+```python
+py_list_jobs(status_filter="running", limit=50)
+# Returns: {"jobs": [...], "total": 5}
+```
+
+**Cancel Job:**
+```python
+py_cancel_job(job_id="abc-123")
+# Returns: {"job_id": "abc-123", "status": "cancelled"}
+```
+
+**Prune Old Jobs:**
+```python
+py_prune_jobs(keep_completed=False, max_age_hours=24)
+# Returns: {"removed": 10, "remaining": 5}
+```
+
+### 6.3 Job Lifecycle
+
+1. **Pending** - Job created but not started
+2. **Running** - Job executing
+3. **Completed** - Job finished successfully
+4. **Failed** - Job raised an exception
+5. **Cancelled** - Job was cancelled by user
+
+### 6.4 Job Persistence
+
+- Jobs are saved to `~/.python_mcp/meta/jobs.json`
+- Survives server restarts
+- Jobs running during restart marked as "failed" on next startup
+- Progress updates automatically persisted
+
+### 6.5 Example: Creating a Smart Async Tool
+
+```python
+from python_mcp_server.smart_async import smart_async, create_progress_callback
+
+@smart_async(timeout_env="MY_TIMEOUT", default_timeout=30.0)
+async def my_long_task(
+    items: list[str],
+    async_mode: bool = False,
+    job_label: str | None = None
+) -> dict:
+    """Process items with automatic background switching."""
+    progress = create_progress_callback()
+    
+    results = []
+    for i, item in enumerate(items):
+        result = await process_item(item)
+        results.append(result)
+        progress(i + 1, len(items), f"Processed {i + 1} items")
+    
+    return {"results": results, "total": len(results)}
+```
+
+**Usage:**
+```python
+# Fast - completes synchronously
+result = await my_long_task(items=["a", "b", "c"])
+# Returns: {"results": [...], "total": 3}
+
+# Slow - switches to background automatically
+result = await my_long_task(items=long_list)
+# Returns: {"job_id": "...", "status": "running", "message": "..."}
+
+# Explicit async - launches immediately
+result = await my_long_task(items=items, async_mode=True)
+# Returns: {"job_id": "...", "status": "pending"}
+```
+
+---
+
+## 7. Environment Variables
 
 All execution tools support setting environment variables via two methods:
 
@@ -337,9 +444,9 @@ run_script_in_dir(
 
 ---
 
-## 7. Usage Examples
+## 8. Usage Examples
 
-### 7.1 Synchronous Run (Existing Script)
+### 8.1 Synchronous Run (Existing Script)
 
 ```
 run_script_in_dir(
@@ -351,7 +458,7 @@ run_script_in_dir(
 )
 ```
 
-### 7.2 Synchronous Inline Code
+### 8.2 Synchronous Inline Code
 
 ```
 run_script_in_dir(
@@ -361,7 +468,7 @@ run_script_in_dir(
 )
 ```
 
-### 7.3 Dependencies (Sync)
+### 8.3 Dependencies (Sync)
 
 ```
 run_script_with_dependencies(
@@ -371,7 +478,7 @@ run_script_with_dependencies(
 )
 ```
 
-### 7.4 Benchmark
+### 8.4 Benchmark
 
 ```
 benchmark_script(
@@ -381,7 +488,7 @@ benchmark_script(
 )
 ```
 
-### 7.5 Async + Streaming
+### 8.5 Async + Streaming
 
 ```
 start = run_script_in_dir_async(
@@ -401,7 +508,7 @@ snapshot = get_resource("job-stream://{job_id}")
 final = get_job_output(job_id)
 ```
 
-### 7.6 Async With Dependencies
+### 8.6 Async With Dependencies
 
 ```
 async_start = run_script_with_dependencies_async(
@@ -412,7 +519,7 @@ async_start = run_script_with_dependencies_async(
 )
 ```
 
-### 7.7 With Environment Variables
+### 8.7 With Environment Variables
 
 ```
 run_script_with_dependencies(
@@ -430,7 +537,28 @@ print(f"Key: {os.getenv('API_KEY')}")
 )
 ```
 
-### 7.8 Killing a Job
+### 8.8 Smart Async Job Tracking
+
+```
+# Tool returns job_id when it switches to background
+result = await some_long_operation()
+
+if "job_id" in result:
+    # Poll for status
+    status = py_job_status(job_id=result["job_id"])
+    print(status["job"]["status"])  # "running"
+    print(status["job"]["progress"])  # {"current": 50, "total": 100}
+    
+    # Wait for completion
+    while status["job"]["status"] == "running":
+        await asyncio.sleep(1)
+        status = py_job_status(job_id=result["job_id"])
+    
+    # Get final result
+    print(status["job"]["result"])
+```
+
+### 8.9 Killing a Job
 
 ```
 kill_job(job_id="abc123")
@@ -438,7 +566,7 @@ kill_job(job_id="abc123")
 
 ---
 
-## 8. Error Handling
+## 9. Error Handling
 
 Common errors:
 | Error | Cause | Recovery |
@@ -456,7 +584,7 @@ Timeout behavior:
 
 ---
 
-## 9. Streaming Semantics
+## 10. Streaming Semantics
 
 - stream=True activates periodic polling via an internal background task.
 - job-stream resource returns full accumulated output each poll.
@@ -470,7 +598,7 @@ Future enhancements (planned):
 
 ---
 
-## 10. Performance Notes
+## 11. Performance Notes
 
 - Cold uv runs with many dependencies can add latency due to resolution; consider caching future ephemeral environments.
 - STREAM_POLL_INTERVAL currently 0.2s (balance between responsiveness and CPU overhead).
@@ -479,7 +607,7 @@ Future enhancements (planned):
 
 ---
 
-## 11. Security Considerations
+## 12. Security Considerations
 
 Per project directives: No sandboxing. Executed code has:
 - Full filesystem access under server user
@@ -498,7 +626,7 @@ If you later require restriction:
 
 ---
 
-## 12. Extensibility Roadmap
+## 13. Extensibility Roadmap
 
 Potential future tools:
 - format_code (black / ruff)
@@ -510,7 +638,7 @@ Potential future tools:
 
 ---
 
-## 13. Troubleshooting
+## 14. Troubleshooting
 
 | Symptom | Cause | Solution |
 |---------|-------|----------|
@@ -523,7 +651,7 @@ Potential future tools:
 
 ---
 
-## 14. Design Principles Summary
+## 15. Design Principles Summary
 
 - Mutual exclusivity of script_path/script_content reduces ambiguity.
 - Synchronous and asynchronous tools separated for clearer schema contracts.
@@ -531,9 +659,11 @@ Potential future tools:
 - Resource-centric streaming (job-stream) keeps data retrieval simple.
 - Logging records lifecycle events (startup, async start, kill, finalize).
 
+- Smart async pattern for optimal performance (fast tasks inline, slow tasks background)
+
 ---
 
-## 15. Example Combined Workflow
+## 16. Example Combined Workflow
 
 ```
 # 1. Fire off a dependency-heavy async script
@@ -560,13 +690,13 @@ print(final["stdout"])
 
 ---
 
-## 16. License / Attribution
+## 17. License / Attribution
 
 Refer to project-level license (if added). FastMCP framework documentation: https://gofastmcp.com
 
 ---
 
-## 17. Maintenance Checklist
+## 18. Maintenance Checklist
 
 Before merging changes:
 - Verify docstrings match async/sync segmentation.
@@ -576,7 +706,7 @@ Before merging changes:
 
 ---
 
-## 18. FAQ
+## 19. FAQ
 
 Q: Why separate async from sync tools?
 A: The return schema differs fundamentally (job descriptor vs final output). Separation avoids overloaded outputs and schema ambiguity.
@@ -596,9 +726,18 @@ A: Yes—they merge with env_vars taking precedence over env_file values.
 Q: Are environment variables visible to spawned subprocesses?
 A: Yes—they are passed to the subprocess environment and inherited by any child processes.
 
+Q: What is the smart async pattern?
+A: A decorator-based approach where tools attempt synchronous completion within a timeout, then automatically switch to background execution if exceeded. Tasks are shielded to prevent cancellation.
+
+Q: How do I use smart async in my tools?
+A: Decorate your async function with `@smart_async()`, add `async_mode` and `job_label` parameters, and use `create_progress_callback()` to report progress.
+
+Q: Can I track progress of background jobs?
+A: Yes - use `create_progress_callback()` in your tool and call `py_job_status()` to check progress.
+
 ---
 
-## 19. Contributing
+## 20. Contributing
 
 Proposed extension guidelines:
 1. Add new Pydantic model for any new output type.
