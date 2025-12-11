@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import asyncio
+import logging
+import os
+import shutil
 import subprocess
 import sys
 import textwrap
 import time
 import uuid
-import logging
-import os
-import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Literal, List
+from typing import List, Literal, Optional
 
 import psutil
 from fastmcp import FastMCP
@@ -109,6 +109,89 @@ JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
 
 
+# ---------------------------
+# Environment variable helpers
+# ---------------------------
+
+
+def _load_env_file(env_file: Path) -> dict[str, str]:
+    """
+    Load environment variables from a .env file.
+
+    Simple parser that handles:
+    - KEY=VALUE syntax
+    - Comments (lines starting with #)
+    - Empty lines
+    - Basic quote stripping (single and double quotes)
+
+    Args:
+        env_file: Path to .env file
+
+    Returns:
+        Dictionary of environment variables
+    """
+    env_vars = {}
+    if not env_file.exists():
+        raise FileNotFoundError(f"Environment file not found: {env_file}")
+
+    with open(env_file, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            # Skip empty lines and comments
+            if not line or line.startswith("#"):
+                continue
+
+            # Split on first = sign
+            if "=" not in line:
+                continue
+
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip()
+
+            # Strip quotes if present
+            if value and value[0] in ('"', "'") and value[-1] == value[0]:
+                value = value[1:-1]
+
+            env_vars[key] = value
+
+    return env_vars
+
+
+def _build_process_env(
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
+) -> dict[str, str]:
+    """
+    Build the environment dictionary for subprocess execution.
+
+    Merges in this order (later overrides earlier):
+    1. Current process environment (os.environ)
+    2. Variables from env_file (if provided)
+    3. Variables from env_vars dict (if provided)
+
+    Args:
+        env_vars: Optional dictionary of environment variables
+        env_file: Optional path to .env file
+
+    Returns:
+        Merged environment dictionary
+    """
+    # Start with inherited environment
+    proc_env = os.environ.copy()
+
+    # Load and merge .env file if provided
+    if env_file:
+        file_vars = _load_env_file(env_file)
+        proc_env.update(file_vars)
+
+    # Merge explicit env_vars (highest priority)
+    if env_vars:
+        proc_env.update(env_vars)
+
+    return proc_env
+
+
 def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
     """
     Infer an exact minor python version (e.g. '3.13') from the project's pyproject.toml
@@ -122,8 +205,8 @@ def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
     if not pyproject.is_file():
         return None
     try:
-        import tomllib
         import re
+        import tomllib
 
         data = tomllib.loads(pyproject.read_text())
         requires = data.get("project", {}).get("requires-python")
@@ -150,6 +233,8 @@ def _exec_script_in_dir_sync(
     use_uv: bool,
     python_version: str | None,
     timeout_seconds: int,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> RunScriptResult:
     workdir = Path(directory).expanduser().resolve()
     if not workdir.is_dir():
@@ -188,6 +273,9 @@ def _exec_script_in_dir_sync(
     command.append(str(script_path_local))
     if args:
         command.extend(args)
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     start = time.time()
     try:
         proc = subprocess.Popen(
@@ -196,6 +284,7 @@ def _exec_script_in_dir_sync(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=proc_env,
         )
         try:
             stdout, stderr = proc.communicate(
@@ -227,6 +316,8 @@ def _exec_with_dependencies_sync(
     dependencies: list[str] | None,
     args: list[str] | None,
     timeout_seconds: int,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> RunWithDepsResult:
     if not script_content and not script_path:
         raise ValueError("Provide either 'script_content' or 'script_path'.")
@@ -248,6 +339,10 @@ def _exec_with_dependencies_sync(
     command.append(str(spath))
     if args:
         command.extend(args)
+
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     start = time.time()
     try:
         proc = subprocess.Popen(
@@ -255,6 +350,7 @@ def _exec_with_dependencies_sync(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=proc_env,
         )
         try:
             stdout, stderr = proc.communicate(
@@ -290,6 +386,8 @@ def py_run_script_in_dir(
     use_uv: bool = True,
     python_version: str | None = None,
     timeout_seconds: int = 300,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> RunScriptResult:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
@@ -305,6 +403,8 @@ def py_run_script_in_dir(
         use_uv: When True use 'uv run'; otherwise system 'python'.
         python_version: Exact minor version (e.g. '3.12') – honored only when use_uv=True.
         timeout_seconds: Max wall time; 0 disables timeout (unbounded).
+        env_vars: Optional dictionary of environment variables to set for the script.
+        env_file: Optional path to .env file to load environment variables from.
 
     Returns (RunScriptResult):
         stdout: Captured stdout.
@@ -367,6 +467,9 @@ def py_run_script_in_dir(
 
     # (Async mode removed from this function; see run_script_in_dir_async.)
 
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     # Synchronous execution
     start = time.time()
     try:
@@ -376,6 +479,7 @@ def py_run_script_in_dir(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=proc_env,
         )
         try:
             stdout, stderr = proc.communicate(
@@ -418,6 +522,8 @@ def py_run_script_with_dependencies(
     args: list[str] | None = None,
     timeout_seconds: int = 300,
     auto_parse_imports: bool = True,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> RunWithDepsResult:
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
@@ -433,6 +539,8 @@ def py_run_script_with_dependencies(
         timeout_seconds: 0 disables timeout.
         auto_parse_imports: When True, parse script source for import statements and append missing top-level modules
                            to dependency list (best-effort heuristic; does not guarantee install success).
+        env_vars: Optional dictionary of environment variables to set for the script.
+        env_file: Optional path to .env file to load environment variables from.
 
     Returns (RunWithDepsResult):
         Extends RunScriptResult with:
@@ -533,6 +641,9 @@ def py_run_script_with_dependencies(
     if args:
         command.extend(args)
 
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     start = time.time()
     try:
         proc = subprocess.Popen(
@@ -540,6 +651,7 @@ def py_run_script_with_dependencies(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=proc_env,
         )
         try:
             stdout, stderr = proc.communicate(
@@ -576,6 +688,8 @@ def py_run_script_in_dir_async(
     use_uv: bool = True,
     python_version: str | None = None,
     stream: bool = False,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> AsyncJobStart:
     """
     Asynchronously execute a Python script (existing file or inline content) inside a target directory. (Tool name: py_run_script_in_dir_async)
@@ -592,6 +706,8 @@ def py_run_script_in_dir_async(
         use_uv: When True uses 'uv run'; otherwise system 'python'.
         python_version: Exact minor (e.g. '3.12') honored only when use_uv=True.
         stream: Enable periodic harvesting of stdout/stderr.
+        env_vars: Optional dictionary of environment variables to set for the script.
+        env_file: Optional path to .env file to load environment variables from.
 
     Returns (AsyncJobStart):
         job_id: Identifier to use with get_job_output / job-stream resource.
@@ -641,13 +757,17 @@ def py_run_script_in_dir_async(
     if args:
         command.extend(args)
 
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
+    # Launch async
     proc = subprocess.Popen(
         command,
         cwd=str(workdir),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        bufsize=1,
+        env=proc_env,
     )
     job_id = uuid.uuid4().hex
     rec = JobRecord(
@@ -688,6 +808,8 @@ def py_run_script_with_dependencies_async(
     args: list[str] | None = None,
     stream: bool = False,
     auto_parse_imports: bool = True,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> AsyncDepsJobStart:
     """
     Asynchronously execute inline code or an existing script in a transient uv environment with dependencies. (Tool name: py_run_script_with_dependencies_async)
@@ -707,6 +829,8 @@ def py_run_script_with_dependencies_async(
         stream: Enable periodic harvesting of stdout/stderr.
         auto_parse_imports: When True, parse script source for import statements and append missing top-level modules
                             to dependency list (heuristic; applies skip list of common stdlib modules).
+        env_vars: Optional dictionary of environment variables to set for the script.
+        env_file: Optional path to .env file to load environment variables from.
 
     Returns (AsyncDepsJobStart):
         job_id, status, python_version_used, resolved_dependencies.
@@ -799,12 +923,16 @@ def py_run_script_with_dependencies_async(
     if args:
         command.extend(args)
 
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
+    # Launch async
     proc = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
-        bufsize=1,
+        env=proc_env,
     )
     job_id = uuid.uuid4().hex
     rec = JobRecord(
@@ -1009,6 +1137,8 @@ def py_benchmark_script(
     args: list[str] | None = None,
     timeout_seconds: int = 300,
     sample_interval: float = 0.05,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> BenchmarkResult:
     """
     Execute code or script with dependency resolution (uv) while collecting basic benchmark metrics.
@@ -1021,6 +1151,8 @@ def py_benchmark_script(
 
     Parameters mirror run_script_with_dependencies plus:
         sample_interval: Polling interval for memory usage sampling.
+        env_vars: Optional dictionary of environment variables to set for the script.
+        env_file: Optional path to .env file to load environment variables from.
     """
     # Use internal helper to start process manually (avoid calling decorated tool object)
     if not script_content and not script_path:
@@ -1045,12 +1177,17 @@ def py_benchmark_script(
     command.append(str(spath))
     if args:
         command.extend(args)
+
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     proc = subprocess.Popen(
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         bufsize=1,
+        env=proc_env,
     )
     start_time = time.time()
     ps_proc = psutil.Process(proc.pid)
@@ -1280,9 +1417,18 @@ def py_run_saved_script(
     script_name: str,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
+    env_vars: dict[str, str] | None = None,
+    env_file: Path | None = None,
 ) -> RunScriptResult:
     """
     Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
+
+    Parameters:
+        script_name: Name of the script in the scripts/ folder
+        args: Optional command-line arguments
+        timeout_seconds: Max wall time; 0 disables timeout (unbounded)
+        env_vars: Optional dictionary of environment variables to set for the script
+        env_file: Optional path to .env file to load environment variables from
     """
     scripts_dir = Path.cwd() / "scripts"
     name = Path(script_name).name
@@ -1294,6 +1440,9 @@ def py_run_saved_script(
     if args:
         command.extend(args)
 
+    # Build environment
+    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
+
     start = time.time()
     try:
         proc = subprocess.Popen(
@@ -1301,6 +1450,7 @@ def py_run_saved_script(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=proc_env,
         )
         try:
             stdout, stderr = proc.communicate(

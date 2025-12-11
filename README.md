@@ -3,6 +3,7 @@
 An MCP (Model Context Protocol) server for executing Python scripts and inline code with:
 - uv-managed transient environments
 - explicit dependency resolution
+- environment variable support (dict or .env file)
 - synchronous or asynchronous (background) execution
 - optional streaming of stdout/stderr
 - benchmarking (wall time, CPU time, peak memory)
@@ -14,16 +15,16 @@ This README documents the server’s tools, resource patterns, data models, usag
 
 ## 1. Features at a Glance
 
-| Capability | Sync | Async | Streaming | Dependencies | Benchmarking |
-|------------|------|-------|-----------|--------------|--------------|
-| Run existing script in directory | ✅ | ✅ (async variant) | ✅ (when stream=True) | ❌ | ❌ |
-| Run inline script in directory | ✅ | ✅ | ✅ | ❌ | ❌ |
-| Run code with dependencies | ✅ | ✅ | ✅ | ✅ | ✅ (benchmark_script) |
-| Benchmark transient execution | ✅ | ❌ | ❌ | ✅ | ✅ |
-| List running jobs | ✅ | N/A | N/A | N/A | N/A |
-| Get job output (partial / final) | ✅ | N/A | Works with async jobs | N/A | N/A |
-| Kill running job | ✅ | N/A | N/A | N/A | N/A |
-| Stream snapshot via resource | ✅ | N/A | Works with async jobs | N/A | N/A |
+| Capability | Sync | Async | Streaming | Dependencies | Benchmarking | Env Vars |
+|------------|------|-------|-----------|--------------|--------------|----------|
+| Run existing script in directory | ✅ | ✅ (async variant) | ✅ (when stream=True) | ❌ | ❌ | ✅ |
+| Run inline script in directory | ✅ | ✅ | ✅ | ❌ | ❌ | ✅ |
+| Run code with dependencies | ✅ | ✅ | ✅ | ✅ | ✅ (benchmark_script) | ✅ |
+| Benchmark transient execution | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| List running jobs | ✅ | N/A | N/A | N/A | N/A | N/A |
+| Get job output (partial / final) | ✅ | N/A | Works with async jobs | N/A | N/A | N/A |
+| Kill running job | ✅ | N/A | N/A | N/A | N/A | N/A |
+| Stream snapshot via resource | ✅ | N/A | Works with async jobs | N/A | N/A | N/A |
 
 ---
 
@@ -82,6 +83,8 @@ Parameters:
 - use_uv: bool (True uses `uv run`)
 - python_version: str | None (exact minor; honored only if use_uv=True)
 - timeout_seconds: int (0 = unlimited)
+- env_vars: dict[str, str] | None (environment variables to set)
+- env_file: Path | None (path to .env file to load)
 
 Returns (RunScriptResult):
 ```
@@ -103,6 +106,8 @@ Parameters:
 - dependencies: list[str] | None (PEP 440 specifiers)
 - args: list[str] | None
 - timeout_seconds: int (0 = unlimited)
+- env_vars: dict[str, str] | None (environment variables to set)
+- env_file: Path | None (path to .env file to load)
 
 Returns (RunWithDepsResult):
 ```
@@ -127,6 +132,8 @@ Parameters:
 - args: list[str] | None
 - timeout_seconds: int
 - sample_interval: float (memory polling interval in seconds; default 0.05)
+- env_vars: dict[str, str] | None (environment variables to set)
+- env_file: Path | None (path to .env file to load)
 
 Returns (BenchmarkResult):
 ```
@@ -152,6 +159,8 @@ Async variants separate concerns and return a job descriptor immediately.
 Parameters similar to run_script_in_dir except:
 - Omits timeout_seconds (no built-in timeout; external kill_job recommended if needed)
 - stream: bool (enable periodic stdout/stderr harvesting)
+- env_vars: dict[str, str] | None (environment variables to set)
+- env_file: Path | None (path to .env file to load)
 
 Returns (AsyncJobStart):
 ```
@@ -163,7 +172,10 @@ Returns (AsyncJobStart):
 ```
 
 #### run_script_with_dependencies_async (tags: execution, dependencies, async, stream)
-Parameters similar to run_script_with_dependencies plus stream.
+Parameters similar to run_script_with_dependencies plus:
+- stream: bool (enable periodic stdout/stderr harvesting)
+- env_vars: dict[str, str] | None (environment variables to set)
+- env_file: Path | None (path to .env file to load)
 
 Returns (AsyncDepsJobStart):
 ```
@@ -249,9 +261,71 @@ These models allow clients to infer precise JSON schema (names, types, optionali
 
 ---
 
-## 6. Usage Examples
+## 6. Environment Variables
 
-### 6.1 Synchronous Run (Existing Script)
+All execution tools support setting environment variables via two methods:
+
+### 6.1 Using env_vars Dictionary
+
+Pass environment variables directly as a dictionary:
+
+```python
+run_script_in_dir(
+  directory="/work/project",
+  script_path="main.py",
+  env_vars={
+    "DATABASE_URL": "postgresql://localhost/db",
+    "API_KEY": "secret123",
+    "DEBUG": "true"
+  }
+)
+```
+
+### 6.2 Using .env File
+
+Load environment variables from a .env file:
+
+```python
+run_script_with_dependencies(
+  script_content="import os; print(os.getenv('MY_VAR'))",
+  python_version="3.13",
+  env_file="/path/to/.env"
+)
+```
+
+**.env file format:**
+```
+# Comments are supported
+DATABASE_URL=postgresql://localhost/testdb
+API_KEY="secret123"
+DEBUG=true
+QUOTED='single quotes work too'
+```
+
+### 6.3 Override Precedence
+
+When both `env_file` and `env_vars` are provided, they are merged with this precedence (later overrides earlier):
+1. Current process environment (inherited from MCP server)
+2. Variables from `env_file`
+3. Variables from `env_vars` dict (highest priority)
+
+Example:
+```python
+# .env contains: MY_VAR=from_file
+run_script_in_dir(
+  directory="/work",
+  script_path="test.py",
+  env_file="/work/.env",
+  env_vars={"MY_VAR": "from_dict"}  # This overrides the .env value
+)
+# Result: MY_VAR=from_dict
+```
+
+---
+
+## 7. Usage Examples
+
+### 7.1 Synchronous Run (Existing Script)
 
 ```
 run_script_in_dir(
@@ -263,7 +337,7 @@ run_script_in_dir(
 )
 ```
 
-### 6.2 Synchronous Inline Code
+### 7.2 Synchronous Inline Code
 
 ```
 run_script_in_dir(
@@ -273,7 +347,7 @@ run_script_in_dir(
 )
 ```
 
-### 6.3 Dependencies (Sync)
+### 7.3 Dependencies (Sync)
 
 ```
 run_script_with_dependencies(
@@ -283,7 +357,7 @@ run_script_with_dependencies(
 )
 ```
 
-### 6.4 Benchmark
+### 7.4 Benchmark
 
 ```
 benchmark_script(
@@ -293,7 +367,7 @@ benchmark_script(
 )
 ```
 
-### 6.5 Async + Streaming
+### 7.5 Async + Streaming
 
 ```
 start = run_script_in_dir_async(
@@ -313,7 +387,7 @@ snapshot = get_resource("job-stream://{job_id}")
 final = get_job_output(job_id)
 ```
 
-### 6.6 Async With Dependencies
+### 7.6 Async With Dependencies
 
 ```
 async_start = run_script_with_dependencies_async(
@@ -324,7 +398,25 @@ async_start = run_script_with_dependencies_async(
 )
 ```
 
-### 6.7 Killing a Job
+### 7.7 With Environment Variables
+
+```
+run_script_with_dependencies(
+  script_content="""
+import os
+print(f"DB: {os.getenv('DATABASE_URL')}")
+print(f"Key: {os.getenv('API_KEY')}")
+""",
+  python_version="3.13",
+  dependencies=[],
+  env_vars={
+    "DATABASE_URL": "postgresql://localhost/mydb",
+    "API_KEY": "sk-test-123"
+  }
+)
+```
+
+### 7.8 Killing a Job
 
 ```
 kill_job(job_id="abc123")
@@ -332,12 +424,12 @@ kill_job(job_id="abc123")
 
 ---
 
-## 7. Error Handling
+## 8. Error Handling
 
 Common errors:
 | Error | Cause | Recovery |
 |-------|-------|----------|
-| FileNotFoundError | directory or script_path missing | Check path resolution / permissions |
+| FileNotFoundError | directory, script_path, or env_file missing | Check path resolution / permissions |
 | ValueError | Both or neither of script_path & script_content provided | Provide exactly one |
 | Timeout (sync tools) | Execution exceeded timeout_seconds | Retry with larger timeout or optimize script |
 | OSError/Subprocess errors | Interpreter or uv not available | Ensure uv installed and in PATH |
@@ -350,7 +442,7 @@ Timeout behavior:
 
 ---
 
-## 8. Streaming Semantics
+## 9. Streaming Semantics
 
 - stream=True activates periodic polling via an internal background task.
 - job-stream resource returns full accumulated output each poll.
@@ -364,7 +456,7 @@ Future enhancements (planned):
 
 ---
 
-## 9. Performance Notes
+## 10. Performance Notes
 
 - Cold uv runs with many dependencies can add latency due to resolution; consider caching future ephemeral environments.
 - STREAM_POLL_INTERVAL currently 0.2s (balance between responsiveness and CPU overhead).
@@ -373,7 +465,7 @@ Future enhancements (planned):
 
 ---
 
-## 10. Security Considerations
+## 11. Security Considerations
 
 Per project directives: No sandboxing. Executed code has:
 - Full filesystem access under server user
@@ -385,9 +477,14 @@ If you later require restriction:
 - Use resource limits (ulimit or cgroups)
 - Add code length and argument validation
 
+**Environment Variables:**
+- Environment variables are passed directly to subprocesses
+- .env files are parsed client-side (not secure for secrets in shared filesystems)
+- Consider using secret management tools for sensitive credentials
+
 ---
 
-## 11. Extensibility Roadmap
+## 12. Extensibility Roadmap
 
 Potential future tools:
 - format_code (black / ruff)
@@ -399,7 +496,7 @@ Potential future tools:
 
 ---
 
-## 12. Troubleshooting
+## 13. Troubleshooting
 
 | Symptom | Cause | Solution |
 |---------|-------|----------|
@@ -408,9 +505,11 @@ Potential future tools:
 | No output captured in streaming | stream=False in async start | Set stream=True or use sync variant |
 | Benchmark returns zero peak_rss_mb | Process too short-lived for sampling | Increase workload or reduce sample_interval |
 
+| Environment variable not visible in script | Typo in key name or .env not loaded | Check env_vars dict keys match usage; verify env_file path |
+
 ---
 
-## 13. Design Principles Summary
+## 14. Design Principles Summary
 
 - Mutual exclusivity of script_path/script_content reduces ambiguity.
 - Synchronous and asynchronous tools separated for clearer schema contracts.
@@ -420,7 +519,7 @@ Potential future tools:
 
 ---
 
-## 14. Example Combined Workflow
+## 15. Example Combined Workflow
 
 ```
 # 1. Fire off a dependency-heavy async script
@@ -447,13 +546,13 @@ print(final["stdout"])
 
 ---
 
-## 15. License / Attribution
+## 16. License / Attribution
 
 Refer to project-level license (if added). FastMCP framework documentation: https://gofastmcp.com
 
 ---
 
-## 16. Maintenance Checklist
+## 17. Maintenance Checklist
 
 Before merging changes:
 - Verify docstrings match async/sync segmentation.
@@ -463,7 +562,7 @@ Before merging changes:
 
 ---
 
-## 17. FAQ
+## 18. FAQ
 
 Q: Why separate async from sync tools?
 A: The return schema differs fundamentally (job descriptor vs final output). Separation avoids overloaded outputs and schema ambiguity.
@@ -477,9 +576,15 @@ A: Currently not built in; implement a wrapper or add an enhancement to limit st
 Q: Why exact minor Python versions only?
 A: Simplifies resolution logic and avoids ambiguous interpreter selection; uv handles installation if missing.
 
+Q: Can I use both env_vars and env_file?
+A: Yes—they merge with env_vars taking precedence over env_file values.
+
+Q: Are environment variables visible to spawned subprocesses?
+A: Yes—they are passed to the subprocess environment and inherited by any child processes.
+
 ---
 
-## 18. Contributing
+## 19. Contributing
 
 Proposed extension guidelines:
 1. Add new Pydantic model for any new output type.
