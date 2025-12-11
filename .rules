@@ -1,0 +1,104 @@
+# Repository Summary
+
+## Executive Overview
+
+Purpose
+- Provide a Python package (src/python_mcp_server) for building an MCP-compliant server, accompanied by documentation, examples, and helper scripts to support adoption and operations.
+Architecture
+- Uses the 'src' layout: all library code resides under src/python_mcp_server, isolating imports and packaging from the repository root.
+- Surrounding directories separate concerns: docs for written guidance, examples for runnable references, and scripts for development/ops tasks.
+Major subsystems (inferred from structure)
+- Core server runtime and lifecycle with protocol handling and request routing.
+- Extension points for capabilities/resources/tools exposed to MCP clients.
+- Configuration and startup utilities to compose and run a server.
+Key patterns
+- Clear separation between library code, documentation, and sample usage.
+- 'src' layout packaging pattern for clean imports and distribution.
+- Pluggable, modular design typical of server frameworks (specifics depend on package internals).
+
+## Directory & File Hierarchy for key files
+
+## .
+
+Repository root organizing the project; typically houses configuration/metadata files and points to the docs, examples, scripts, and src directories.
+
+**Files:**
+
+- `.gitignore` : (no summary)
+- `.python-version` : (no summary)
+- `CHANGELOG.md` : (no summary)
+- `README.md` : (no summary)
+- `pyproject.toml` : (no summary)
+- `test_env_vars.py` : (no summary)
+- `test_mcp_integration.py` : (no summary)
+- `test_smart_async.py` : (no summary)
+
+### docs
+
+Project documentation with conceptual overviews, usage guides, and reference material supporting users of the server library and examples.
+
+**Files:**
+
+- `docs/SMART_ASYNC_CONSIDERATION.md` : (no summary)
+- `docs/SMART_ASYNC_SUMMARY.md` : (no summary)
+
+### examples
+
+Contains sample projects or snippets demonstrating how to use the python_mcp_server package to build or run MCP-compatible servers; useful for quick starts and integration testing.
+
+**Files:**
+
+- `examples/README.md` : (no summary)
+- `examples/env_vars_demo.py` : (no summary)
+
+### scripts
+
+Holds helper scripts for common developer and maintenance tasks, such as running demos, local tooling, or release/CI workflows.
+
+**Files:**
+
+- `scripts/check_braces.py` : (no summary)
+- `scripts/clean_ipynb_outputs.py` : (no summary)
+- `scripts/count_tokens.py` : (no summary)
+- `scripts/scrape_mcpservers.py` : (no summary)
+- `scripts/smart_async_demo.py` : (no summary)
+
+### src
+
+Top-level source directory following the 'src' layout pattern; contains the python_mcp_server package and isolates library code from the repository root.
+
+#### src/python_mcp_server
+
+The primary Python package implementing the MCP server functionality, exposing core server logic, protocol integration, and the public API used by applications and examples.
+
+**Files:**
+
+- `src/python_mcp_server/__init__.py` : (no summary)
+- `src/python_mcp_server/smart_async.py` : (no summary)
+
+
+## Summary Statistics
+
+- Total files in repository: 22
+- Total textual files scanned: 19
+- Files included after budget/filter: 19
+- Strategy (comprehension level): comprehensive (auto-selected)
+- Batches executed: 1
+- Avg estimated tokens per batch: 33_102
+- Model (generation): gpt-5
+- Token budget (input): 400_000
+- Summary token count: 748
+
+## Summary Cost Analysis
+
+- Total tokens processed: 4,159
+  - Input tokens (sent to API): 277
+  - API cached tokens (prompt cache): 0
+  - Output tokens: 3,882
+  - Local cached tokens (files not sent): 0
+- Local cache: 0 files skipped
+- Actual cost (with all caching): kr0.401
+- Cost without any cache: kr0.401
+- Total savings: kr0.0000
+  - API cache savings: kr0.0000
+  - Local cache savings: kr0.0000
