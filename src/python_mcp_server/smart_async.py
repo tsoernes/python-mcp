@@ -128,6 +128,29 @@ def _load_jobs() -> None:
         logger.warning(f"Failed to load jobs: {e}")
 
 
+def _refresh_jobs_from_disk() -> None:
+    """
+    Refresh jobs from disk to sync with other processes.
+
+    This ensures that jobs created in subprocesses (e.g., via py_run_script_*)
+    are visible in the main MCP server process.
+    """
+    jobs_path = STATE.persistence_dir / "meta" / "jobs.json"
+    if not jobs_path.exists():
+        return
+
+    try:
+        data = json.loads(jobs_path.read_text())
+        for job_data in data:
+            job_id = job_data["id"]
+            # Only update if we don't have this job or it's been updated
+            if job_id not in STATE.jobs or job_data.get("completed_at"):
+                STATE.jobs[job_id] = JobMeta(**job_data)
+        logger.debug(f"Refreshed {len(data)} jobs from disk")
+    except Exception as e:
+        logger.warning(f"Failed to refresh jobs from disk: {e}")
+
+
 def _update_job_progress(
     job_id: str, current: int, total: int, message: str | None = None
 ) -> None:
@@ -354,6 +377,9 @@ def get_job_status(job_id: str) -> dict[str, Any]:
     Returns:
         Job status including progress, result, or error
     """
+    # Refresh from disk to get jobs from other processes
+    _refresh_jobs_from_disk()
+
     job = STATE.jobs.get(job_id)
     if not job:
         return {"error": f"Job {job_id} not found"}
@@ -372,6 +398,9 @@ def list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str, An
     Returns:
         List of jobs with metadata
     """
+    # Refresh from disk to get jobs from other processes
+    _refresh_jobs_from_disk()
+
     jobs = list(STATE.jobs.values())
 
     if status_filter:
@@ -396,6 +425,9 @@ def cancel_job(job_id: str) -> dict[str, Any]:
     Returns:
         Status of the cancellation
     """
+    # Refresh from disk to get jobs from other processes
+    _refresh_jobs_from_disk()
+
     job = STATE.jobs.get(job_id)
     if not job:
         return {"error": f"Job {job_id} not found"}
@@ -432,6 +464,9 @@ def prune_jobs(
     Returns:
         Number of jobs removed
     """
+    # Refresh from disk to get jobs from other processes
+    _refresh_jobs_from_disk()
+
     from datetime import timedelta
 
     now = datetime.now()
