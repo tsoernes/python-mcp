@@ -2184,3 +2184,262 @@ Traceback (most recent call last):
   File "/home/torstein.sornes/code/python-mcp/test_smart_async.py", line 82, in failing_tool
     raise ValueError("Intentional test failure")
 ValueError: Intentional test failure
+2025-12-11 10:28:06,599 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:06,815 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:06,816 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:06,817 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:06,819 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:06,819 INFO Smart async job tracking initialized
+2025-12-11 10:28:11,051 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:11,239 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:11,240 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:11,241 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:11,242 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:11,242 INFO Smart async job tracking initialized
+2025-12-11 10:28:11,549 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:11,569 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:11,575 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:17,451 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:17,630 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:17,631 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:17,631 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:17,632 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:17,633 INFO Smart async job tracking initialized
+2025-12-11 10:28:17,692 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:18,678 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:18,787 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:18,788 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:18,788 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:18,789 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:18,789 INFO Smart async job tracking initialized
+2025-12-11 10:28:18,889 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:20,507 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:20,590 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:20,591 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:20,591 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:20,591 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:20,592 INFO Smart async job tracking initialized
+2025-12-11 10:28:20,637 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:20,642 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:20,650 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:22,952 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:23,047 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:23,048 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:23,048 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:23,049 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:23,049 INFO Smart async job tracking initialized
+2025-12-11 10:28:23,103 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:23,108 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:23,114 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:26,029 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:28:26,117 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:28:26,118 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:28:26,118 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:28:26,119 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:28:26,119 INFO Smart async job tracking initialized
+2025-12-11 10:28:26,237 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:28:26,242 INFO Processing request of type ListToolsRequest
+2025-12-11 10:28:26,248 INFO Processing request of type ListToolsRequest
+2025-12-11 10:29:04,008 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:29:04,106 INFO Loaded 2 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:29:06,610 INFO Task 'demo_slow_task' exceeded 2.0s budget, switching to background
+2025-12-11 10:29:37,692 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:29:38,068 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:29:38,069 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:29:38,071 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:29:38,074 INFO Loaded 3 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:29:38,075 INFO Smart async job tracking initialized
+2025-12-11 10:29:38,239 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:29:38,245 INFO Processing request of type ListToolsRequest
+2025-12-11 10:29:38,264 INFO Processing request of type ListToolsRequest
+2025-12-11 10:32:47,403 INFO Processing request of type CallToolRequest
+2025-12-11 10:32:59,709 INFO Processing request of type CallToolRequest
+2025-12-11 10:32:59,714 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-11 10:33:02,720 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:33:05,868 INFO Task 'long_running_task' exceeded 3.0s budget, switching to background
+2025-12-11 10:33:10,982 INFO Processing request of type CallToolRequest
+2025-12-11 10:33:23,449 INFO Processing request of type CallToolRequest
+2025-12-11 10:33:27,460 INFO Processing request of type CallToolRequest
+2025-12-11 10:33:36,686 INFO Processing request of type CallToolRequest
+2025-12-11 10:34:08,121 INFO Processing request of type CallToolRequest
+2025-12-11 10:34:10,753 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:10,923 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:10,924 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:10,925 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:10,930 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:10,930 INFO Smart async job tracking initialized
+2025-12-11 10:34:14,027 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:14,204 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:14,205 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:14,205 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:14,206 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:14,207 INFO Smart async job tracking initialized
+2025-12-11 10:34:14,282 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:14,289 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:14,292 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:20,843 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:20,996 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:21,000 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:21,001 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:21,002 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:21,002 INFO Smart async job tracking initialized
+2025-12-11 10:34:21,075 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:22,324 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:22,410 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:22,411 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:22,411 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:22,412 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:22,413 INFO Smart async job tracking initialized
+2025-12-11 10:34:22,574 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:26,315 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:26,505 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:26,506 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:26,507 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:26,508 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:26,508 INFO Smart async job tracking initialized
+2025-12-11 10:34:26,687 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:26,692 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:26,701 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:28,509 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:28,596 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:28,596 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:28,597 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:28,597 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:28,597 INFO Smart async job tracking initialized
+2025-12-11 10:34:28,657 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:28,664 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:28,671 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:30,855 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:31,011 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:31,011 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:31,012 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:31,013 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:31,013 INFO Smart async job tracking initialized
+2025-12-11 10:34:31,216 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:31,219 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:31,226 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:32,405 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:34:32,472 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:34:32,472 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:34:32,472 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:34:32,473 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:34:32,473 INFO Smart async job tracking initialized
+2025-12-11 10:34:32,564 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:34:32,568 INFO Processing request of type ListToolsRequest
+2025-12-11 10:34:32,574 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:14,267 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:14,339 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:14,340 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:14,340 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:14,341 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:14,341 INFO Smart async job tracking initialized
+2025-12-11 10:36:16,975 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:17,143 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:17,144 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:17,144 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:17,146 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:17,146 INFO Smart async job tracking initialized
+2025-12-11 10:36:17,227 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:17,237 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:17,241 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:22,694 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:22,851 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:22,851 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:22,851 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:22,852 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:22,852 INFO Smart async job tracking initialized
+2025-12-11 10:36:22,951 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:23,765 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:23,835 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:23,835 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:23,835 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:23,836 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:23,836 INFO Smart async job tracking initialized
+2025-12-11 10:36:23,920 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:26,353 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:26,424 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:26,424 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:26,425 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:26,425 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:26,425 INFO Smart async job tracking initialized
+2025-12-11 10:36:26,473 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:26,482 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:26,488 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:30,237 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:30,371 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:30,371 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:30,372 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:30,373 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:30,373 INFO Smart async job tracking initialized
+2025-12-11 10:36:32,199 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:32,213 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:32,226 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:35,207 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:35,399 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:35,406 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:35,408 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:35,412 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:35,417 INFO Smart async job tracking initialized
+2025-12-11 10:36:36,203 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:36,214 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:36,228 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:38,722 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:38,994 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:39,009 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:39,031 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:39,046 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:39,059 INFO Smart async job tracking initialized
+2025-12-11 10:36:39,292 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:39,295 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:39,300 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:42,639 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:42,728 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:42,730 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:42,730 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:42,731 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:42,731 INFO Smart async job tracking initialized
+2025-12-11 10:36:44,803 INFO Processing request of type CallToolRequest
+2025-12-11 10:36:46,570 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:46,749 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:46,750 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:46,751 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:46,752 INFO Loaded 1 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:46,752 INFO Smart async job tracking initialized
+2025-12-11 10:36:46,831 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:46,840 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:36:46,844 INFO Processing request of type ListToolsRequest
+2025-12-11 10:36:48,691 INFO Processing request of type CallToolRequest
+2025-12-11 10:36:53,030 INFO Processing request of type CallToolRequest
+2025-12-11 10:36:57,547 INFO Processing request of type CallToolRequest
+2025-12-11 10:36:58,252 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:36:58,324 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:36:58,325 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:36:58,325 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:36:58,326 INFO Loaded 0 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:36:58,326 INFO Smart async job tracking initialized
+2025-12-11 10:36:58,385 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:37:00,191 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:37:00,261 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:37:00,261 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:37:00,262 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:37:00,262 INFO Loaded 0 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:37:00,262 INFO Smart async job tracking initialized
+2025-12-11 10:37:00,372 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:37:03,150 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:37:03,223 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:37:03,224 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:37:03,224 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:37:03,225 INFO Loaded 0 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:37:03,225 INFO Smart async job tracking initialized
+2025-12-11 10:37:03,267 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:37:03,275 INFO Processing request of type ListToolsRequest
+2025-12-11 10:37:03,282 INFO Processing request of type ListToolsRequest
+2025-12-11 10:37:05,214 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:37:05,288 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:37:05,289 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:37:05,289 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:37:05,289 INFO Loaded 0 jobs from /home/torstein.sornes/.python_mcp/meta/jobs.json
+2025-12-11 10:37:05,290 INFO Smart async job tracking initialized
+2025-12-11 10:37:05,328 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:37:05,330 INFO Processing request of type ListToolsRequest
+2025-12-11 10:37:05,333 INFO Processing request of type ListToolsRequest

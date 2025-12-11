@@ -109,15 +109,21 @@ def _load_jobs() -> None:
 
     try:
         data = json.loads(jobs_path.read_text())
+        updated = False
         for job_data in data:
             # Skip running jobs from previous sessions (mark as stale)
             if job_data["status"] == "running":
                 job_data["status"] = "failed"
                 job_data["error"] = "Server restarted while job was running"
                 job_data["completed_at"] = datetime.now().isoformat()
+                updated = True
 
             STATE.jobs[job_data["id"]] = JobMeta(**job_data)
         logger.info(f"Loaded {len(STATE.jobs)} jobs from {jobs_path}")
+
+        # Save updated statuses back to disk
+        if updated:
+            _save_jobs()
     except Exception as e:
         logger.warning(f"Failed to load jobs: {e}")
 
