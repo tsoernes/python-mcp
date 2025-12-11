@@ -35,6 +35,7 @@ This README documents the server’s tools, resource patterns, data models, usag
 - fastmcp (server framework)
 - psutil (benchmark metrics)
 - pydantic (response models)
+- python-dotenv (environment variable loading)
 
 Install and sync environment:
 
@@ -294,13 +295,26 @@ run_script_with_dependencies(
 ```
 
 **.env file format:**
+
+Uses standard [python-dotenv](https://github.com/theskumar/python-dotenv) format:
+
 ```
 # Comments are supported
 DATABASE_URL=postgresql://localhost/testdb
 API_KEY="secret123"
 DEBUG=true
 QUOTED='single quotes work too'
+MULTILINE_VAR="line1
+line2
+line3"
 ```
+
+Supports:
+- Comments (`#`)
+- Single and double quotes
+- Multiline values
+- Variable expansion
+- Empty lines
 
 ### 6.3 Override Precedence
 

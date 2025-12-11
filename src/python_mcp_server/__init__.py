@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import List, Literal, Optional
 
 import psutil
+from dotenv import dotenv_values
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
@@ -116,46 +117,26 @@ STREAM_POLL_INTERVAL = 0.2  # seconds
 
 def _load_env_file(env_file: Path) -> dict[str, str]:
     """
-    Load environment variables from a .env file.
-
-    Simple parser that handles:
-    - KEY=VALUE syntax
-    - Comments (lines starting with #)
-    - Empty lines
-    - Basic quote stripping (single and double quotes)
+    Load environment variables from a .env file using python-dotenv.
 
     Args:
         env_file: Path to .env file
 
     Returns:
         Dictionary of environment variables
+
+    Raises:
+        FileNotFoundError: If the env_file does not exist
     """
-    env_vars = {}
     if not env_file.exists():
         raise FileNotFoundError(f"Environment file not found: {env_file}")
 
-    with open(env_file, "r", encoding="utf-8") as f:
-        for line in f:
-            line = line.strip()
-            # Skip empty lines and comments
-            if not line or line.startswith("#"):
-                continue
+    # dotenv_values returns a dict with all values from the .env file
+    # It handles comments, quotes, multiline values, etc.
+    env_dict = dotenv_values(env_file)
 
-            # Split on first = sign
-            if "=" not in line:
-                continue
-
-            key, _, value = line.partition("=")
-            key = key.strip()
-            value = value.strip()
-
-            # Strip quotes if present
-            if value and value[0] in ('"', "'") and value[-1] == value[0]:
-                value = value[1:-1]
-
-            env_vars[key] = value
-
-    return env_vars
+    # Filter out None values and convert to dict[str, str]
+    return {k: v for k, v in env_dict.items() if v is not None}
 
 
 def _build_process_env(

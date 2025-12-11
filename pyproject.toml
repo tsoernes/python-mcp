@@ -7,7 +7,7 @@ authors = [
     { name = "Torstein Sørnes", email = "t.soernes@gmail.com" }
 ]
 requires-python = ">=3.13"
-dependencies = ["fastmcp", "psutil"]
+dependencies = ["fastmcp", "psutil", "python-dotenv"]
 
 [project.scripts]
 python-mcp-server = "python_mcp_server:main"

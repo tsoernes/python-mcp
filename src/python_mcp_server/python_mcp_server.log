@@ -715,3 +715,1461 @@
 2025-11-10 13:49:05,969 INFO Processing request of type ListToolsRequest
 2025-11-10 13:49:05,980 INFO Processing request of type ListPromptsRequest
 2025-11-10 13:49:05,984 INFO Processing request of type ListToolsRequest
+2025-11-10 14:27:56,110 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:27:56,362 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:27:56,507 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:27:56,508 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:27:56,508 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:27:56,734 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:27:56,898 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:27:56,899 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:27:56,899 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:27:57,145 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:27:57,178 INFO Processing request of type ListToolsRequest
+2025-11-10 14:27:57,221 INFO Processing request of type ListToolsRequest
+2025-11-10 14:27:57,322 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:27:57,323 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:27:57,324 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:28:00,532 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:28:00,535 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:28:00,543 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:00,566 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:00,576 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:00,595 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:14,916 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:24,853 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:28:24,952 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:28:24,953 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:28:24,953 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:28:25,084 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:28:25,094 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:25,107 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:31,855 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:28:31,948 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:28:31,948 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:28:31,949 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:28:32,969 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:28:32,977 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:32,984 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:39,500 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:28:39,561 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:28:39,561 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:28:39,563 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:28:39,617 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:28:39,622 INFO Processing request of type ListToolsRequest
+2025-11-10 14:28:39,625 INFO Processing request of type ListToolsRequest
+2025-11-10 14:29:42,882 INFO Processing request of type ListToolsRequest
+2025-11-10 14:29:53,067 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:29:53,156 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:29:53,159 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:29:53,159 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:29:53,216 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:29:53,218 INFO Processing request of type ListToolsRequest
+2025-11-10 14:29:53,221 INFO Processing request of type ListToolsRequest
+2025-11-10 14:29:53,337 INFO Processing request of type ListToolsRequest
+2025-11-10 14:31:45,159 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 14:31:45,248 INFO Starting MCP server (transport=stdio)
+2025-11-10 14:31:45,248 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 14:31:45,248 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 14:31:45,316 INFO Processing request of type ListPromptsRequest
+2025-11-10 14:31:45,321 INFO Processing request of type ListToolsRequest
+2025-11-10 14:31:45,332 INFO Processing request of type ListToolsRequest
+2025-11-10 14:32:07,260 INFO Processing request of type ListToolsRequest
+2025-11-10 14:54:22,915 INFO Processing request of type ListToolsRequest
+2025-11-10 14:54:22,918 INFO Processing request of type ListToolsRequest
+2025-11-10 15:25:16,293 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 15:25:16,317 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 15:25:16,419 INFO Starting MCP server (transport=stdio)
+2025-11-10 15:25:16,425 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 15:25:16,426 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 15:25:16,988 INFO Starting MCP server (transport=stdio)
+2025-11-10 15:25:17,014 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 15:25:17,032 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 15:25:17,969 INFO Processing request of type ListToolsRequest
+2025-11-10 15:25:17,985 INFO Processing request of type ListPromptsRequest
+2025-11-10 15:25:17,993 INFO Processing request of type ListToolsRequest
+2025-11-10 15:27:25,368 INFO Processing request of type ListToolsRequest
+2025-11-10 15:27:25,374 INFO Processing request of type ListToolsRequest
+2025-11-10 15:27:36,977 INFO Processing request of type ListToolsRequest
+2025-11-10 15:55:10,435 INFO Processing request of type ListToolsRequest
+2025-11-10 15:55:10,451 INFO Processing request of type ListToolsRequest
+2025-11-10 15:56:06,014 INFO Processing request of type ListToolsRequest
+2025-11-10 15:56:08,633 INFO Processing request of type ListToolsRequest
+2025-11-10 15:56:17,718 INFO Processing request of type ListToolsRequest
+2025-11-10 15:56:17,721 INFO Processing request of type ListToolsRequest
+2025-11-10 22:50:02,377 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 22:50:02,383 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 22:50:02,465 INFO Starting MCP server (transport=stdio)
+2025-11-10 22:50:02,466 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 22:50:02,466 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 22:50:02,502 INFO Starting MCP server (transport=stdio)
+2025-11-10 22:50:02,503 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 22:50:02,504 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 22:50:05,715 INFO Processing request of type ListToolsRequest
+2025-11-10 22:50:05,718 INFO Processing request of type ListPromptsRequest
+2025-11-10 22:50:05,720 INFO Processing request of type ListToolsRequest
+2025-11-10 22:50:37,543 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 22:50:37,607 INFO Starting MCP server (transport=stdio)
+2025-11-10 22:50:37,607 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 22:50:37,608 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 22:50:42,087 INFO Processing request of type ListToolsRequest
+2025-11-10 22:50:42,093 INFO Processing request of type ListPromptsRequest
+2025-11-10 22:50:42,096 INFO Processing request of type ListToolsRequest
+2025-11-10 23:25:10,789 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:25:10,847 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:25:10,847 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:25:10,847 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:25:14,668 INFO Processing request of type ListToolsRequest
+2025-11-10 23:25:14,675 INFO Processing request of type ListPromptsRequest
+2025-11-10 23:25:14,679 INFO Processing request of type ListToolsRequest
+2025-11-10 23:29:42,242 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:29:42,559 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:29:42,559 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:29:42,560 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:29:45,777 INFO Processing request of type ListToolsRequest
+2025-11-10 23:29:45,783 INFO Processing request of type ListPromptsRequest
+2025-11-10 23:29:46,048 INFO Processing request of type ListToolsRequest
+2025-11-10 23:47:09,882 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:47:09,952 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:47:09,952 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:47:09,952 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:47:14,141 INFO Processing request of type ListToolsRequest
+2025-11-10 23:47:14,148 INFO Processing request of type ListPromptsRequest
+2025-11-10 23:47:14,152 INFO Processing request of type ListToolsRequest
+2025-11-10 23:47:19,585 INFO Processing request of type ListToolsRequest
+2025-11-10 23:49:19,011 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:49:19,155 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:49:19,156 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:49:19,156 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:49:43,200 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:49:43,296 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:49:43,297 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:49:43,297 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:49:43,512 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:49:43,667 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:49:43,686 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:49:43,707 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:49:46,538 INFO Processing request of type ListToolsRequest
+2025-11-10 23:49:50,784 INFO Processing request of type ListPromptsRequest
+2025-11-10 23:50:20,438 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:50:20,463 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-10 23:50:20,574 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:50:20,575 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:50:20,576 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:50:20,615 INFO Starting MCP server (transport=stdio)
+2025-11-10 23:50:20,616 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-10 23:50:20,617 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-10 23:50:20,954 INFO Processing request of type ListToolsRequest
+2025-11-10 23:50:25,174 INFO Processing request of type ListPromptsRequest
+2025-11-10 23:50:28,411 INFO Processing request of type ListToolsRequest
+2025-11-10 23:50:40,457 INFO Processing request of type ListToolsRequest
+2025-11-11 00:01:26,764 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 00:01:26,887 INFO Starting MCP server (transport=stdio)
+2025-11-11 00:01:26,887 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 00:01:26,888 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 00:01:30,878 INFO Processing request of type ListToolsRequest
+2025-11-11 00:01:30,886 INFO Processing request of type ListPromptsRequest
+2025-11-11 00:01:30,904 INFO Processing request of type ListToolsRequest
+2025-11-11 09:05:02,243 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 09:05:02,292 INFO Starting MCP server (transport=stdio)
+2025-11-11 09:05:02,292 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 09:05:02,292 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 09:05:02,775 INFO Processing request of type ListToolsRequest
+2025-11-11 09:05:02,776 INFO Processing request of type ListPromptsRequest
+2025-11-11 09:05:02,777 INFO Processing request of type ListToolsRequest
+2025-11-11 09:10:25,750 INFO Processing request of type ListToolsRequest
+2025-11-11 09:10:25,755 INFO Processing request of type ListToolsRequest
+2025-11-11 09:25:37,108 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 09:25:37,286 INFO Starting MCP server (transport=stdio)
+2025-11-11 09:25:37,309 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 09:25:37,336 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 09:25:37,444 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 09:25:38,061 INFO Processing request of type ListToolsRequest
+2025-11-11 09:25:38,106 INFO Starting MCP server (transport=stdio)
+2025-11-11 09:25:38,109 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 09:25:38,110 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 09:25:40,491 INFO Processing request of type ListPromptsRequest
+2025-11-11 09:25:41,133 INFO Processing request of type ListToolsRequest
+2025-11-11 09:26:00,467 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 09:26:00,548 INFO Starting MCP server (transport=stdio)
+2025-11-11 09:26:00,549 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 09:26:00,549 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 09:26:00,987 INFO Processing request of type ListToolsRequest
+2025-11-11 09:26:01,017 INFO Processing request of type ListPromptsRequest
+2025-11-11 09:26:01,019 INFO Processing request of type ListToolsRequest
+2025-11-11 09:26:16,447 INFO Processing request of type ListToolsRequest
+2025-11-11 09:27:48,814 INFO Processing request of type ListToolsRequest
+2025-11-11 11:50:23,832 INFO Processing request of type ListToolsRequest
+2025-11-11 11:50:23,846 INFO Processing request of type ListToolsRequest
+2025-11-11 12:24:31,719 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 12:24:31,780 INFO Starting MCP server (transport=stdio)
+2025-11-11 12:24:31,781 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 12:24:31,782 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 12:24:33,846 INFO Processing request of type ListToolsRequest
+2025-11-11 12:24:33,848 INFO Processing request of type ListPromptsRequest
+2025-11-11 12:24:33,850 INFO Processing request of type ListToolsRequest
+2025-11-11 12:24:37,969 INFO Processing request of type ListToolsRequest
+2025-11-11 12:37:53,237 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 12:37:53,240 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 12:37:53,319 INFO Starting MCP server (transport=stdio)
+2025-11-11 12:37:53,320 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 12:37:53,321 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 12:37:53,552 INFO Starting MCP server (transport=stdio)
+2025-11-11 12:37:53,567 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 12:37:53,567 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 12:37:57,237 INFO Processing request of type ListToolsRequest
+2025-11-11 12:37:57,267 INFO Processing request of type ListPromptsRequest
+2025-11-11 12:37:57,293 INFO Processing request of type ListToolsRequest
+2025-11-11 12:41:34,816 INFO Processing request of type ListToolsRequest
+2025-11-11 12:51:33,027 INFO Processing request of type ListToolsRequest
+2025-11-11 12:51:33,034 INFO Processing request of type ListToolsRequest
+2025-11-11 13:14:35,735 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 13:14:35,811 INFO Starting MCP server (transport=stdio)
+2025-11-11 13:14:35,812 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 13:14:35,812 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 13:14:37,659 INFO Processing request of type ListToolsRequest
+2025-11-11 13:14:37,661 INFO Processing request of type ListPromptsRequest
+2025-11-11 13:14:37,662 INFO Processing request of type ListToolsRequest
+2025-11-11 13:14:43,064 INFO Processing request of type ListToolsRequest
+2025-11-11 13:14:49,020 INFO Processing request of type ListToolsRequest
+2025-11-11 13:19:54,396 INFO Processing request of type CallToolRequest
+2025-11-11 13:19:54,399 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-11-11 13:20:08,539 INFO Processing request of type CallToolRequest
+2025-11-11 13:20:08,541 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-11-11 13:30:54,947 INFO Processing request of type ListToolsRequest
+2025-11-11 13:30:54,973 INFO Processing request of type ListToolsRequest
+2025-11-11 13:33:54,104 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 13:33:54,169 INFO Starting MCP server (transport=stdio)
+2025-11-11 13:33:54,169 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 13:33:54,169 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 13:33:54,413 INFO Processing request of type ListToolsRequest
+2025-11-11 13:33:54,423 INFO Processing request of type ListPromptsRequest
+2025-11-11 13:33:54,433 INFO Processing request of type ListToolsRequest
+2025-11-11 13:41:43,620 INFO Processing request of type ListToolsRequest
+2025-11-11 13:41:43,640 INFO Processing request of type ListToolsRequest
+2025-11-11 13:41:46,398 INFO Processing request of type ListToolsRequest
+2025-11-11 14:23:38,166 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 14:23:38,203 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 14:23:38,283 INFO Starting MCP server (transport=stdio)
+2025-11-11 14:23:38,283 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 14:23:38,284 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 14:23:38,326 INFO Starting MCP server (transport=stdio)
+2025-11-11 14:23:38,327 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 14:23:38,328 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 14:23:40,648 INFO Processing request of type ListToolsRequest
+2025-11-11 14:23:40,651 INFO Processing request of type ListPromptsRequest
+2025-11-11 14:23:40,683 INFO Processing request of type ListToolsRequest
+2025-11-11 14:23:52,108 INFO Processing request of type ListToolsRequest
+2025-11-11 14:27:19,578 INFO Processing request of type ListToolsRequest
+2025-11-11 14:27:19,585 INFO Processing request of type ListToolsRequest
+2025-11-11 14:34:56,130 INFO Processing request of type ListToolsRequest
+2025-11-11 14:34:56,143 INFO Processing request of type ListToolsRequest
+2025-11-11 14:57:15,630 INFO Processing request of type ListToolsRequest
+2025-11-11 14:57:15,635 INFO Processing request of type ListToolsRequest
+2025-11-11 14:57:19,849 INFO Processing request of type ListToolsRequest
+2025-11-11 15:27:04,175 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 15:27:04,252 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 15:27:04,400 INFO Starting MCP server (transport=stdio)
+2025-11-11 15:27:04,413 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 15:27:04,426 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 15:27:04,547 INFO Starting MCP server (transport=stdio)
+2025-11-11 15:27:04,552 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 15:27:04,553 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 15:31:35,788 INFO Processing request of type ListToolsRequest
+2025-11-11 15:31:44,258 INFO Processing request of type ListPromptsRequest
+2025-11-11 15:31:51,489 INFO Processing request of type ListToolsRequest
+2025-11-11 15:45:32,923 INFO Processing request of type ListToolsRequest
+2025-11-11 15:45:32,960 INFO Processing request of type ListToolsRequest
+2025-11-11 20:45:48,693 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 20:45:48,821 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-11 20:45:48,826 INFO Starting MCP server (transport=stdio)
+2025-11-11 20:45:48,827 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 20:45:48,827 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 20:45:48,954 INFO Starting MCP server (transport=stdio)
+2025-11-11 20:45:48,955 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-11 20:45:48,955 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-11 20:45:49,632 INFO Processing request of type ListPromptsRequest
+2025-11-11 20:45:49,640 INFO Processing request of type ListToolsRequest
+2025-11-11 20:45:49,647 INFO Processing request of type ListToolsRequest
+2025-11-12 00:22:43,205 INFO Processing request of type CallToolRequest
+2025-11-12 00:22:43,229 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-12 00:22:55,620 INFO Processing request of type CallToolRequest
+2025-11-12 00:22:55,624 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-12 09:12:07,868 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:12:07,924 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:12:07,924 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:12:07,924 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:12:07,961 INFO Processing request of type ListPromptsRequest
+2025-11-12 09:12:07,962 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:07,964 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:11,274 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:20,751 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:12:20,795 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:12:20,796 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:12:20,796 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:12:20,831 INFO Processing request of type ListPromptsRequest
+2025-11-12 09:12:20,835 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:20,840 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:27,868 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:52,408 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:12:52,490 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:12:52,491 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:12:52,491 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:12:56,597 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:12:56,689 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:12:56,690 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:12:56,690 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:12:57,503 INFO Processing request of type ListPromptsRequest
+2025-11-12 09:12:57,505 INFO Processing request of type ListToolsRequest
+2025-11-12 09:12:58,281 INFO Processing request of type ListToolsRequest
+2025-11-12 09:13:23,300 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:13:23,396 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:13:23,397 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:13:23,397 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:13:23,457 INFO Processing request of type ListPromptsRequest
+2025-11-12 09:13:23,460 INFO Processing request of type ListToolsRequest
+2025-11-12 09:13:23,464 INFO Processing request of type ListToolsRequest
+2025-11-12 09:13:25,733 INFO Processing request of type ListToolsRequest
+2025-11-12 09:17:42,147 INFO Processing request of type ListToolsRequest
+2025-11-12 09:17:42,217 INFO Processing request of type ListToolsRequest
+2025-11-12 09:19:10,914 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 09:19:11,006 INFO Starting MCP server (transport=stdio)
+2025-11-12 09:19:11,007 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 09:19:11,007 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 09:19:11,088 INFO Processing request of type ListPromptsRequest
+2025-11-12 09:19:11,092 INFO Processing request of type ListToolsRequest
+2025-11-12 09:19:11,098 INFO Processing request of type ListToolsRequest
+2025-11-12 09:22:02,211 INFO Processing request of type ListToolsRequest
+2025-11-12 09:23:14,945 INFO Processing request of type ListToolsRequest
+2025-11-12 09:23:14,947 INFO Processing request of type ListToolsRequest
+2025-11-12 09:26:58,618 INFO Processing request of type ListToolsRequest
+2025-11-12 09:27:38,918 INFO Processing request of type ListToolsRequest
+2025-11-12 09:27:46,254 INFO Processing request of type ListToolsRequest
+2025-11-12 10:40:50,935 INFO Processing request of type ListToolsRequest
+2025-11-12 10:40:52,665 INFO Processing request of type ListToolsRequest
+2025-11-12 11:01:49,184 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 11:01:49,487 INFO Starting MCP server (transport=stdio)
+2025-11-12 11:01:49,488 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 11:01:49,489 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 11:01:56,681 INFO Processing request of type ListPromptsRequest
+2025-11-12 11:01:56,692 INFO Processing request of type ListToolsRequest
+2025-11-12 11:01:56,705 INFO Processing request of type ListToolsRequest
+2025-11-12 11:03:09,511 INFO Processing request of type ListToolsRequest
+2025-11-12 11:03:15,246 INFO Processing request of type ListToolsRequest
+2025-11-12 11:03:18,984 INFO Processing request of type ListToolsRequest
+2025-11-12 12:00:01,399 INFO Processing request of type ListToolsRequest
+2025-11-12 12:00:01,402 INFO Processing request of type ListToolsRequest
+2025-11-12 12:42:40,485 INFO Processing request of type ListToolsRequest
+2025-11-12 12:42:40,488 INFO Processing request of type ListToolsRequest
+2025-11-12 12:54:14,619 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 12:54:14,711 INFO Starting MCP server (transport=stdio)
+2025-11-12 12:54:14,712 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 12:54:14,712 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 12:54:15,118 INFO Processing request of type ListPromptsRequest
+2025-11-12 12:54:15,120 INFO Processing request of type ListToolsRequest
+2025-11-12 12:54:15,123 INFO Processing request of type ListToolsRequest
+2025-11-12 13:14:17,747 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 13:14:17,832 INFO Starting MCP server (transport=stdio)
+2025-11-12 13:14:17,833 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 13:14:17,833 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 13:14:18,096 INFO Processing request of type ListPromptsRequest
+2025-11-12 13:14:18,099 INFO Processing request of type ListToolsRequest
+2025-11-12 13:14:18,105 INFO Processing request of type ListToolsRequest
+2025-11-12 14:19:05,893 INFO Processing request of type ListToolsRequest
+2025-11-12 14:19:05,904 INFO Processing request of type ListToolsRequest
+2025-11-12 15:24:37,834 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-12 15:24:38,005 INFO Starting MCP server (transport=stdio)
+2025-11-12 15:24:38,005 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-12 15:24:38,005 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-12 15:24:38,277 INFO Processing request of type ListPromptsRequest
+2025-11-12 15:24:38,280 INFO Processing request of type ListToolsRequest
+2025-11-12 15:24:38,284 INFO Processing request of type ListToolsRequest
+2025-11-13 09:38:39,494 INFO Processing request of type ListToolsRequest
+2025-11-13 09:38:39,502 INFO Processing request of type ListToolsRequest
+2025-11-13 10:51:39,351 INFO Processing request of type CallToolRequest
+2025-11-13 10:51:39,358 INFO auto_parse_imports sync detected=[] final_deps=['fastmcp>=2.0.0']
+2025-11-13 10:51:48,071 INFO Processing request of type CallToolRequest
+2025-11-13 10:51:48,072 INFO auto_parse_imports sync detected=[] final_deps=['fastmcp>=2.0.0']
+2025-11-13 10:52:50,564 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 10:52:50,595 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 10:52:50,755 INFO Starting MCP server (transport=stdio)
+2025-11-13 10:52:50,755 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 10:52:50,756 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 10:52:51,008 INFO Starting MCP server (transport=stdio)
+2025-11-13 10:52:51,009 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 10:52:51,010 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 10:52:53,313 INFO Processing request of type ListPromptsRequest
+2025-11-13 10:52:53,317 INFO Processing request of type ListToolsRequest
+2025-11-13 10:52:53,322 INFO Processing request of type ListToolsRequest
+2025-11-13 10:53:54,085 INFO Processing request of type ListToolsRequest
+2025-11-13 10:54:05,670 INFO Processing request of type ListToolsRequest
+2025-11-13 10:54:12,759 INFO Processing request of type ListToolsRequest
+2025-11-13 10:54:31,499 INFO Processing request of type ListToolsRequest
+2025-11-13 10:55:12,669 INFO Processing request of type ListToolsRequest
+2025-11-13 10:55:12,683 INFO Processing request of type ListToolsRequest
+2025-11-13 11:44:39,109 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 11:44:39,402 INFO Starting MCP server (transport=stdio)
+2025-11-13 11:44:39,402 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 11:44:39,403 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 11:44:43,807 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 11:44:43,881 INFO Starting MCP server (transport=stdio)
+2025-11-13 11:44:43,885 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 11:44:43,886 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 11:44:44,005 INFO Processing request of type ListPromptsRequest
+2025-11-13 11:44:44,013 INFO Processing request of type ListToolsRequest
+2025-11-13 11:44:44,017 INFO Processing request of type ListToolsRequest
+2025-11-13 12:03:54,741 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 12:03:54,751 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 12:03:54,824 INFO Starting MCP server (transport=stdio)
+2025-11-13 12:03:54,825 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 12:03:54,825 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 12:03:54,855 INFO Starting MCP server (transport=stdio)
+2025-11-13 12:03:54,855 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 12:03:54,856 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 12:03:56,030 INFO Processing request of type ListPromptsRequest
+2025-11-13 12:03:56,032 INFO Processing request of type ListToolsRequest
+2025-11-13 12:03:56,661 INFO Processing request of type ListToolsRequest
+2025-11-13 12:35:04,022 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 12:35:04,094 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 12:35:04,193 INFO Starting MCP server (transport=stdio)
+2025-11-13 12:35:04,193 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 12:35:04,195 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 12:35:04,681 INFO Starting MCP server (transport=stdio)
+2025-11-13 12:35:04,682 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 12:35:04,683 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 12:35:06,676 INFO Processing request of type ListPromptsRequest
+2025-11-13 12:35:06,679 INFO Processing request of type ListToolsRequest
+2025-11-13 12:35:08,234 INFO Processing request of type ListToolsRequest
+2025-11-13 13:10:42,658 INFO Processing request of type ListToolsRequest
+2025-11-13 13:10:42,682 INFO Processing request of type ListToolsRequest
+2025-11-13 13:48:06,915 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-13 13:48:06,979 INFO Starting MCP server (transport=stdio)
+2025-11-13 13:48:06,979 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-13 13:48:06,980 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-13 13:48:07,045 INFO Processing request of type ListPromptsRequest
+2025-11-13 13:48:07,048 INFO Processing request of type ListToolsRequest
+2025-11-13 13:48:07,052 INFO Processing request of type ListToolsRequest
+2025-11-13 15:00:28,251 INFO Processing request of type ListToolsRequest
+2025-11-13 15:00:28,264 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:29,558 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:29,589 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:38,472 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:40,420 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:41,990 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:44,281 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:47,065 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:52,239 INFO Processing request of type ListToolsRequest
+2025-11-13 16:21:52,241 INFO Processing request of type ListToolsRequest
+2025-11-14 09:10:03,296 INFO Processing request of type ListToolsRequest
+2025-11-14 09:19:37,799 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 09:19:37,923 INFO Starting MCP server (transport=stdio)
+2025-11-14 09:19:37,924 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 09:19:37,924 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 09:19:40,739 INFO Processing request of type ListPromptsRequest
+2025-11-14 09:19:40,742 INFO Processing request of type ListToolsRequest
+2025-11-14 09:19:40,747 INFO Processing request of type ListToolsRequest
+2025-11-14 12:39:25,441 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 12:39:25,543 INFO Starting MCP server (transport=stdio)
+2025-11-14 12:39:25,543 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 12:39:25,543 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 12:39:25,598 INFO Processing request of type ListPromptsRequest
+2025-11-14 12:39:25,601 INFO Processing request of type ListToolsRequest
+2025-11-14 12:39:25,605 INFO Processing request of type ListToolsRequest
+2025-11-14 13:06:31,305 INFO Processing request of type CallToolRequest
+2025-11-14 13:06:31,316 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 13:06:38,094 INFO Processing request of type CallToolRequest
+2025-11-14 13:06:38,096 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 13:31:31,624 INFO Processing request of type ListToolsRequest
+2025-11-14 13:31:31,632 INFO Processing request of type ListToolsRequest
+2025-11-14 15:02:25,874 INFO Processing request of type ListToolsRequest
+2025-11-14 15:02:25,886 INFO Processing request of type ListToolsRequest
+2025-11-14 15:05:12,435 INFO Processing request of type CallToolRequest
+2025-11-14 15:05:12,444 INFO auto_parse_imports sync detected=[] final_deps=['httpx']
+2025-11-14 15:05:19,187 INFO Processing request of type CallToolRequest
+2025-11-14 15:05:19,189 INFO auto_parse_imports sync detected=[] final_deps=['httpx']
+2025-11-14 16:20:55,594 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:20:55,668 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:20:55,668 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:20:55,669 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:20:55,897 INFO Processing request of type ListPromptsRequest
+2025-11-14 16:20:55,905 INFO Processing request of type ListToolsRequest
+2025-11-14 16:20:55,912 INFO Processing request of type ListToolsRequest
+2025-11-14 16:28:51,149 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:28:51,185 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:28:51,185 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:28:51,185 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:28:51,266 INFO Processing request of type ListPromptsRequest
+2025-11-14 16:28:51,267 INFO Processing request of type ListToolsRequest
+2025-11-14 16:28:51,268 INFO Processing request of type ListToolsRequest
+2025-11-14 16:28:55,576 INFO Processing request of type ListToolsRequest
+2025-11-14 16:44:12,483 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:44:12,493 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:44:12,562 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:44:12,563 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:44:12,563 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:44:12,682 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:44:12,683 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:44:12,683 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:44:14,248 INFO Processing request of type ListToolsRequest
+2025-11-14 16:44:14,251 INFO Processing request of type ListPromptsRequest
+2025-11-14 16:44:14,717 INFO Processing request of type ListToolsRequest
+2025-11-14 16:44:35,423 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:44:35,474 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:44:35,475 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:44:35,475 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:44:42,239 INFO Processing request of type ListToolsRequest
+2025-11-14 16:44:42,240 INFO Processing request of type ListPromptsRequest
+2025-11-14 16:44:42,243 INFO Processing request of type ListToolsRequest
+2025-11-14 16:53:07,283 INFO Processing request of type CallToolRequest
+2025-11-14 16:53:07,301 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 16:55:41,680 INFO Processing request of type ListToolsRequest
+2025-11-14 16:55:41,720 INFO Processing request of type ListToolsRequest
+2025-11-14 16:56:30,434 INFO Processing request of type ListToolsRequest
+2025-11-14 16:57:37,355 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 16:57:37,450 INFO Starting MCP server (transport=stdio)
+2025-11-14 16:57:37,451 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 16:57:37,452 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 16:57:37,562 INFO Processing request of type ListPromptsRequest
+2025-11-14 16:57:37,566 INFO Processing request of type ListToolsRequest
+2025-11-14 16:57:37,569 INFO Processing request of type ListToolsRequest
+2025-11-14 16:57:48,015 INFO Processing request of type ListToolsRequest
+2025-11-14 17:05:00,503 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 17:05:00,581 INFO Starting MCP server (transport=stdio)
+2025-11-14 17:05:00,582 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 17:05:00,582 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 17:05:04,268 INFO Processing request of type ListPromptsRequest
+2025-11-14 17:05:04,271 INFO Processing request of type ListToolsRequest
+2025-11-14 17:05:04,275 INFO Processing request of type ListToolsRequest
+2025-11-14 17:16:23,439 INFO Processing request of type ListToolsRequest
+2025-11-14 17:17:01,765 INFO Processing request of type CallToolRequest
+2025-11-14 17:18:53,773 INFO Processing request of type CallToolRequest
+2025-11-14 17:21:48,454 INFO Processing request of type CallToolRequest
+2025-11-14 17:21:48,456 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 17:21:59,058 INFO Processing request of type CallToolRequest
+2025-11-14 17:21:59,059 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 17:35:38,521 INFO Processing request of type ListToolsRequest
+2025-11-14 18:27:46,645 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 18:27:46,694 INFO Starting MCP server (transport=stdio)
+2025-11-14 18:27:46,694 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 18:27:46,694 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 18:27:46,727 INFO Processing request of type ListPromptsRequest
+2025-11-14 18:27:46,728 INFO Processing request of type ListToolsRequest
+2025-11-14 18:27:46,730 INFO Processing request of type ListToolsRequest
+2025-11-14 19:59:11,992 INFO Processing request of type ListToolsRequest
+2025-11-14 19:59:12,012 INFO Processing request of type ListToolsRequest
+2025-11-14 20:01:29,052 INFO Processing request of type ListToolsRequest
+2025-11-14 20:50:54,186 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 20:50:54,204 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 20:50:54,300 INFO Starting MCP server (transport=stdio)
+2025-11-14 20:50:54,313 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 20:50:54,313 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 20:50:54,580 INFO Starting MCP server (transport=stdio)
+2025-11-14 20:50:54,580 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 20:50:54,581 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 20:51:01,677 INFO Processing request of type ListToolsRequest
+2025-11-14 20:51:01,679 INFO Processing request of type ListPromptsRequest
+2025-11-14 20:51:01,680 INFO Processing request of type ListToolsRequest
+2025-11-14 21:00:25,534 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 21:00:25,626 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-14 21:00:25,722 INFO Starting MCP server (transport=stdio)
+2025-11-14 21:00:25,723 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 21:00:25,723 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 21:00:25,804 INFO Starting MCP server (transport=stdio)
+2025-11-14 21:00:25,805 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-14 21:00:25,806 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-14 21:00:25,917 INFO Processing request of type ListToolsRequest
+2025-11-14 21:00:26,469 INFO Processing request of type ListPromptsRequest
+2025-11-14 21:00:27,488 INFO Processing request of type ListToolsRequest
+2025-11-14 21:01:43,704 INFO Processing request of type CallToolRequest
+2025-11-14 21:01:46,788 INFO Processing request of type CallToolRequest
+2025-11-14 21:01:49,739 INFO Processing request of type CallToolRequest
+2025-11-14 21:01:55,065 INFO Processing request of type CallToolRequest
+2025-11-14 21:01:57,809 INFO Processing request of type CallToolRequest
+2025-11-14 21:04:58,690 INFO Processing request of type ListToolsRequest
+2025-11-14 21:14:01,431 INFO Processing request of type CallToolRequest
+2025-11-14 21:15:15,317 INFO Processing request of type CallToolRequest
+2025-11-14 21:16:08,760 INFO Processing request of type CallToolRequest
+2025-11-14 21:16:13,086 INFO Processing request of type CallToolRequest
+2025-11-14 21:16:34,781 INFO Processing request of type CallToolRequest
+2025-11-14 21:16:46,058 INFO Processing request of type CallToolRequest
+2025-11-14 21:18:53,238 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:06,153 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:12,475 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:16,674 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:29,441 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:29,442 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 21:19:36,109 INFO Processing request of type CallToolRequest
+2025-11-14 21:19:36,110 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 21:19:40,433 INFO Processing request of type CallToolRequest
+2025-11-14 22:11:43,096 INFO Processing request of type CallToolRequest
+2025-11-14 22:11:43,098 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 22:12:30,042 INFO Processing request of type CallToolRequest
+2025-11-14 22:12:34,101 INFO Processing request of type CallToolRequest
+2025-11-14 22:12:56,836 INFO Processing request of type CallToolRequest
+2025-11-14 22:12:56,838 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 22:13:01,386 INFO Processing request of type CallToolRequest
+2025-11-14 22:14:07,936 INFO Processing request of type CallToolRequest
+2025-11-14 22:14:07,937 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-14 22:14:13,164 INFO Processing request of type CallToolRequest
+2025-11-15 11:34:22,519 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:34:22,520 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:34:22,585 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:34:22,585 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:34:22,586 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:34:22,612 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:34:22,612 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:34:22,612 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:34:23,502 INFO Processing request of type ListToolsRequest
+2025-11-15 11:34:23,510 INFO Processing request of type ListPromptsRequest
+2025-11-15 11:34:24,972 INFO Processing request of type ListToolsRequest
+2025-11-15 11:34:51,027 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:34:51,076 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:34:51,076 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:34:51,077 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:34:58,395 INFO Processing request of type ListToolsRequest
+2025-11-15 11:34:58,404 INFO Processing request of type ListPromptsRequest
+2025-11-15 11:34:58,409 INFO Processing request of type ListToolsRequest
+2025-11-15 11:37:42,815 INFO Processing request of type ListToolsRequest
+2025-11-15 11:38:17,685 INFO Processing request of type ListToolsRequest
+2025-11-15 11:42:38,797 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:42:38,932 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:42:38,933 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:42:38,933 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:42:39,005 INFO Processing request of type ListPromptsRequest
+2025-11-15 11:42:39,008 INFO Processing request of type ListToolsRequest
+2025-11-15 11:42:39,012 INFO Processing request of type ListToolsRequest
+2025-11-15 11:55:13,661 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:55:13,683 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:55:13,758 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:55:13,758 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:55:13,758 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:55:13,776 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:55:13,776 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:55:13,777 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:55:27,021 INFO Processing request of type ListToolsRequest
+2025-11-15 11:55:27,027 INFO Processing request of type ListPromptsRequest
+2025-11-15 11:55:27,032 INFO Processing request of type ListToolsRequest
+2025-11-15 11:56:07,256 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 11:56:07,335 INFO Starting MCP server (transport=stdio)
+2025-11-15 11:56:07,335 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 11:56:07,336 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 11:56:16,363 INFO Processing request of type ListToolsRequest
+2025-11-15 11:56:16,366 INFO Processing request of type ListPromptsRequest
+2025-11-15 11:56:16,367 INFO Processing request of type ListToolsRequest
+2025-11-15 12:16:15,390 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 12:16:15,516 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 12:16:15,522 INFO Starting MCP server (transport=stdio)
+2025-11-15 12:16:15,523 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 12:16:15,524 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 12:16:15,668 INFO Starting MCP server (transport=stdio)
+2025-11-15 12:16:15,669 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 12:16:15,670 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 12:16:16,669 INFO Processing request of type ListToolsRequest
+2025-11-15 12:16:16,985 INFO Processing request of type ListPromptsRequest
+2025-11-15 12:16:18,111 INFO Processing request of type ListToolsRequest
+2025-11-15 12:24:25,531 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 12:24:25,606 INFO Starting MCP server (transport=stdio)
+2025-11-15 12:24:25,606 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 12:24:25,606 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 12:24:25,735 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-15 12:24:25,823 INFO Starting MCP server (transport=stdio)
+2025-11-15 12:24:25,823 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-15 12:24:25,824 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-15 12:24:26,700 INFO Processing request of type ListToolsRequest
+2025-11-15 12:24:29,312 INFO Processing request of type ListPromptsRequest
+2025-11-15 12:24:32,086 INFO Processing request of type ListToolsRequest
+2025-11-15 12:24:41,326 INFO Processing request of type ListToolsRequest
+2025-11-15 12:24:50,588 INFO Processing request of type ListToolsRequest
+2025-11-15 12:24:57,858 INFO Processing request of type ListToolsRequest
+2025-11-15 12:25:03,188 INFO Processing request of type ListToolsRequest
+2025-11-15 12:25:09,187 INFO Processing request of type ListToolsRequest
+2025-11-17 10:53:01,249 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-17 10:53:01,331 INFO Starting MCP server (transport=stdio)
+2025-11-17 10:53:01,332 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-17 10:53:01,332 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-17 10:53:03,131 INFO Processing request of type ListToolsRequest
+2025-11-17 10:53:03,141 INFO Processing request of type ListPromptsRequest
+2025-11-17 10:53:03,143 INFO Processing request of type ListToolsRequest
+2025-11-17 11:55:03,371 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-17 11:55:03,439 INFO Starting MCP server (transport=stdio)
+2025-11-17 11:55:03,439 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-17 11:55:03,439 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-17 11:55:03,539 INFO Processing request of type ListPromptsRequest
+2025-11-17 11:55:03,540 INFO Processing request of type ListToolsRequest
+2025-11-17 11:55:03,542 INFO Processing request of type ListToolsRequest
+2025-11-17 11:56:22,672 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-17 11:56:22,712 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-17 11:56:23,133 INFO Starting MCP server (transport=stdio)
+2025-11-17 11:56:23,134 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-17 11:56:23,135 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-17 11:56:23,186 INFO Starting MCP server (transport=stdio)
+2025-11-17 11:56:23,186 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-17 11:56:23,187 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-17 11:56:25,926 INFO Processing request of type ListToolsRequest
+2025-11-17 11:56:27,101 INFO Processing request of type ListPromptsRequest
+2025-11-17 11:56:31,009 INFO Processing request of type ListToolsRequest
+2025-11-17 12:44:50,095 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-17 12:44:50,122 INFO Starting MCP server (transport=stdio)
+2025-11-17 12:44:50,122 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-17 12:44:50,122 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-17 12:44:50,142 INFO Processing request of type ListToolsRequest
+2025-11-17 12:44:50,143 INFO Processing request of type ListPromptsRequest
+2025-11-17 12:44:50,144 INFO Processing request of type ListToolsRequest
+2025-11-18 09:13:01,684 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 09:13:01,718 INFO Starting MCP server (transport=stdio)
+2025-11-18 09:13:01,719 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 09:13:01,719 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 09:13:01,741 INFO Processing request of type ListPromptsRequest
+2025-11-18 09:13:01,742 INFO Processing request of type ListToolsRequest
+2025-11-18 09:13:01,743 INFO Processing request of type ListToolsRequest
+2025-11-18 09:13:12,362 INFO Processing request of type ListToolsRequest
+2025-11-18 09:15:00,875 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 09:15:00,931 INFO Starting MCP server (transport=stdio)
+2025-11-18 09:15:00,932 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 09:15:00,932 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 09:15:00,976 INFO Processing request of type ListPromptsRequest
+2025-11-18 09:15:00,978 INFO Processing request of type ListToolsRequest
+2025-11-18 09:15:00,980 INFO Processing request of type ListToolsRequest
+2025-11-18 09:15:07,647 INFO Processing request of type ListToolsRequest
+2025-11-18 09:22:17,403 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 09:22:17,453 INFO Starting MCP server (transport=stdio)
+2025-11-18 09:22:17,453 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 09:22:17,453 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 09:22:17,485 INFO Processing request of type ListPromptsRequest
+2025-11-18 09:22:17,486 INFO Processing request of type ListToolsRequest
+2025-11-18 09:22:17,487 INFO Processing request of type ListToolsRequest
+2025-11-18 09:22:24,467 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 09:22:24,519 INFO Starting MCP server (transport=stdio)
+2025-11-18 09:22:24,519 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 09:22:24,519 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 09:22:24,551 INFO Processing request of type ListPromptsRequest
+2025-11-18 09:22:24,553 INFO Processing request of type ListToolsRequest
+2025-11-18 09:22:24,556 INFO Processing request of type ListToolsRequest
+2025-11-18 09:38:20,576 INFO Processing request of type ListToolsRequest
+2025-11-18 13:45:24,888 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 13:45:24,922 INFO Starting MCP server (transport=stdio)
+2025-11-18 13:45:24,923 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 13:45:24,923 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 13:45:24,955 INFO Processing request of type ListPromptsRequest
+2025-11-18 13:45:24,956 INFO Processing request of type ListToolsRequest
+2025-11-18 13:45:24,958 INFO Processing request of type ListToolsRequest
+2025-11-18 13:45:28,862 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 13:45:28,887 INFO Starting MCP server (transport=stdio)
+2025-11-18 13:45:28,888 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 13:45:28,888 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 13:45:28,907 INFO Processing request of type ListPromptsRequest
+2025-11-18 13:45:28,908 INFO Processing request of type ListToolsRequest
+2025-11-18 13:45:28,909 INFO Processing request of type ListToolsRequest
+2025-11-18 14:39:05,106 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 14:39:05,141 INFO Starting MCP server (transport=stdio)
+2025-11-18 14:39:05,141 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 14:39:05,141 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 14:39:05,158 INFO Processing request of type ListPromptsRequest
+2025-11-18 14:39:05,159 INFO Processing request of type ListToolsRequest
+2025-11-18 14:39:05,161 INFO Processing request of type ListToolsRequest
+2025-11-18 14:39:15,254 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-18 14:39:15,335 INFO Starting MCP server (transport=stdio)
+2025-11-18 14:39:15,336 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-18 14:39:15,336 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-18 14:39:15,397 INFO Processing request of type ListPromptsRequest
+2025-11-18 14:39:15,399 INFO Processing request of type ListToolsRequest
+2025-11-18 14:39:15,402 INFO Processing request of type ListToolsRequest
+2025-11-18 15:11:49,629 INFO Processing request of type ListToolsRequest
+2025-11-18 15:11:49,634 INFO Processing request of type ListToolsRequest
+2025-11-18 15:56:29,400 INFO Processing request of type ListToolsRequest
+2025-11-18 15:56:29,420 INFO Processing request of type ListToolsRequest
+2025-11-18 15:57:03,152 INFO Processing request of type ListToolsRequest
+2025-11-18 15:57:18,289 INFO Processing request of type ListToolsRequest
+2025-11-19 09:19:00,392 INFO Processing request of type ListToolsRequest
+2025-11-19 09:19:00,397 INFO Processing request of type ListToolsRequest
+2025-11-19 09:48:49,996 INFO Processing request of type ListToolsRequest
+2025-11-19 09:48:50,033 INFO Processing request of type ListToolsRequest
+2025-11-19 09:49:09,685 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-19 09:49:09,728 INFO Starting MCP server (transport=stdio)
+2025-11-19 09:49:09,731 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-19 09:49:09,731 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-19 09:49:09,761 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-19 09:49:09,863 INFO Starting MCP server (transport=stdio)
+2025-11-19 09:49:09,864 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-19 09:49:09,864 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-19 09:49:10,692 INFO Processing request of type ListToolsRequest
+2025-11-19 09:49:10,771 INFO Processing request of type ListPromptsRequest
+2025-11-19 09:49:11,402 INFO Processing request of type ListToolsRequest
+2025-11-19 11:42:06,168 INFO Processing request of type ListToolsRequest
+2025-11-19 11:42:06,172 INFO Processing request of type ListToolsRequest
+2025-11-19 12:46:20,016 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-19 12:46:20,070 INFO Starting MCP server (transport=stdio)
+2025-11-19 12:46:20,070 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-19 12:46:20,070 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-19 12:46:30,466 INFO Processing request of type ListToolsRequest
+2025-11-19 12:46:30,469 INFO Processing request of type ListPromptsRequest
+2025-11-19 12:46:30,470 INFO Processing request of type ListToolsRequest
+2025-11-19 13:03:31,584 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-19 13:03:31,663 INFO Starting MCP server (transport=stdio)
+2025-11-19 13:03:31,668 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-19 13:03:31,674 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-19 13:03:34,011 INFO Processing request of type ListToolsRequest
+2025-11-19 13:03:34,016 INFO Processing request of type ListPromptsRequest
+2025-11-19 13:03:34,023 INFO Processing request of type ListToolsRequest
+2025-11-19 13:43:07,983 INFO Processing request of type ListToolsRequest
+2025-11-19 13:43:07,989 INFO Processing request of type ListToolsRequest
+2025-11-19 13:45:34,492 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-19 13:45:34,555 INFO Starting MCP server (transport=stdio)
+2025-11-19 13:45:34,556 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-19 13:45:34,556 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-19 13:45:34,706 INFO Processing request of type ListToolsRequest
+2025-11-19 13:45:34,710 INFO Processing request of type ListPromptsRequest
+2025-11-19 13:45:34,713 INFO Processing request of type ListToolsRequest
+2025-11-19 13:45:50,853 INFO Processing request of type ListToolsRequest
+2025-11-19 16:04:06,000 INFO Processing request of type ListToolsRequest
+2025-11-19 16:04:06,008 INFO Processing request of type ListToolsRequest
+2025-11-20 12:38:26,033 INFO Processing request of type ListToolsRequest
+2025-11-20 12:38:26,035 INFO Processing request of type ListToolsRequest
+2025-11-21 09:50:11,265 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 09:50:11,406 INFO Starting MCP server (transport=stdio)
+2025-11-21 09:50:11,406 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 09:50:11,407 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 09:50:19,342 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 09:50:19,469 INFO Starting MCP server (transport=stdio)
+2025-11-21 09:50:19,470 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 09:50:19,470 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 09:50:19,547 INFO Processing request of type ListPromptsRequest
+2025-11-21 09:50:19,551 INFO Processing request of type ListToolsRequest
+2025-11-21 09:50:19,555 INFO Processing request of type ListToolsRequest
+2025-11-21 10:12:04,880 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 10:12:04,995 INFO Starting MCP server (transport=stdio)
+2025-11-21 10:12:05,000 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 10:12:05,005 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 10:12:05,217 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 10:12:05,360 INFO Starting MCP server (transport=stdio)
+2025-11-21 10:12:05,361 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 10:12:05,361 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 10:12:16,555 INFO Processing request of type ListToolsRequest
+2025-11-21 10:12:16,616 INFO Processing request of type ListPromptsRequest
+2025-11-21 10:12:16,628 INFO Processing request of type ListToolsRequest
+2025-11-21 10:12:58,662 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 10:12:58,769 INFO Starting MCP server (transport=stdio)
+2025-11-21 10:12:58,770 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 10:12:58,770 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 10:13:04,704 INFO Processing request of type ListToolsRequest
+2025-11-21 10:13:04,708 INFO Processing request of type ListPromptsRequest
+2025-11-21 10:13:04,710 INFO Processing request of type ListToolsRequest
+2025-11-21 10:21:17,516 INFO Processing request of type CallToolRequest
+2025-11-21 10:21:35,501 INFO Processing request of type CallToolRequest
+2025-11-21 10:21:35,504 INFO auto_parse_imports sync detected=[] final_deps=['matplotlib', 'numpy']
+2025-11-21 10:21:52,521 INFO Processing request of type CallToolRequest
+2025-11-21 10:21:52,523 INFO auto_parse_imports sync detected=[] final_deps=['matplotlib', 'numpy']
+2025-11-21 14:41:47,178 INFO Processing request of type CallToolRequest
+2025-11-21 14:41:47,180 INFO auto_parse_imports sync detected=[] final_deps=['matplotlib', 'numpy']
+2025-11-21 15:01:03,767 INFO Processing request of type ListToolsRequest
+2025-11-21 15:01:04,726 INFO Processing request of type ListToolsRequest
+2025-11-21 15:03:00,444 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 15:03:00,470 INFO Starting MCP server (transport=stdio)
+2025-11-21 15:03:00,470 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 15:03:00,470 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 15:03:00,489 INFO Processing request of type ListPromptsRequest
+2025-11-21 15:03:00,490 INFO Processing request of type ListToolsRequest
+2025-11-21 15:03:00,492 INFO Processing request of type ListToolsRequest
+2025-11-21 15:57:33,064 INFO Processing request of type CallToolRequest
+2025-11-21 15:57:33,067 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:57:38,611 INFO Processing request of type CallToolRequest
+2025-11-21 15:57:38,612 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:57:44,815 INFO Processing request of type CallToolRequest
+2025-11-21 15:57:44,816 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:57:56,770 INFO Processing request of type CallToolRequest
+2025-11-21 15:57:56,771 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:58:02,326 INFO Processing request of type CallToolRequest
+2025-11-21 15:58:02,326 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:58:08,326 INFO Processing request of type CallToolRequest
+2025-11-21 15:58:08,327 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 15:58:39,457 INFO Processing request of type CallToolRequest
+2025-11-21 15:58:39,458 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:02:56,973 INFO Processing request of type CallToolRequest
+2025-11-21 16:02:56,974 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:03:13,299 INFO Processing request of type CallToolRequest
+2025-11-21 16:03:13,300 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:03:23,184 INFO Processing request of type CallToolRequest
+2025-11-21 16:03:23,185 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:04:15,909 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-21 16:04:15,958 INFO Starting MCP server (transport=stdio)
+2025-11-21 16:04:15,958 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-21 16:04:15,958 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-21 16:04:15,989 INFO Processing request of type ListPromptsRequest
+2025-11-21 16:04:15,990 INFO Processing request of type ListToolsRequest
+2025-11-21 16:04:15,992 INFO Processing request of type ListToolsRequest
+2025-11-21 16:04:18,488 INFO Processing request of type ListToolsRequest
+2025-11-21 16:06:01,076 INFO Processing request of type CallToolRequest
+2025-11-21 16:06:01,077 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:07:51,591 INFO Processing request of type CallToolRequest
+2025-11-21 16:07:51,592 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:08:03,498 INFO Processing request of type CallToolRequest
+2025-11-21 16:08:03,498 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-11-21 16:16:05,262 INFO Processing request of type ListToolsRequest
+2025-11-21 16:16:05,271 INFO Processing request of type ListToolsRequest
+2025-11-21 16:23:45,196 INFO Processing request of type ListToolsRequest
+2025-11-21 16:23:45,200 INFO Processing request of type ListToolsRequest
+2025-11-21 16:33:26,613 INFO Processing request of type ListToolsRequest
+2025-11-24 09:54:28,408 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 09:54:28,559 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 09:54:29,108 INFO Starting MCP server (transport=stdio)
+2025-11-24 09:54:29,109 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 09:54:29,114 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 09:54:29,336 INFO Starting MCP server (transport=stdio)
+2025-11-24 09:54:29,339 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 09:54:29,339 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 09:54:29,561 INFO Processing request of type ListPromptsRequest
+2025-11-24 09:54:29,579 INFO Processing request of type ListToolsRequest
+2025-11-24 09:54:29,604 INFO Processing request of type ListToolsRequest
+2025-11-24 09:54:29,701 INFO Processing request of type ListPromptsRequest
+2025-11-24 09:54:29,711 INFO Processing request of type ListToolsRequest
+2025-11-24 09:54:29,724 INFO Processing request of type ListToolsRequest
+2025-11-24 10:34:17,132 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 10:34:17,198 INFO Starting MCP server (transport=stdio)
+2025-11-24 10:34:17,198 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 10:34:17,199 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 10:34:17,247 INFO Processing request of type ListPromptsRequest
+2025-11-24 10:34:17,250 INFO Processing request of type ListToolsRequest
+2025-11-24 10:34:17,257 INFO Processing request of type ListToolsRequest
+2025-11-24 11:45:00,672 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 11:45:00,730 INFO Starting MCP server (transport=stdio)
+2025-11-24 11:45:00,730 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 11:45:00,731 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 11:45:00,771 INFO Processing request of type ListPromptsRequest
+2025-11-24 11:45:00,774 INFO Processing request of type ListToolsRequest
+2025-11-24 11:45:00,777 INFO Processing request of type ListToolsRequest
+2025-11-24 11:45:47,296 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 11:45:47,330 INFO Starting MCP server (transport=stdio)
+2025-11-24 11:45:47,330 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 11:45:47,330 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 11:45:47,354 INFO Processing request of type ListPromptsRequest
+2025-11-24 11:45:47,356 INFO Processing request of type ListToolsRequest
+2025-11-24 11:45:47,358 INFO Processing request of type ListToolsRequest
+2025-11-24 12:07:04,827 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-24 12:07:04,861 INFO Starting MCP server (transport=stdio)
+2025-11-24 12:07:04,861 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-24 12:07:04,861 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-24 12:07:04,890 INFO Processing request of type ListPromptsRequest
+2025-11-24 12:07:04,892 INFO Processing request of type ListToolsRequest
+2025-11-24 12:07:04,894 INFO Processing request of type ListToolsRequest
+2025-11-25 13:53:52,905 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-25 13:53:52,933 INFO Starting MCP server (transport=stdio)
+2025-11-25 13:53:52,933 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-25 13:53:52,933 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-25 13:53:52,959 INFO Processing request of type ListPromptsRequest
+2025-11-25 13:53:52,960 INFO Processing request of type ListToolsRequest
+2025-11-25 13:53:52,964 INFO Processing request of type ListToolsRequest
+2025-11-27 14:32:45,123 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-27 14:32:45,147 INFO Starting MCP server (transport=stdio)
+2025-11-27 14:32:45,148 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-27 14:32:45,148 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-27 14:32:45,165 INFO Processing request of type ListPromptsRequest
+2025-11-27 14:32:45,166 INFO Processing request of type ListToolsRequest
+2025-11-27 14:32:45,168 INFO Processing request of type ListToolsRequest
+2025-11-27 14:33:00,250 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-27 14:33:00,290 INFO Starting MCP server (transport=stdio)
+2025-11-27 14:33:00,290 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-27 14:33:00,290 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-27 14:33:00,319 INFO Processing request of type ListPromptsRequest
+2025-11-27 14:33:00,320 INFO Processing request of type ListToolsRequest
+2025-11-27 14:33:00,322 INFO Processing request of type ListToolsRequest
+2025-11-27 14:33:21,865 INFO Processing request of type ListToolsRequest
+2025-11-27 14:33:22,097 INFO Processing request of type ListToolsRequest
+2025-11-28 09:14:59,845 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-28 09:14:59,910 INFO Starting MCP server (transport=stdio)
+2025-11-28 09:14:59,913 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-28 09:14:59,913 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-28 09:14:59,959 INFO Processing request of type ListPromptsRequest
+2025-11-28 09:14:59,961 INFO Processing request of type ListToolsRequest
+2025-11-28 09:14:59,963 INFO Processing request of type ListToolsRequest
+2025-11-28 09:15:05,645 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-11-28 09:15:05,703 INFO Starting MCP server (transport=stdio)
+2025-11-28 09:15:05,703 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-11-28 09:15:05,704 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-11-28 09:15:05,731 INFO Processing request of type ListPromptsRequest
+2025-11-28 09:15:05,733 INFO Processing request of type ListToolsRequest
+2025-11-28 09:15:05,735 INFO Processing request of type ListToolsRequest
+2025-11-28 09:16:18,625 INFO Processing request of type ListToolsRequest
+2025-11-28 14:32:57,808 INFO Processing request of type ListToolsRequest
+2025-12-01 09:17:34,345 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-01 09:17:34,388 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-01 09:17:34,437 INFO Starting MCP server (transport=stdio)
+2025-12-01 09:17:34,438 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-01 09:17:34,438 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-01 09:17:34,462 INFO Starting MCP server (transport=stdio)
+2025-12-01 09:17:34,464 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-01 09:17:34,464 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-01 09:17:43,092 INFO Processing request of type ListToolsRequest
+2025-12-01 09:17:43,095 INFO Processing request of type ListPromptsRequest
+2025-12-01 09:17:43,096 INFO Processing request of type ListToolsRequest
+2025-12-01 09:18:19,372 INFO Processing request of type ListToolsRequest
+2025-12-01 09:18:21,371 INFO Processing request of type ListToolsRequest
+2025-12-01 09:18:25,150 INFO Processing request of type ListToolsRequest
+2025-12-01 09:18:25,892 INFO Processing request of type ListToolsRequest
+2025-12-01 09:18:30,949 INFO Processing request of type ListToolsRequest
+2025-12-01 13:56:20,511 INFO Processing request of type CallToolRequest
+2025-12-01 13:56:20,515 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-01 13:56:31,046 INFO Processing request of type CallToolRequest
+2025-12-01 13:56:31,048 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-02 09:19:19,228 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-02 09:19:19,338 INFO Starting MCP server (transport=stdio)
+2025-12-02 09:19:19,338 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-02 09:19:19,339 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-02 09:19:20,046 INFO Processing request of type ListToolsRequest
+2025-12-02 09:19:20,061 INFO Processing request of type ListPromptsRequest
+2025-12-02 09:19:20,068 INFO Processing request of type ListToolsRequest
+2025-12-02 09:31:22,937 INFO Processing request of type CallToolRequest
+2025-12-02 09:31:22,939 INFO auto_parse_imports sync detected=[] final_deps=['requests', 'tqdm']
+2025-12-02 09:31:29,141 INFO Processing request of type CallToolRequest
+2025-12-02 09:31:29,142 INFO auto_parse_imports sync detected=[] final_deps=['requests', 'tqdm']
+2025-12-02 09:34:14,578 INFO Processing request of type CallToolRequest
+2025-12-02 09:34:14,579 INFO auto_parse_imports sync detected=[] final_deps=['beautifulsoup4', 'lxml', 'tqdm']
+2025-12-02 09:34:33,840 INFO Processing request of type CallToolRequest
+2025-12-02 09:34:33,842 INFO auto_parse_imports sync detected=[] final_deps=['beautifulsoup4', 'lxml', 'tqdm']
+2025-12-02 11:25:27,408 INFO Processing request of type ListToolsRequest
+2025-12-02 11:25:27,415 INFO Processing request of type ListToolsRequest
+2025-12-02 11:26:38,931 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-02 11:26:39,095 INFO Starting MCP server (transport=stdio)
+2025-12-02 11:26:39,095 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-02 11:26:39,096 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-02 11:26:39,259 INFO Processing request of type ListPromptsRequest
+2025-12-02 11:26:39,264 INFO Processing request of type ListToolsRequest
+2025-12-02 11:26:39,269 INFO Processing request of type ListToolsRequest
+2025-12-02 11:26:51,584 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-02 11:26:51,661 INFO Starting MCP server (transport=stdio)
+2025-12-02 11:26:51,661 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-02 11:26:51,661 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-02 11:26:51,711 INFO Processing request of type ListPromptsRequest
+2025-12-02 11:26:51,715 INFO Processing request of type ListToolsRequest
+2025-12-02 11:26:51,718 INFO Processing request of type ListToolsRequest
+2025-12-02 11:27:44,743 INFO Processing request of type ListToolsRequest
+2025-12-02 11:34:08,648 INFO Processing request of type ListToolsRequest
+2025-12-02 12:21:42,220 INFO Processing request of type CallToolRequest
+2025-12-02 12:21:42,227 INFO auto_parse_imports sync detected=[] final_deps=['numpy']
+2025-12-02 12:21:52,785 INFO Processing request of type CallToolRequest
+2025-12-02 12:21:52,787 INFO auto_parse_imports sync detected=[] final_deps=['numpy']
+2025-12-02 12:26:56,128 INFO Processing request of type ListToolsRequest
+2025-12-02 12:26:56,164 INFO Processing request of type ListToolsRequest
+2025-12-02 14:43:31,136 INFO Processing request of type ListToolsRequest
+2025-12-02 14:43:36,397 INFO Processing request of type ListToolsRequest
+2025-12-02 15:54:09,694 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-02 15:54:10,146 INFO Starting MCP server (transport=stdio)
+2025-12-02 15:54:10,148 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-02 15:54:10,149 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-02 15:54:11,185 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-02 15:54:11,458 INFO Starting MCP server (transport=stdio)
+2025-12-02 15:54:11,459 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-02 15:54:11,460 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-03 09:13:11,936 INFO Processing request of type ListToolsRequest
+2025-12-03 09:14:01,614 INFO Processing request of type CallToolRequest
+2025-12-03 11:01:35,149 INFO Processing request of type CallToolRequest
+2025-12-03 11:01:35,153 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-03 11:01:42,410 INFO Processing request of type CallToolRequest
+2025-12-03 11:01:42,411 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-03 11:13:03,879 INFO Processing request of type CallToolRequest
+2025-12-03 11:13:03,883 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-03 14:39:17,231 INFO Processing request of type ListToolsRequest
+2025-12-03 14:39:17,249 INFO Processing request of type ListToolsRequest
+2025-12-03 15:28:30,863 INFO Processing request of type CallToolRequest
+2025-12-03 15:28:30,865 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-03 15:31:42,685 INFO Processing request of type CallToolRequest
+2025-12-03 15:31:42,687 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-03 16:16:13,664 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-03 16:16:13,664 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-03 16:16:13,706 INFO Starting MCP server (transport=stdio)
+2025-12-03 16:16:13,706 INFO Starting MCP server (transport=stdio)
+2025-12-03 16:16:13,707 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-03 16:16:13,707 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-03 16:16:13,707 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-03 16:16:13,707 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-03 16:16:18,539 INFO Processing request of type ListToolsRequest
+2025-12-03 16:16:18,544 INFO Processing request of type ListPromptsRequest
+2025-12-03 16:16:18,545 INFO Processing request of type ListToolsRequest
+2025-12-03 16:16:58,996 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-03 16:16:59,034 INFO Starting MCP server (transport=stdio)
+2025-12-03 16:16:59,034 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-03 16:16:59,034 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-03 16:16:59,241 INFO Processing request of type ListToolsRequest
+2025-12-03 16:16:59,244 INFO Processing request of type ListPromptsRequest
+2025-12-03 16:16:59,245 INFO Processing request of type ListToolsRequest
+2025-12-03 16:17:15,225 INFO Processing request of type ListToolsRequest
+2025-12-03 16:17:16,507 INFO Processing request of type ListToolsRequest
+2025-12-03 16:17:19,140 INFO Processing request of type ListToolsRequest
+2025-12-03 16:17:20,074 INFO Processing request of type ListToolsRequest
+2025-12-03 16:17:25,408 INFO Processing request of type ListToolsRequest
+2025-12-04 09:22:08,077 INFO Processing request of type ListToolsRequest
+2025-12-04 09:23:52,792 INFO Processing request of type CallToolRequest
+2025-12-04 09:23:52,796 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-04 09:24:11,107 INFO Processing request of type CallToolRequest
+2025-12-04 09:24:11,109 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-04 09:24:28,064 INFO Processing request of type CallToolRequest
+2025-12-04 09:24:57,069 INFO Processing request of type CallToolRequest
+2025-12-04 09:25:40,759 INFO Processing request of type CallToolRequest
+2025-12-04 09:26:23,668 INFO Processing request of type CallToolRequest
+2025-12-04 09:27:36,576 INFO Processing request of type CallToolRequest
+2025-12-04 09:37:07,879 INFO Processing request of type CallToolRequest
+2025-12-04 09:37:41,251 INFO Processing request of type CallToolRequest
+2025-12-04 09:40:35,121 INFO Processing request of type ListToolsRequest
+2025-12-04 09:47:40,149 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:47:40,525 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:47:40,526 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:47:40,526 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:47:43,261 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:47:43,372 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:47:43,373 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:47:43,373 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:47:44,049 INFO Processing request of type ListToolsRequest
+2025-12-04 09:47:44,056 INFO Processing request of type ListPromptsRequest
+2025-12-04 09:47:44,058 INFO Processing request of type ListToolsRequest
+2025-12-04 09:50:49,801 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:50:49,903 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:50:49,904 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:50:49,905 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:50:54,064 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:50:54,192 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:50:54,195 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:50:54,196 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:50:54,730 INFO Processing request of type ListToolsRequest
+2025-12-04 09:50:54,741 INFO Processing request of type ListPromptsRequest
+2025-12-04 09:50:54,747 INFO Processing request of type ListToolsRequest
+2025-12-04 09:52:52,459 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:52:52,569 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:52:52,570 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:52:52,570 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:52:57,966 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 09:52:58,047 INFO Starting MCP server (transport=stdio)
+2025-12-04 09:52:58,047 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 09:52:58,048 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 09:52:58,197 INFO Processing request of type ListToolsRequest
+2025-12-04 09:52:58,201 INFO Processing request of type ListPromptsRequest
+2025-12-04 09:52:58,203 INFO Processing request of type ListToolsRequest
+2025-12-04 09:57:09,922 INFO Processing request of type ListToolsRequest
+2025-12-04 10:22:46,266 INFO Processing request of type ListToolsRequest
+2025-12-04 10:22:46,272 INFO Processing request of type ListToolsRequest
+2025-12-04 12:36:46,704 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 12:36:46,911 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 12:36:47,015 INFO Starting MCP server (transport=stdio)
+2025-12-04 12:36:47,019 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 12:36:47,020 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 12:36:47,189 INFO Starting MCP server (transport=stdio)
+2025-12-04 12:36:47,189 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 12:36:47,190 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 12:36:49,540 INFO Processing request of type ListToolsRequest
+2025-12-04 12:36:50,093 INFO Processing request of type ListPromptsRequest
+2025-12-04 12:36:50,405 INFO Processing request of type ListToolsRequest
+2025-12-04 12:37:16,372 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 12:37:16,468 INFO Starting MCP server (transport=stdio)
+2025-12-04 12:37:16,468 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 12:37:16,469 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 12:37:23,443 INFO Processing request of type ListToolsRequest
+2025-12-04 12:37:23,446 INFO Processing request of type ListPromptsRequest
+2025-12-04 12:37:23,447 INFO Processing request of type ListToolsRequest
+2025-12-04 12:56:54,526 INFO Processing request of type ListToolsRequest
+2025-12-04 12:56:54,532 INFO Processing request of type ListToolsRequest
+2025-12-04 13:34:27,942 INFO Processing request of type ListToolsRequest
+2025-12-04 13:34:29,195 INFO Processing request of type ListToolsRequest
+2025-12-04 13:34:31,785 INFO Processing request of type ListToolsRequest
+2025-12-04 13:34:33,923 INFO Processing request of type ListToolsRequest
+2025-12-04 13:34:36,485 INFO Processing request of type ListToolsRequest
+2025-12-04 13:58:52,689 INFO Processing request of type CallToolRequest
+2025-12-04 13:58:52,694 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-04 13:59:04,634 INFO Processing request of type CallToolRequest
+2025-12-04 13:59:04,636 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-04 14:38:00,238 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 14:38:00,399 INFO Starting MCP server (transport=stdio)
+2025-12-04 14:38:00,399 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 14:38:00,400 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 14:38:00,805 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 14:38:00,884 INFO Starting MCP server (transport=stdio)
+2025-12-04 14:38:00,884 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 14:38:00,885 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 14:38:01,840 INFO Processing request of type ListToolsRequest
+2025-12-04 14:38:06,302 INFO Processing request of type ListPromptsRequest
+2025-12-04 14:38:10,498 INFO Processing request of type ListToolsRequest
+2025-12-04 14:38:41,598 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-04 14:38:41,648 INFO Starting MCP server (transport=stdio)
+2025-12-04 14:38:41,649 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-04 14:38:41,649 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-04 14:38:46,618 INFO Processing request of type ListToolsRequest
+2025-12-04 14:38:46,620 INFO Processing request of type ListPromptsRequest
+2025-12-04 14:38:46,621 INFO Processing request of type ListToolsRequest
+2025-12-04 14:55:04,752 INFO Processing request of type ListToolsRequest
+2025-12-04 14:55:04,759 INFO Processing request of type ListToolsRequest
+2025-12-05 11:46:35,320 INFO Processing request of type ListToolsRequest
+2025-12-05 11:46:35,325 INFO Processing request of type ListToolsRequest
+2025-12-05 11:49:16,147 INFO Processing request of type ListToolsRequest
+2025-12-05 11:49:16,168 INFO Processing request of type ListToolsRequest
+2025-12-05 11:49:58,414 INFO Processing request of type CallToolRequest
+2025-12-05 11:50:39,765 INFO Processing request of type CallToolRequest
+2025-12-05 11:51:19,864 INFO Processing request of type CallToolRequest
+2025-12-05 11:51:50,324 INFO Processing request of type CallToolRequest
+2025-12-05 11:51:50,328 INFO auto_parse_imports sync detected=[] final_deps=['fastmcp']
+2025-12-05 11:51:58,186 INFO Processing request of type CallToolRequest
+2025-12-05 11:51:58,187 INFO auto_parse_imports sync detected=[] final_deps=['fastmcp', 'duckdb']
+2025-12-05 11:52:33,495 INFO Processing request of type CallToolRequest
+2025-12-05 11:52:52,263 INFO Processing request of type CallToolRequest
+2025-12-05 11:53:31,701 INFO Processing request of type CallToolRequest
+2025-12-05 11:55:48,789 INFO Processing request of type CallToolRequest
+2025-12-05 11:55:48,793 INFO py_run_script_in_dir_async started job_id=f432c11545374c3da8c54b35ac3dc50d strategy=uv-run cwd=/home/torstein.sornes/code/rag-mcp stream=True
+2025-12-05 11:55:48,794 INFO Streaming poller launched for job_id=f432c11545374c3da8c54b35ac3dc50d
+2025-12-05 11:55:51,037 INFO Job finalized job_id=f432c11545374c3da8c54b35ac3dc50d exit_code=0 frozen_elapsed=2.24s stdout_len=1190 stderr_len=4164
+2025-12-05 11:55:55,866 INFO Processing request of type CallToolRequest
+2025-12-05 11:57:02,442 INFO Processing request of type CallToolRequest
+2025-12-05 11:57:02,444 INFO py_run_script_in_dir_async started job_id=895e1b106c7847ec95cefa9b298f1d76 strategy=uv-run cwd=/home/torstein.sornes/code/rag-mcp stream=True
+2025-12-05 11:57:02,444 INFO Streaming poller launched for job_id=895e1b106c7847ec95cefa9b298f1d76
+2025-12-05 11:57:13,280 INFO Job finalized job_id=895e1b106c7847ec95cefa9b298f1d76 exit_code=0 frozen_elapsed=10.84s stdout_len=149419 stderr_len=7553
+2025-12-05 11:57:18,268 INFO Processing request of type CallToolRequest
+2025-12-05 12:10:36,986 INFO Processing request of type CallToolRequest
+2025-12-05 12:10:36,988 INFO py_run_script_in_dir_async started job_id=4d50a54feca94596938c736c9db9cc7e strategy=uv-run cwd=/home/torstein.sornes/code/rag-mcp stream=True
+2025-12-05 12:10:36,988 INFO Streaming poller launched for job_id=4d50a54feca94596938c736c9db9cc7e
+2025-12-05 12:10:47,621 INFO Job finalized job_id=4d50a54feca94596938c736c9db9cc7e exit_code=0 frozen_elapsed=10.63s stdout_len=16606 stderr_len=14689
+2025-12-05 12:10:54,253 INFO Processing request of type CallToolRequest
+2025-12-05 12:19:40,466 INFO Processing request of type ListToolsRequest
+2025-12-05 12:29:34,393 INFO Processing request of type CallToolRequest
+2025-12-05 12:29:34,395 INFO py_run_script_in_dir_async started job_id=14fa47ef34da4535aa27f720c4ec2114 strategy=uv-run cwd=/home/torstein.sornes/code/rag-mcp stream=True
+2025-12-05 12:29:34,395 INFO Streaming poller launched for job_id=14fa47ef34da4535aa27f720c4ec2114
+2025-12-05 12:32:17,154 INFO Processing request of type CallToolRequest
+2025-12-05 12:34:42,277 INFO Job finalized job_id=14fa47ef34da4535aa27f720c4ec2114 exit_code=0 frozen_elapsed=307.88s stdout_len=14915 stderr_len=13149
+2025-12-05 12:34:42,278 INFO Processing request of type CallToolRequest
+2025-12-05 12:34:42,279 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-05 13:04:41,012 INFO Processing request of type ListToolsRequest
+2025-12-05 13:04:41,036 INFO Processing request of type ListToolsRequest
+2025-12-05 13:31:40,714 INFO Processing request of type ListToolsRequest
+2025-12-05 13:31:40,728 INFO Processing request of type ListToolsRequest
+2025-12-05 14:20:44,982 INFO Processing request of type ListToolsRequest
+2025-12-05 14:20:44,987 INFO Processing request of type ListToolsRequest
+2025-12-05 15:39:23,338 INFO Processing request of type ListToolsRequest
+2025-12-05 15:39:23,352 INFO Processing request of type ListToolsRequest
+2025-12-08 09:39:14,383 INFO Processing request of type ListToolsRequest
+2025-12-08 09:39:14,410 INFO Processing request of type ListToolsRequest
+2025-12-08 09:46:25,571 INFO Processing request of type CallToolRequest
+2025-12-08 09:46:25,582 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 09:46:32,225 INFO Processing request of type CallToolRequest
+2025-12-08 09:46:32,229 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 10:30:42,764 INFO Processing request of type CallToolRequest
+2025-12-08 10:50:57,475 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 10:50:57,474 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 10:50:57,598 INFO Starting MCP server (transport=stdio)
+2025-12-08 10:50:57,599 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 10:50:57,599 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 10:50:57,603 INFO Starting MCP server (transport=stdio)
+2025-12-08 10:50:57,604 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 10:50:57,605 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 10:51:14,601 INFO Processing request of type ListToolsRequest
+2025-12-08 10:51:14,607 INFO Processing request of type ListPromptsRequest
+2025-12-08 10:51:14,610 INFO Processing request of type ListToolsRequest
+2025-12-08 10:51:40,005 INFO Processing request of type ListToolsRequest
+2025-12-08 11:44:44,013 INFO Processing request of type ListToolsRequest
+2025-12-08 11:44:44,025 INFO Processing request of type ListToolsRequest
+2025-12-08 11:48:42,214 INFO Processing request of type CallToolRequest
+2025-12-08 11:48:42,223 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 11:48:50,690 INFO Processing request of type CallToolRequest
+2025-12-08 11:48:50,691 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 11:49:03,082 INFO Processing request of type CallToolRequest
+2025-12-08 11:49:03,084 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 11:49:22,156 INFO Processing request of type CallToolRequest
+2025-12-08 11:49:22,159 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 11:51:56,326 INFO Processing request of type CallToolRequest
+2025-12-08 11:51:56,328 INFO auto_parse_imports sync detected=[] final_deps=['duckdb', 'openai', 'python-dotenv', 'pydantic', 'tenacity', 'tiktoken']
+2025-12-08 11:52:56,304 INFO Processing request of type CallToolRequest
+2025-12-08 11:52:56,307 INFO auto_parse_imports async detected=['asyncio', 'json', 'pathlib', 'rag_mcp', 'sys', 'time'] final_deps=['duckdb', 'openai', 'python-dotenv', 'pydantic', 'tenacity', 'tiktoken', 'watchdog', 'beautifulsoup4', 'lxml', 'mcp', 'fastmcp', 'numpy', 'rag_mcp']
+2025-12-08 11:52:56,307 INFO py_run_script_with_dependencies_async started job_id=8d23c066c823430996fa344168dc4172 python=3.13 deps=['duckdb', 'openai', 'python-dotenv', 'pydantic', 'tenacity', 'tiktoken', 'watchdog', 'beautifulsoup4', 'lxml', 'mcp', 'fastmcp', 'numpy', 'rag_mcp'] stream=True auto_parse_imports=True
+2025-12-08 11:52:56,308 INFO Streaming poller launched for job_id=8d23c066c823430996fa344168dc4172
+2025-12-08 11:54:17,269 INFO Job finalized job_id=8d23c066c823430996fa344168dc4172 exit_code=1 frozen_elapsed=80.96s stdout_len=397 stderr_len=1956
+2025-12-08 11:58:11,900 INFO Processing request of type CallToolRequest
+2025-12-08 11:58:11,906 INFO py_run_script_in_dir_async started job_id=f56e9d0ede334a18a2b1c3ad01e03e11 strategy=uv-run cwd=/home/torstein.sornes/code/rag-mcp stream=True
+2025-12-08 11:58:11,906 INFO Streaming poller launched for job_id=f56e9d0ede334a18a2b1c3ad01e03e11
+2025-12-08 11:58:13,752 INFO Job finalized job_id=f56e9d0ede334a18a2b1c3ad01e03e11 exit_code=1 frozen_elapsed=1.85s stdout_len=30 stderr_len=1100
+2025-12-08 12:00:51,701 INFO Processing request of type CallToolRequest
+2025-12-08 12:00:57,481 INFO Processing request of type CallToolRequest
+2025-12-08 12:26:07,390 INFO Processing request of type ListToolsRequest
+2025-12-08 12:26:07,401 INFO Processing request of type ListToolsRequest
+2025-12-08 12:46:58,781 INFO Processing request of type CallToolRequest
+2025-12-08 12:46:58,791 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 12:47:07,575 INFO Processing request of type CallToolRequest
+2025-12-08 12:47:07,576 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 12:47:27,707 INFO Processing request of type CallToolRequest
+2025-12-08 12:47:27,708 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 12:52:36,554 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 12:52:36,690 INFO Starting MCP server (transport=stdio)
+2025-12-08 12:52:36,690 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 12:52:36,691 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 12:52:37,141 INFO Processing request of type ListToolsRequest
+2025-12-08 12:52:37,146 INFO Processing request of type ListPromptsRequest
+2025-12-08 12:52:37,150 INFO Processing request of type ListToolsRequest
+2025-12-08 13:36:48,337 INFO Processing request of type CallToolRequest
+2025-12-08 13:36:48,363 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 13:57:51,719 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 13:57:51,864 INFO Starting MCP server (transport=stdio)
+2025-12-08 13:57:51,865 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 13:57:51,866 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 13:57:53,402 INFO Processing request of type ListToolsRequest
+2025-12-08 13:57:53,415 INFO Processing request of type ListPromptsRequest
+2025-12-08 13:57:55,426 INFO Processing request of type ListToolsRequest
+2025-12-08 14:11:01,575 INFO Processing request of type CallToolRequest
+2025-12-08 14:11:01,599 INFO auto_parse_imports sync detected=[] final_deps=['openai']
+2025-12-08 14:18:59,245 INFO Processing request of type ListToolsRequest
+2025-12-08 14:18:59,274 INFO Processing request of type ListToolsRequest
+2025-12-08 14:19:37,844 INFO Processing request of type ListToolsRequest
+2025-12-08 14:19:38,775 INFO Processing request of type ListToolsRequest
+2025-12-08 14:19:54,976 INFO Processing request of type ListToolsRequest
+2025-12-08 14:19:54,983 INFO Processing request of type ListToolsRequest
+2025-12-08 14:23:56,820 INFO Processing request of type CallToolRequest
+2025-12-08 14:23:56,828 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 14:24:08,436 INFO Processing request of type CallToolRequest
+2025-12-08 14:24:08,438 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-08 14:24:14,368 INFO Processing request of type CallToolRequest
+2025-12-08 14:24:14,374 INFO auto_parse_imports sync detected=[] final_deps=['tiktoken']
+2025-12-08 14:35:29,071 INFO Processing request of type CallToolRequest
+2025-12-08 14:35:29,074 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-08 15:03:35,080 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 15:03:35,370 INFO Starting MCP server (transport=stdio)
+2025-12-08 15:03:35,371 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 15:03:35,372 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 15:04:21,708 INFO Processing request of type ListToolsRequest
+2025-12-08 15:04:39,554 INFO Processing request of type ListPromptsRequest
+2025-12-08 15:04:52,503 INFO Processing request of type ListToolsRequest
+2025-12-08 15:34:55,690 INFO Processing request of type ListToolsRequest
+2025-12-08 15:35:26,809 INFO Processing request of type ListToolsRequest
+2025-12-08 15:36:31,147 INFO Processing request of type ListToolsRequest
+2025-12-08 15:36:46,554 INFO Processing request of type ListToolsRequest
+2025-12-08 15:42:42,941 INFO Processing request of type CallToolRequest
+2025-12-08 16:35:37,889 INFO Processing request of type ListToolsRequest
+2025-12-08 16:35:46,046 INFO Processing request of type ListToolsRequest
+2025-12-08 16:36:01,636 INFO Processing request of type ListToolsRequest
+2025-12-08 16:36:05,493 INFO Processing request of type ListToolsRequest
+2025-12-08 16:36:09,347 INFO Processing request of type ListToolsRequest
+2025-12-08 16:36:34,730 INFO Processing request of type ListToolsRequest
+2025-12-08 16:36:38,516 INFO Processing request of type ListToolsRequest
+2025-12-08 22:14:55,149 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-08 22:14:55,407 INFO Starting MCP server (transport=stdio)
+2025-12-08 22:14:55,466 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-08 22:14:55,466 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-08 22:14:57,609 INFO Processing request of type ListToolsRequest
+2025-12-08 22:14:57,620 INFO Processing request of type ListPromptsRequest
+2025-12-08 22:14:57,628 INFO Processing request of type ListToolsRequest
+2025-12-08 22:15:32,333 INFO Processing request of type ListToolsRequest
+2025-12-08 22:24:47,199 INFO Processing request of type CallToolRequest
+2025-12-08 22:24:47,207 INFO auto_parse_imports sync detected=[] final_deps=['duckdb']
+2025-12-09 12:43:00,740 INFO Processing request of type CallToolRequest
+2025-12-09 12:43:00,749 INFO auto_parse_imports sync detected=[] final_deps=['pydantic', 'pydantic-settings', 'tiktoken']
+2025-12-09 12:43:14,619 INFO Processing request of type CallToolRequest
+2025-12-09 12:43:14,622 INFO auto_parse_imports sync detected=[] final_deps=['pydantic', 'pydantic-settings', 'tiktoken', 'openai', 'python-dotenv']
+2025-12-09 13:02:04,293 INFO Processing request of type ListToolsRequest
+2025-12-09 13:02:04,362 INFO Processing request of type ListToolsRequest
+2025-12-09 14:46:22,887 INFO Processing request of type ListToolsRequest
+2025-12-09 14:46:22,959 INFO Processing request of type ListToolsRequest
+2025-12-09 15:37:46,544 INFO Processing request of type CallToolRequest
+2025-12-09 15:37:46,605 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-09 15:37:57,494 INFO Processing request of type CallToolRequest
+2025-12-09 15:44:28,783 INFO Processing request of type CallToolRequest
+2025-12-10 09:01:08,615 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 09:01:08,993 INFO Starting MCP server (transport=stdio)
+2025-12-10 09:01:08,994 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 09:01:08,996 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 09:01:09,418 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 09:01:09,762 INFO Starting MCP server (transport=stdio)
+2025-12-10 09:01:09,763 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 09:01:09,765 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 09:01:14,590 INFO Processing request of type ListToolsRequest
+2025-12-10 09:01:14,616 INFO Processing request of type ListPromptsRequest
+2025-12-10 09:01:19,931 INFO Processing request of type ListToolsRequest
+2025-12-10 09:03:08,659 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 09:03:08,999 INFO Starting MCP server (transport=stdio)
+2025-12-10 09:03:09,004 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 09:03:09,014 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 09:03:56,722 INFO Processing request of type ListToolsRequest
+2025-12-10 09:03:56,764 INFO Processing request of type ListPromptsRequest
+2025-12-10 09:03:56,780 INFO Processing request of type ListToolsRequest
+2025-12-10 13:11:58,671 INFO Processing request of type ListToolsRequest
+2025-12-10 13:11:58,690 INFO Processing request of type ListToolsRequest
+2025-12-10 13:12:40,091 INFO Processing request of type ListToolsRequest
+2025-12-10 13:12:44,466 INFO Processing request of type ListToolsRequest
+2025-12-10 13:12:47,472 INFO Processing request of type ListToolsRequest
+2025-12-10 13:13:03,104 INFO Processing request of type ListToolsRequest
+2025-12-10 13:13:03,113 INFO Processing request of type ListToolsRequest
+2025-12-10 13:14:55,886 INFO Processing request of type CallToolRequest
+2025-12-10 13:14:55,910 INFO auto_parse_imports sync detected=[] final_deps=['prometheus-client']
+2025-12-10 13:15:12,140 INFO Processing request of type CallToolRequest
+2025-12-10 13:15:12,142 INFO auto_parse_imports sync detected=[] final_deps=['prometheus-client']
+2025-12-10 13:15:39,408 INFO Processing request of type CallToolRequest
+2025-12-10 13:15:39,412 INFO auto_parse_imports sync detected=[] final_deps=['prometheus-client']
+2025-12-10 13:16:13,101 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 13:16:13,172 INFO Starting MCP server (transport=stdio)
+2025-12-10 13:16:13,172 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 13:16:13,173 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 13:16:16,534 INFO Processing request of type ListToolsRequest
+2025-12-10 13:16:16,577 INFO Processing request of type ListPromptsRequest
+2025-12-10 13:16:19,255 INFO Processing request of type ListToolsRequest
+2025-12-10 13:16:57,230 INFO Processing request of type ListToolsRequest
+2025-12-10 13:17:06,110 INFO Processing request of type ListToolsRequest
+2025-12-10 13:17:15,980 INFO Processing request of type ListToolsRequest
+2025-12-10 13:23:46,071 INFO Processing request of type CallToolRequest
+2025-12-10 13:23:46,077 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-10 13:25:37,207 INFO Processing request of type CallToolRequest
+2025-12-10 13:25:37,214 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-10 13:26:09,721 INFO Processing request of type CallToolRequest
+2025-12-10 13:26:09,724 INFO auto_parse_imports sync detected=[] final_deps=[]
+2025-12-10 13:46:22,002 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 13:46:22,281 INFO Starting MCP server (transport=stdio)
+2025-12-10 13:46:22,286 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 13:46:22,287 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 13:46:22,669 INFO Processing request of type ListPromptsRequest
+2025-12-10 13:46:22,677 INFO Processing request of type ListToolsRequest
+2025-12-10 13:46:22,689 INFO Processing request of type ListToolsRequest
+2025-12-10 14:34:10,944 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 14:34:10,983 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 14:34:11,138 INFO Starting MCP server (transport=stdio)
+2025-12-10 14:34:11,144 INFO Starting MCP server (transport=stdio)
+2025-12-10 14:34:11,145 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 14:34:11,145 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 14:34:11,168 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 14:34:11,171 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 14:34:11,440 INFO Processing request of type ListPromptsRequest
+2025-12-10 14:34:11,443 INFO Processing request of type ListToolsRequest
+2025-12-10 14:34:11,446 INFO Processing request of type ListToolsRequest
+2025-12-10 14:34:11,759 INFO Processing request of type ListPromptsRequest
+2025-12-10 14:34:11,783 INFO Processing request of type ListToolsRequest
+2025-12-10 14:34:11,795 INFO Processing request of type ListToolsRequest
+2025-12-10 14:38:57,158 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 14:38:57,241 INFO Starting MCP server (transport=stdio)
+2025-12-10 14:38:57,241 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 14:38:57,242 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 14:38:58,272 INFO Processing request of type ListToolsRequest
+2025-12-10 14:38:58,281 INFO Processing request of type ListPromptsRequest
+2025-12-10 14:38:59,477 INFO Processing request of type ListToolsRequest
+2025-12-10 14:39:30,089 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 14:39:30,174 INFO Starting MCP server (transport=stdio)
+2025-12-10 14:39:30,174 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 14:39:30,175 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 14:39:34,191 INFO Processing request of type ListToolsRequest
+2025-12-10 14:39:35,735 INFO Processing request of type ListPromptsRequest
+2025-12-10 14:39:38,436 INFO Processing request of type ListToolsRequest
+2025-12-10 16:02:19,722 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 16:02:19,769 INFO Starting MCP server (transport=stdio)
+2025-12-10 16:02:19,769 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 16:02:19,769 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 16:02:19,817 INFO Processing request of type ListPromptsRequest
+2025-12-10 16:02:19,819 INFO Processing request of type ListToolsRequest
+2025-12-10 16:02:19,821 INFO Processing request of type ListToolsRequest
+2025-12-10 16:18:11,407 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-10 16:18:11,493 INFO Starting MCP server (transport=stdio)
+2025-12-10 16:18:11,496 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-10 16:18:11,497 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-10 16:18:11,608 INFO Processing request of type ListPromptsRequest
+2025-12-10 16:18:11,613 INFO Processing request of type ListToolsRequest
+2025-12-10 16:18:11,621 INFO Processing request of type ListToolsRequest
+2025-12-10 16:18:54,252 INFO Processing request of type ListToolsRequest
+2025-12-11 10:08:21,157 INFO Processing request of type CallToolRequest
+2025-12-11 10:08:21,174 INFO auto_parse_imports sync detected=[] final_deps=['openai>=1.55.0', 'python-dotenv>=1.0.1']
+2025-12-11 10:09:40,433 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:09:40,537 INFO Starting MCP server (transport=stdio)
+2025-12-11 10:09:40,538 INFO Diagnostics: cwd=/home/torstein.sornes/code/python-mcp executable=/home/torstein.sornes/code/python-mcp/.venv/bin/python3 python_version=3.13.9 uv_present=True
+2025-12-11 10:09:40,539 INFO Environment (filtered): {'UV': '/usr/bin/uv', 'UV_RUN_RECURSION_DEPTH': '1'}
+2025-12-11 10:09:40,630 INFO Processing request of type ListPromptsRequest
+2025-12-11 10:09:40,633 INFO Processing request of type ListToolsRequest
+2025-12-11 10:09:40,637 INFO Processing request of type ListToolsRequest
+2025-12-11 10:14:58,914 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:15:18,739 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:17:12,728 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:19:12,987 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:19:18,745 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
