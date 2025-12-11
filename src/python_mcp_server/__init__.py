@@ -11,12 +11,26 @@ import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Literal, Optional
+from typing import Any, List, Literal, Optional
 
 import psutil
 from dotenv import dotenv_values
 from fastmcp import FastMCP
 from pydantic import BaseModel, Field
+
+# Import smart_async components
+from .smart_async import (
+    STATE as ASYNC_STATE,
+)
+from .smart_async import (
+    cancel_job,
+    create_progress_callback,
+    get_job_status,
+    initialize_state,
+    list_jobs,
+    prune_jobs,
+    smart_async,
+)
 
 # Configure logging (file + stderr console)
 LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
@@ -1333,6 +1347,11 @@ def main() -> None:
         logger.info("Environment (filtered): %s", interesting_env)
     else:
         logger.info("No filtered environment variables detected.")
+
+    # Initialize smart async state
+    initialize_state()
+    logger.info("Smart async job tracking initialized")
+
     mcp.run(transport="stdio")
 
 
@@ -1520,6 +1539,82 @@ def py_list_scripts() -> list[dict[str, str]]:
             }
         )
     return out
+
+
+# ---------------------------
+# Smart Async Job Management Tools
+# ---------------------------
+
+
+@mcp.tool(tags=["jobs", "async"])
+def py_job_status(job_id: str) -> dict[str, Any]:
+    """
+    Get status and progress of a background job.
+
+    Args:
+        job_id: Job identifier returned from async execution
+
+    Returns:
+        Job status including:
+        - status: pending, running, completed, failed, cancelled
+        - progress: {current, total, message} if available
+        - result: Job result if completed
+        - error: Error message if failed
+    """
+    return get_job_status(job_id)
+
+
+@mcp.tool(tags=["jobs", "async"])
+def py_list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str, Any]:
+    """
+    List background jobs with optional filtering.
+
+    Args:
+        status_filter: Optional status filter (pending, running, completed, failed, cancelled)
+        limit: Maximum number of jobs to return (default: 50)
+
+    Returns:
+        List of jobs with metadata and total count
+    """
+    return list_jobs(status_filter=status_filter, limit=limit)
+
+
+@mcp.tool(tags=["jobs", "async"])
+def py_cancel_job(job_id: str) -> dict[str, Any]:
+    """
+    Cancel a running background job.
+
+    Args:
+        job_id: Job identifier to cancel
+
+    Returns:
+        Cancellation status
+    """
+    return cancel_job(job_id)
+
+
+@mcp.tool(tags=["jobs", "async"])
+def py_prune_jobs(
+    keep_completed: bool = True,
+    keep_failed: bool = True,
+    max_age_hours: int = 24,
+) -> dict[str, Any]:
+    """
+    Prune old jobs from the job registry.
+
+    Args:
+        keep_completed: If False, remove completed jobs (default: True)
+        keep_failed: If False, remove failed jobs (default: True)
+        max_age_hours: Remove jobs older than this many hours (default: 24)
+
+    Returns:
+        Number of jobs removed and remaining
+    """
+    return prune_jobs(
+        keep_completed=keep_completed,
+        keep_failed=keep_failed,
+        max_age_hours=max_age_hours,
+    )
 
 
 if __name__ == "__main__":

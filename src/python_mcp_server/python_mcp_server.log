@@ -2173,3 +2173,14 @@
 2025-12-11 10:17:12,728 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
 2025-12-11 10:19:12,987 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
 2025-12-11 10:19:18,745 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:24:30,447 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:24:46,349 INFO Logger initialized; log file at /home/torstein.sornes/code/python-mcp/src/python_mcp_server/python_mcp_server.log
+2025-12-11 10:24:48,947 INFO Task 'slow_tool' exceeded 2.0s budget, switching to background
+2025-12-11 10:24:55,069 ERROR Job f2f6237d-5bec-4f4b-8e7e-bd2624efe84e (Error test) failed
+Traceback (most recent call last):
+  File "/home/torstein.sornes/code/python-mcp/src/python_mcp_server/smart_async.py", line 202, in _run_job
+    result = await coro_factory()
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/home/torstein.sornes/code/python-mcp/test_smart_async.py", line 82, in failing_tool
+    raise ValueError("Intentional test failure")
+ValueError: Intentional test failure
