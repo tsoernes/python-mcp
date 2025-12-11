@@ -134,6 +134,8 @@ def _refresh_jobs_from_disk() -> None:
 
     This ensures that jobs created in subprocesses (e.g., via py_run_script_*)
     are visible in the main MCP server process.
+
+    Always syncs the latest state from disk to ensure cross-process consistency.
     """
     jobs_path = STATE.persistence_dir / "meta" / "jobs.json"
     if not jobs_path.exists():
@@ -143,9 +145,8 @@ def _refresh_jobs_from_disk() -> None:
         data = json.loads(jobs_path.read_text())
         for job_data in data:
             job_id = job_data["id"]
-            # Only update if we don't have this job or it's been updated
-            if job_id not in STATE.jobs or job_data.get("completed_at"):
-                STATE.jobs[job_id] = JobMeta(**job_data)
+            # Always update from disk to get latest state (handles status changes, completions, etc.)
+            STATE.jobs[job_id] = JobMeta(**job_data)
         logger.debug(f"Refreshed {len(data)} jobs from disk")
     except Exception as e:
         logger.warning(f"Failed to refresh jobs from disk: {e}")
