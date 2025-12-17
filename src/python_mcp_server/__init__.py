@@ -386,7 +386,6 @@ async def py_run_script_in_dir(
     env_file: Path | None = None,
     async_mode: bool = False,
     job_label: str | None = None,
-    enable_streaming: bool = False,
 ) -> RunScriptResult | dict[str, Any]:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
@@ -405,7 +404,6 @@ async def py_run_script_in_dir(
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
-        enable_streaming: If True, capture output incrementally for background jobs (default: False).
 
     Returns:
         RunScriptResult if completed synchronously, or job metadata if switched to background.
@@ -467,10 +465,10 @@ async def py_run_script_in_dir(
     # Async execution using asyncio subprocess
     start = time.time()
 
-    # Get output callback for streaming if enabled
+    # Get output callback for streaming (always enabled for background jobs)
     from .smart_async import create_output_callback, current_job_id
 
-    output_callback = create_output_callback() if enable_streaming else None
+    output_callback = create_output_callback()
 
     try:
         proc = await asyncio.create_subprocess_exec(
@@ -481,8 +479,8 @@ async def py_run_script_in_dir(
             env=proc_env,
         )
 
-        # If streaming and we have a job context, read line by line
-        if enable_streaming and current_job_id.get() and output_callback:
+        # If we have a job context (background job), read line by line for streaming
+        if current_job_id.get() and output_callback:
             stdout_lines = []
             stderr_lines = []
 
@@ -1333,13 +1331,13 @@ def py_list_scripts() -> list[dict[str, str]]:
 
 
 @mcp.tool(tags=["jobs", "async"])
-def py_job_status(job_id: str, incremental: bool = False) -> dict[str, Any]:
+def py_job_status(job_id: str, incremental: bool = True) -> dict[str, Any]:
     """
     Get status and progress of a background job.
 
     Args:
         job_id: Job identifier returned from async execution
-        incremental: If True, return only new output since last check (for streaming jobs)
+        incremental: If True, return only new output since last check (default: True, set False for full output)
 
     Returns:
         Job status including:
