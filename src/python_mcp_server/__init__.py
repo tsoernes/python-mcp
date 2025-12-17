@@ -1237,7 +1237,54 @@ def main() -> None:
     initialize_state()
     logger.info("Smart async job tracking initialized")
 
-    mcp.run(transport="stdio")
+    # Global exception hook: capture uncaught exceptions to a file for post-mortem
+    def _write_exception(exc_type, exc_value, exc_tb):
+        try:
+            import traceback
+
+            path = Path("/tmp/python_mcp_uncaught.log")
+            with path.open("a", encoding="utf-8") as f:
+                f.write("\n=== Uncaught exception ===\n")
+                traceback.print_exception(exc_type, exc_value, exc_tb, file=f)
+        except Exception:
+            # Best-effort only; avoid raising in excepthook
+            pass
+
+    sys.excepthook = _write_exception
+
+    # Asyncio exception handler: capture loop exceptions
+    def _asyncio_exc_handler(loop, context):
+        try:
+            path = Path("/tmp/python_mcp_async_exc.log")
+            with path.open("a", encoding="utf-8") as f:
+                f.write("\n=== Asyncio exception ===\n")
+                f.write(str(context))
+                f.write("\n")
+        except Exception:
+            pass
+
+    try:
+        loop = asyncio.get_event_loop()
+        loop.set_exception_handler(_asyncio_exc_handler)
+    except Exception:
+        # If event loop not available at startup, ignore
+        pass
+
+    # Run the MCP server and capture top-level exceptions to a file as well
+    try:
+        mcp.run(transport="stdio")
+    except Exception:
+        try:
+            import traceback
+
+            path = Path("/tmp/python_mcp_run_exception.log")
+            with path.open("a", encoding="utf-8") as f:
+                f.write("\n=== MCP server top-level exception ===\n")
+                traceback.print_exc(file=f)
+        except Exception:
+            pass
+        # Re-raise after logging so any supervising process can act accordingly
+        raise
 
 
 @mcp.tool(tags=["scripts", "save"])
