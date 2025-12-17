@@ -32,6 +32,7 @@ Dependencies:
 #   "yt-dlp>=2024.0.0",
 #   "youtube-transcript-api>=0.6.0",
 #   "python-dotenv>=1.0.0",
+#   "google-api-python-client>=2.0.0",
 # ]
 # ///
 """
@@ -53,6 +54,7 @@ from typing import Any
 
 import yt_dlp
 from dotenv import load_dotenv
+from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api._errors import (
     NoTranscriptFound,
@@ -266,6 +268,19 @@ class YouTubeTranscriptDownloader:
         self.before_date: datetime | None = (
             datetime.strptime(before_date, "%Y-%m-%d") if before_date else None
         )
+
+        # Initialize YouTube Data API service if API key is available
+        self.youtube_service = None
+        api_key = os.getenv("YOUTUBE_API_KEY")
+        if api_key:
+            try:
+                self.youtube_service = build("youtube", "v3", developerKey=api_key)
+                logging.info("YouTube Data API initialized successfully")
+            except Exception as e:
+                logging.warning(f"Failed to initialize YouTube Data API: {e}")
+                logging.info("Will use yt-dlp for all operations")
+        else:
+            logging.info("YOUTUBE_API_KEY not found, using yt-dlp for all operations")
 
         # Create output directories
         self.json_dir: Path = self.output_dir / "json"
@@ -538,7 +553,49 @@ Categories: {", ".join(metadata.get("categories", []))}
         return True, f"Successfully downloaded: {video_id} - {metadata.get('title')}"
 
     def get_playlist_videos(self, playlist_id: str) -> list[str]:
-        """Get all video IDs from a playlist."""
+        """Get all video IDs from a playlist using YouTube Data API if available, otherwise yt-dlp."""
+        # Try YouTube Data API first (avoids rate limiting)
+        if self.youtube_service:
+            try:
+                return self._get_playlist_videos_api(playlist_id)
+            except Exception as e:
+                self.logger.warning(
+                    f"YouTube Data API failed for playlist {playlist_id}: {e}"
+                )
+                self.logger.info("Falling back to yt-dlp")
+
+        # Fallback to yt-dlp
+        return self._get_playlist_videos_ytdlp(playlist_id)
+
+    def _get_playlist_videos_api(self, playlist_id: str) -> list[str]:
+        """Get playlist videos using YouTube Data API v3."""
+        video_ids = []
+        next_page_token = None
+
+        while True:
+            request = self.youtube_service.playlistItems().list(
+                part="contentDetails",
+                playlistId=playlist_id,
+                maxResults=50,
+                pageToken=next_page_token,
+            )
+            response = request.execute()
+
+            for item in response.get("items", []):
+                video_id = item["contentDetails"]["videoId"]
+                video_ids.append(video_id)
+
+            next_page_token = response.get("nextPageToken")
+            if not next_page_token:
+                break
+
+        self.logger.info(
+            f"Found {len(video_ids)} videos in playlist {playlist_id} via YouTube Data API"
+        )
+        return video_ids
+
+    def _get_playlist_videos_ytdlp(self, playlist_id: str) -> list[str]:
+        """Get playlist videos using yt-dlp (fallback method)."""
         ydl_opts = {
             "quiet": True,
             "no_warnings": True,
@@ -565,7 +622,79 @@ Categories: {", ".join(metadata.get("categories", []))}
             return []
 
     def get_channel_videos(self, channel_url: str) -> list[str]:
-        """Get all video IDs from a channel."""
+        """Get all video IDs from a channel using YouTube Data API if available, otherwise yt-dlp."""
+        # Try YouTube Data API first (avoids rate limiting)
+        if self.youtube_service:
+            try:
+                # Extract channel ID or username from URL
+                channel_id = self._extract_channel_id(channel_url)
+                if channel_id:
+                    return self._get_channel_videos_api(channel_id)
+            except Exception as e:
+                self.logger.warning(
+                    f"YouTube Data API failed for channel {channel_url}: {e}"
+                )
+                self.logger.info("Falling back to yt-dlp")
+
+        # Fallback to yt-dlp
+        return self._get_channel_videos_ytdlp(channel_url)
+
+    def _extract_channel_id(self, channel_url: str) -> str | None:
+        """Extract channel ID from various YouTube channel URL formats."""
+        # Handle @username format
+        if "@" in channel_url:
+            username = channel_url.split("@")[-1].split("/")[0]
+            request = self.youtube_service.channels().list(
+                part="id", forUsername=username
+            )
+            response = request.execute()
+            if response.get("items"):
+                return response["items"][0]["id"]
+
+            # Try search by handle
+            request = self.youtube_service.search().list(
+                part="snippet", q=f"@{username}", type="channel", maxResults=1
+            )
+            response = request.execute()
+            if response.get("items"):
+                return response["items"][0]["snippet"]["channelId"]
+
+        # Handle /channel/ID format
+        if "/channel/" in channel_url:
+            return channel_url.split("/channel/")[-1].split("/")[0]
+
+        # Handle /c/ or /user/ format
+        if "/c/" in channel_url or "/user/" in channel_url:
+            username = channel_url.split("/")[-1]
+            request = self.youtube_service.channels().list(
+                part="id", forUsername=username
+            )
+            response = request.execute()
+            if response.get("items"):
+                return response["items"][0]["id"]
+
+        return None
+
+    def _get_channel_videos_api(self, channel_id: str) -> list[str]:
+        """Get channel videos using YouTube Data API v3."""
+        # First, get the uploads playlist ID
+        request = self.youtube_service.channels().list(
+            part="contentDetails", id=channel_id
+        )
+        response = request.execute()
+
+        if not response.get("items"):
+            return []
+
+        uploads_playlist_id = response["items"][0]["contentDetails"][
+            "relatedPlaylists"
+        ]["uploads"]
+
+        # Now get all videos from the uploads playlist
+        return self._get_playlist_videos_api(uploads_playlist_id)
+
+    def _get_channel_videos_ytdlp(self, channel_url: str) -> list[str]:
+        """Get channel videos using yt-dlp (fallback method)."""
         ydl_opts = {
             "quiet": True,
             "no_warnings": True,
