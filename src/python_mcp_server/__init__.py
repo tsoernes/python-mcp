@@ -386,6 +386,7 @@ async def py_run_script_in_dir(
     env_file: Path | None = None,
     async_mode: bool = False,
     job_label: str | None = None,
+    enable_streaming: bool = False,
 ) -> RunScriptResult | dict[str, Any]:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
@@ -404,6 +405,7 @@ async def py_run_script_in_dir(
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
+        enable_streaming: If True, capture output incrementally for background jobs (default: False).
 
     Returns:
         RunScriptResult if completed synchronously, or job metadata if switched to background.
@@ -464,6 +466,12 @@ async def py_run_script_in_dir(
 
     # Async execution using asyncio subprocess
     start = time.time()
+
+    # Get output callback for streaming if enabled
+    from .smart_async import create_output_callback, current_job_id
+
+    output_callback = create_output_callback() if enable_streaming else None
+
     try:
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -472,24 +480,63 @@ async def py_run_script_in_dir(
             stderr=asyncio.subprocess.PIPE,
             env=proc_env,
         )
-        try:
-            stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                proc.communicate(),
-                timeout=None if timeout_seconds == 0 else timeout_seconds,
-            )
-            stdout = stdout_bytes.decode("utf-8")
-            stderr = stderr_bytes.decode("utf-8")
-        except asyncio.TimeoutError:
-            proc.kill()
-            await proc.wait()
-            result = RunScriptResult(
-                stdout="",
-                stderr="[TIMEOUT]",
-                exit_code=-1,
-                execution_strategy=execution_strategy,
-                elapsed_seconds=time.time() - start,
-            )
-            return result.model_dump()
+
+        # If streaming and we have a job context, read line by line
+        if enable_streaming and current_job_id.get() and output_callback:
+            stdout_lines = []
+            stderr_lines = []
+
+            async def read_stdout():
+                while True:
+                    line = await proc.stdout.readline()
+                    if not line:
+                        break
+                    text = line.decode("utf-8")
+                    stdout_lines.append(text)
+                    output_callback(stdout=text, stderr="")
+
+            async def read_stderr():
+                while True:
+                    line = await proc.stderr.readline()
+                    if not line:
+                        break
+                    text = line.decode("utf-8")
+                    stderr_lines.append(text)
+                    output_callback(stdout="", stderr=text)
+
+            try:
+                # Read both streams concurrently with timeout
+                await asyncio.wait_for(
+                    asyncio.gather(read_stdout(), read_stderr(), proc.wait()),
+                    timeout=None if timeout_seconds == 0 else timeout_seconds,
+                )
+                stdout = "".join(stdout_lines)
+                stderr = "".join(stderr_lines)
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                stdout = "".join(stdout_lines)
+                stderr = "".join(stderr_lines) + "\n[TIMEOUT]"
+        else:
+            # Non-streaming: wait for completion
+            try:
+                stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                    proc.communicate(),
+                    timeout=None if timeout_seconds == 0 else timeout_seconds,
+                )
+                stdout = stdout_bytes.decode("utf-8")
+                stderr = stderr_bytes.decode("utf-8")
+            except asyncio.TimeoutError:
+                proc.kill()
+                await proc.wait()
+                result = RunScriptResult(
+                    stdout="",
+                    stderr="[TIMEOUT]",
+                    exit_code=-1,
+                    execution_strategy=execution_strategy,
+                    elapsed_seconds=time.time() - start,
+                )
+                return result.model_dump()
     finally:
         if script_content:
             # Clean up temp script file
@@ -1286,12 +1333,13 @@ def py_list_scripts() -> list[dict[str, str]]:
 
 
 @mcp.tool(tags=["jobs", "async"])
-def py_job_status(job_id: str) -> dict[str, Any]:
+def py_job_status(job_id: str, incremental: bool = False) -> dict[str, Any]:
     """
     Get status and progress of a background job.
 
     Args:
         job_id: Job identifier returned from async execution
+        incremental: If True, return only new output since last check (for streaming jobs)
 
     Returns:
         Job status including:
@@ -1300,7 +1348,7 @@ def py_job_status(job_id: str) -> dict[str, Any]:
         - result: Job result if completed
         - error: Error message if failed
     """
-    return get_job_status(job_id)
+    return get_job_status(job_id, incremental=incremental)
 
 
 @mcp.tool(tags=["jobs", "async"])

@@ -49,6 +49,10 @@ class JobMeta:
     progress: dict[str, Any] | None = (
         None  # {"current": int, "total": int, "message": str}
     )
+    partial_stdout: str = ""  # Incremental stdout for running jobs
+    partial_stderr: str = ""  # Incremental stderr for running jobs
+    stdout_offset: int = 0  # Track what's been read for incremental access
+    stderr_offset: int = 0  # Track what's been read for incremental access
 
 
 @dataclass
@@ -93,6 +97,8 @@ def _save_jobs() -> None:
             "error": j.error,
             "result": j.result,
             "progress": j.progress,
+            "partial_stdout": j.partial_stdout if j.status == "running" else "",
+            "partial_stderr": j.partial_stderr if j.status == "running" else "",
         }
         for j in STATE.jobs.values()
     ]
@@ -175,17 +181,18 @@ def _update_job_progress(
     _save_jobs()
 
 
-def _job_public(job: JobMeta) -> dict[str, Any]:
+def _job_public(job: JobMeta, include_partial: bool = True) -> dict[str, Any]:
     """
     Convert JobMeta to public dict for API responses.
 
     Args:
         job: Job metadata
+        include_partial: Include partial stdout/stderr for running jobs
 
     Returns:
         Public job representation
     """
-    return {
+    response = {
         "id": job.id,
         "label": job.label,
         "status": job.status,
@@ -196,6 +203,13 @@ def _job_public(job: JobMeta) -> dict[str, Any]:
         "result": job.result,
         "progress": job.progress,
     }
+
+    # Include partial output for running jobs
+    if include_partial and job.status == "running":
+        response["partial_stdout"] = job.partial_stdout
+        response["partial_stderr"] = job.partial_stderr
+
+    return response
 
 
 def _launch_background_job(
@@ -233,6 +247,17 @@ def _launch_background_job(
             job.status = "completed"
             job.result = result
             job.completed_at = datetime.now().isoformat()
+
+            # Store final output from result if it's a dict with stdout/stderr
+            if isinstance(result, dict):
+                if "stdout" in result:
+                    job.partial_stdout = result.get("stdout", "")
+                if "stderr" in result:
+                    job.partial_stderr = result.get("stderr", "")
+
+            # Clear partial output on completion (result has full output)
+            job.partial_stdout = ""
+            job.partial_stderr = ""
         except Exception as e:
             job.status = "failed"
             job.error = str(e)
@@ -291,6 +316,17 @@ async def _run_with_time_budget(
                 job.status = "completed"
                 job.result = result
                 job.completed_at = datetime.now().isoformat()
+
+                # Store final output from result if it's a dict with stdout/stderr
+                if isinstance(result, dict):
+                    if "stdout" in result:
+                        job.partial_stdout = result.get("stdout", "")
+                    if "stderr" in result:
+                        job.partial_stderr = result.get("stderr", "")
+
+                # Clear partial output on completion
+                job.partial_stdout = ""
+                job.partial_stderr = ""
             except Exception as e:
                 job.status = "failed"
                 job.error = str(e)
@@ -368,12 +404,13 @@ def smart_async(
     return _decorator
 
 
-def get_job_status(job_id: str) -> dict[str, Any]:
+def get_job_status(job_id: str, incremental: bool = False) -> dict[str, Any]:
     """
     Get status of a background job.
 
     Args:
         job_id: Job identifier
+        incremental: If True, return only new output since last check
 
     Returns:
         Job status including progress, result, or error
@@ -385,7 +422,23 @@ def get_job_status(job_id: str) -> dict[str, Any]:
     if not job:
         return {"error": f"Job {job_id} not found"}
 
-    return {"job": _job_public(job)}
+    response = {"job": _job_public(job, include_partial=True)}
+
+    # Handle incremental output
+    if incremental and job.status == "running":
+        # Return only new output since last read
+        new_stdout = job.partial_stdout[job.stdout_offset :]
+        new_stderr = job.partial_stderr[job.stderr_offset :]
+
+        # Update offsets for next incremental read
+        job.stdout_offset = len(job.partial_stdout)
+        job.stderr_offset = len(job.partial_stderr)
+
+        response["job"]["new_stdout"] = new_stdout
+        response["job"]["new_stderr"] = new_stderr
+        response["incremental"] = True
+
+    return response
 
 
 def list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str, Any]:
@@ -529,3 +582,55 @@ def create_progress_callback() -> Callable[[int, int, str | None], None]:
             _update_job_progress(job_id, current, total, message)
 
     return progress_callback
+
+
+def update_job_output(job_id: str, stdout: str = "", stderr: str = "") -> None:
+    """
+    Update partial output for a running job.
+
+    This allows tools to stream output incrementally while running.
+    Output is appended to existing partial output.
+
+    Args:
+        job_id: Job identifier
+        stdout: Stdout to append
+        stderr: Stderr to append
+    """
+    job = STATE.jobs.get(job_id)
+    if not job or job.status != "running":
+        return
+
+    if stdout:
+        job.partial_stdout += stdout
+    if stderr:
+        job.partial_stderr += stderr
+
+    _save_jobs()
+
+
+def create_output_callback() -> Callable[[str, str], None]:
+    """
+    Create an output callback that uses the current job context.
+
+    This allows tools to stream output incrementally while running.
+
+    Returns:
+        Output callback function
+
+    Example:
+        @smart_async()
+        async def my_tool(...) -> dict:
+            output_callback = create_output_callback()
+
+            for line in process_lines():
+                output_callback(stdout=line, stderr="")
+
+            return {"result": "done"}
+    """
+
+    def output_callback(stdout: str = "", stderr: str = ""):
+        job_id = current_job_id.get()
+        if job_id:
+            update_job_output(job_id, stdout, stderr)
+
+    return output_callback
