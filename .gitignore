@@ -4,3 +4,10 @@ inline_scripts/
 # Ensure scripts directory remains tracked (explicit unignore in case of broad ignores elsewhere)
 !scripts/
 !scripts/**
+
+# Lex Fridman transcript downloads
+lex_fridman_transcripts/json/
+lex_fridman_transcripts/text/
+lex_fridman_transcripts/transcript_state.db
+lex_fridman_transcripts/downloader.log
+downloader.out
