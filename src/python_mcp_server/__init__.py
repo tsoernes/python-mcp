@@ -124,6 +124,124 @@ JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
 
 
+def _ensure_python_version(version: str) -> bool:
+    """
+    Ensure the specified Python version is installed via uv.
+
+    Args:
+        version: Python version string (e.g., '3.13', '3.12')
+
+    Returns:
+        True if version is available or was installed successfully
+    """
+    try:
+        # Check if version is already available
+        result = subprocess.run(
+            ["uv", "python", "list"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode == 0 and version in result.stdout:
+            logger.info(f"Python {version} already available")
+            return True
+
+        # Install the version
+        logger.info(f"Installing Python {version} via uv...")
+        result = subprocess.run(
+            ["uv", "python", "install", version],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        if result.returncode == 0:
+            logger.info(f"Successfully installed Python {version}")
+            return True
+        else:
+            logger.warning(f"Failed to install Python {version}: {result.stderr}")
+            return False
+    except Exception as e:
+        logger.warning(f"Error ensuring Python {version}: {e}")
+        return False
+
+
+def _parse_imports(source_text: str) -> list[str]:
+    """
+    Parse import statements from Python source and return top-level package names.
+
+    Args:
+        source_text: Python source code
+
+    Returns:
+        List of top-level package names (excluding stdlib)
+    """
+    import re
+
+    lines = source_text.splitlines()
+    detected: set[str] = set()
+    import_pattern = re.compile(r"^(?:from|import)\s+([a-zA-Z0-9_\.]+)")
+
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        m = import_pattern.match(line)
+        if not m:
+            continue
+        raw = m.group(1)
+        # Take top-level package name (segment before dot)
+        top = raw.split(".")[0]
+        detected.add(top)
+
+    # Basic skip list for common stdlib / internal modules
+    skip = {
+        "sys",
+        "os",
+        "re",
+        "time",
+        "uuid",
+        "json",
+        "math",
+        "pathlib",
+        "subprocess",
+        "typing",
+        "dataclasses",
+        "logging",
+        "asyncio",
+        "shutil",
+        "itertools",
+        "functools",
+        "collections",
+        "statistics",
+        "pprint",
+        "enum",
+        "io",
+        "datetime",
+        "copy",
+        "abc",
+        "warnings",
+        "contextlib",
+        "weakref",
+        "gc",
+        "pickle",
+        "struct",
+        "array",
+        "socket",
+        "ssl",
+        "http",
+        "urllib",
+        "email",
+        "html",
+        "xml",
+        "threading",
+        "multiprocessing",
+        "concurrent",
+        "queue",
+    }
+
+    return [pkg for pkg in sorted(detected) if pkg not in skip]
+
+
 # ---------------------------
 # Environment variable helpers
 # ---------------------------
@@ -386,6 +504,7 @@ async def py_run_script_in_dir(
     env_file: Path | None = None,
     async_mode: bool = False,
     job_label: str | None = None,
+    auto_install_deps: bool = True,
 ) -> RunScriptResult | dict[str, Any]:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
@@ -404,6 +523,7 @@ async def py_run_script_in_dir(
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
+        auto_install_deps: If True, auto-detect and install missing dependencies (default: True).
 
     Returns:
         RunScriptResult if completed synchronously, or job metadata if switched to background.
@@ -430,6 +550,7 @@ async def py_run_script_in_dir(
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
         script_path_local = inline_dir / tmp_name
         script_path_local.write_text(script_content)
+        source_text = script_content
     else:
         if not script_path:
             raise ValueError(
@@ -442,15 +563,36 @@ async def py_run_script_in_dir(
         script_path_local = candidate.resolve()
         if not script_path_local.is_file():
             raise FileNotFoundError(f"Script file not found: {script_path_local}")
+        source_text = script_path_local.read_text()
+
+    # Auto-detect dependencies if enabled
+    detected_deps: list[str] = []
+    if auto_install_deps and use_uv:
+        detected_deps = _parse_imports(source_text)
+        if detected_deps:
+            logger.info(f"Auto-detected dependencies: {detected_deps}")
 
     command: list[str]
     execution_strategy = "system-python"
     if use_uv:
         command = ["uv", "run"]
+
+        # Use --isolated to ignore pyproject.toml when running standalone scripts with auto-deps
+        if detected_deps:
+            command.append("--isolated")
+
         if not python_version:
             python_version = _infer_python_version_from_pyproject(workdir)
+
+        # If we have a version requirement, ensure it's installed
         if python_version:
+            _ensure_python_version(python_version)
             command += ["--python", python_version]
+
+        # Add auto-detected dependencies
+        for dep in detected_deps:
+            command += ["--with", dep]
+
         execution_strategy = "uv-run"
     else:
         command = ["python"]
@@ -568,6 +710,7 @@ async def py_run_script_with_dependencies(
     env_file: Path | None = None,
     async_mode: bool = False,
     job_label: str | None = None,
+    ignore_project_requirements: bool = True,
 ) -> RunWithDepsResult | dict[str, Any]:
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
@@ -587,6 +730,7 @@ async def py_run_script_with_dependencies(
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
+        ignore_project_requirements: If True, use --isolated to ignore pyproject.toml (default: True).
 
     Returns:
         RunWithDepsResult if completed synchronously, or job metadata if switched to background.
@@ -623,61 +767,26 @@ async def py_run_script_with_dependencies(
     resolved_dependencies = dependencies[:] if dependencies else []
 
     if auto_parse_imports:
-        # Simple heuristic import parser
-        import re
-
-        lines = source_text.splitlines()
-        detected: set[str] = set()
-        import_pattern = re.compile(r"^(?:from|import)\\s+([a-zA-Z0-9_\\.]+)")
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            m = import_pattern.match(line)
-            if not m:
-                continue
-            raw = m.group(1)
-            # Take top-level package name (segment before dot)
-            top = raw.split(".")[0]
-            detected.add(top)
-
-        # Basic skip list for common stdlib / internal modules to reduce noise
-        skip = {
-            "sys",
-            "os",
-            "re",
-            "time",
-            "uuid",
-            "json",
-            "math",
-            "pathlib",
-            "subprocess",
-            "typing",
-            "dataclasses",
-            "logging",
-            "asyncio",
-            "shutil",
-            "itertools",
-            "functools",
-            "collections",
-            "statistics",
-            "pprint",
-            "enum",
-        }
-
-        for pkg in sorted(detected):
-            if pkg in skip:
-                continue
+        detected = _parse_imports(source_text)
+        for pkg in detected:
             if pkg not in resolved_dependencies:
                 resolved_dependencies.append(pkg)
-        # Logging auto-import detection for sync dependency execution
         logger.info(
-            "auto_parse_imports sync detected=%s final_deps=%s",
+            "auto_parse_imports detected=%s final_deps=%s",
             sorted(detected),
             resolved_dependencies,
         )
 
-    command: list[str] = ["uv", "run", "--python", python_version]
+    command: list[str] = ["uv", "run"]
+
+    # Use --isolated to ignore pyproject.toml requirements when running standalone scripts
+    if ignore_project_requirements:
+        command.append("--isolated")
+
+    # Ensure Python version is installed
+    _ensure_python_version(python_version)
+
+    command += ["--python", python_version]
     for dep in resolved_dependencies:
         command += ["--with", dep]
     command.append(str(spath))
@@ -937,6 +1046,9 @@ async def py_benchmark_script(
         spath = (inline_dir / f"inline_bench_{uuid.uuid4().hex}.py").resolve()
         spath.write_text(script_content or "")
         is_inline = True
+    # Ensure Python version is installed
+    _ensure_python_version(python_version)
+
     command: list[str] = ["uv", "run", "--python", python_version]
     resolved_dependencies = dependencies[:] if dependencies else []
     for dep in resolved_dependencies:
@@ -1195,6 +1307,7 @@ async def py_run_saved_script(
     env_file: Path | None = None,
     async_mode: bool = False,
     job_label: str | None = None,
+    auto_install_deps: bool = True,
 ) -> RunScriptResult | dict[str, Any]:
     """
     Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
@@ -1209,6 +1322,7 @@ async def py_run_saved_script(
         env_file: Optional path to .env file to load environment variables from
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
+        auto_install_deps: If True, auto-detect and install missing dependencies (default: True).
     """
     scripts_dir = Path.cwd() / "scripts"
     name = Path(script_name).name
@@ -1216,7 +1330,29 @@ async def py_run_saved_script(
     if not spath.is_file():
         raise FileNotFoundError(f"Script not found: {spath}")
 
-    command: list[str] = ["uv", "run", "--script", str(spath)]
+    # Auto-detect dependencies if enabled and no header exists
+    detected_deps: list[str] = []
+    if auto_install_deps:
+        source_text = spath.read_text()
+        # Check if script has TOML header
+        if not source_text.startswith("# /// script"):
+            detected_deps = _parse_imports(source_text)
+            if detected_deps:
+                logger.info(
+                    f"Auto-detected dependencies for {script_name}: {detected_deps}"
+                )
+
+    command: list[str] = ["uv", "run"]
+
+    # If auto-detected deps, use isolated mode to avoid pyproject.toml conflicts
+    if detected_deps:
+        command.append("--isolated")
+
+    # Add auto-detected dependencies
+    for dep in detected_deps:
+        command += ["--with", dep]
+
+    command += ["--script", str(spath)]
     if args:
         command.extend(args)
 
