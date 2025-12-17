@@ -308,7 +308,7 @@ async def _run_with_time_budget(
 
 
 def smart_async(
-    timeout_env: str = "SMART_ASYNC_TIMEOUT_SECONDS", default_timeout: float = 50.0
+    timeout_env: str = "SMART_ASYNC_TIMEOUT_SECONDS", default_timeout: float = 20.0
 ):
     """
     Decorator to apply shielded time-threshold smart async to long-running MCP tools.
@@ -321,7 +321,7 @@ def smart_async(
 
     Args:
         timeout_env: Environment variable name for timeout configuration
-        default_timeout: Default timeout in seconds if env var not set
+        default_timeout: Default timeout in seconds if env var not set (default: 20.0)
 
     Returns:
         Decorated function that handles both sync and async execution
