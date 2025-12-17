@@ -482,13 +482,14 @@ async def py_run_script_in_dir(
         except asyncio.TimeoutError:
             proc.kill()
             await proc.wait()
-            return RunScriptResult(
+            result = RunScriptResult(
                 stdout="",
                 stderr="[TIMEOUT]",
                 exit_code=-1,
                 execution_strategy=execution_strategy,
                 elapsed_seconds=time.time() - start,
             )
+            return result.model_dump()
     finally:
         if script_content:
             # Clean up temp script file
@@ -498,13 +499,14 @@ async def py_run_script_in_dir(
                 except Exception:
                     pass
 
-    return RunScriptResult(
+    result = RunScriptResult(
         stdout=stdout,
         stderr=stderr,
         exit_code=proc.returncode or 0,
         execution_strategy=execution_strategy,
         elapsed_seconds=time.time() - start,
     )
+    return result.model_dump()
 
 
 @mcp.tool(tags=["execution", "dependencies"])
@@ -667,7 +669,7 @@ async def py_run_script_with_dependencies(
             except Exception:
                 pass
 
-    return RunWithDepsResult(
+    result = RunWithDepsResult(
         stdout=stdout,
         stderr=stderr,
         exit_code=proc.returncode or 0,
@@ -676,6 +678,7 @@ async def py_run_script_with_dependencies(
         resolved_dependencies=resolved_dependencies,
         python_version_used=python_version,
     )
+    return result.model_dump()
 
 
 @mcp.tool(tags=["jobs", "introspection"])
@@ -942,24 +945,25 @@ async def py_benchmark_script(
             stderr_chunks.append(line)
     end_cpu = ps_proc.cpu_times()
     wall = time.time() - start_time
+    cpu = (end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system)
     if is_inline and spath.exists():
         try:
             spath.unlink()
         except Exception:
             pass
-    return BenchmarkResult(
+    result = BenchmarkResult(
         stdout="".join(stdout_chunks),
         stderr="".join(stderr_chunks),
         exit_code=proc.returncode,
         execution_strategy="uv-run",
         elapsed_seconds=wall,
-        resolved_dependencies=list(resolved_dependencies),
+        resolved_dependencies=resolved_dependencies,
         python_version_used=python_version,
         wall_time_seconds=wall,
-        cpu_time_seconds=(end_cpu.user - start_cpu.user)
-        + (end_cpu.system - start_cpu.system),
+        cpu_time_seconds=cpu,
         peak_rss_mb=peak_rss / (1024 * 1024),
     )
+    return result.model_dump()
 
 
 async def _poll_stream(job_id: str) -> None:
@@ -1196,13 +1200,14 @@ async def py_run_saved_script(
         stderr = "[TIMEOUT]"
     except Exception as e:
         raise RuntimeError(f"Execution failed: {e}")  # noqa: TRY003
-    return RunScriptResult(
+    result = RunScriptResult(
         stdout=stdout,
         stderr=stderr,
         exit_code=proc.returncode or 0,
         execution_strategy="uv-run",
         elapsed_seconds=time.time() - start,
     )
+    return result.model_dump()
 
 
 @mcp.tool(tags=["scripts", "introspection"])
