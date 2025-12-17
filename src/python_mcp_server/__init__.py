@@ -194,7 +194,7 @@ def _infer_python_version_from_pyproject(workdir: Path) -> str | None:
 
     Strategy:
       - Look for project.requires-python (PEP 621)
-      - Extract first occurrence of \d+.\d+ from the version spec (e.g. '>=3.13' -> '3.13')
+      - Extract first occurrence of \\d+.\\d+ from the version spec (e.g. '>=3.13' -> '3.13')
     """
     pyproject = workdir / "pyproject.toml"
     if not pyproject.is_file():
@@ -372,8 +372,9 @@ def _exec_with_dependencies_sync(
     )
 
 
-@mcp.tool(tags=["execution", "sync"])
-def py_run_script_in_dir(
+@mcp.tool(tags=["execution"])
+@smart_async(default_timeout=20.0)
+async def py_run_script_in_dir(
     directory: Path,
     script_path: Path | None = None,
     script_content: str | None = None,
@@ -383,12 +384,13 @@ def py_run_script_in_dir(
     timeout_seconds: int = 300,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
-) -> RunScriptResult:
+    async_mode: bool = False,
+    job_label: str | None = None,
+) -> RunScriptResult | dict[str, Any]:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
 
-    This is the synchronous variant. For asynchronous/background execution with optional streaming,
-    use py_run_script_in_dir_async.
+    Uses smart async: completes synchronously if under 20s, switches to background if longer.
 
     Parameters:
         directory: Base directory; must exist.
@@ -397,28 +399,25 @@ def py_run_script_in_dir(
         args: Optional argument list appended after the script path.
         use_uv: When True use 'uv run'; otherwise system 'python'.
         python_version: Exact minor version (e.g. '3.12') – honored only when use_uv=True.
-        timeout_seconds: Max wall time; 0 disables timeout (unbounded).
+        timeout_seconds: Max wall time for subprocess; 0 disables timeout (unbounded).
         env_vars: Optional dictionary of environment variables to set for the script.
         env_file: Optional path to .env file to load environment variables from.
+        async_mode: If True, launch in background immediately (default: False).
+        job_label: Optional label for job tracking.
 
-    Returns (RunScriptResult):
-        stdout: Captured stdout.
-        stderr: Captured stderr.
-        exit_code: Process exit code.
-        execution_strategy: 'uv-run' or 'system-python'.
-        elapsed_seconds: Wall time in seconds.
+    Returns:
+        RunScriptResult if completed synchronously, or job metadata if switched to background.
 
     Errors:
         FileNotFoundError: directory or script_path missing.
         ValueError: Neither or both of script_path and script_content provided.
-        Timeout: On timeout, process killed; stderr is suffixed with '[TIMEOUT]'.
 
     Path Resolution:
         Relative script_path values are resolved against 'directory'.
 
     Notes:
         - No sandboxing; full filesystem/network access (per project requirements).
-        - Temporary inline file removed after synchronous completion.
+        - Temporary inline file removed after completion.
     """
 
     workdir = Path(directory).expanduser().resolve()
@@ -460,39 +459,39 @@ def py_run_script_in_dir(
     if args:
         command.extend(args)
 
-    # (Async mode removed from this function; see run_script_in_dir_async.)
-
     # Build environment
     proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
 
-    # Synchronous execution
+    # Async execution using asyncio subprocess
     start = time.time()
     try:
-        proc = subprocess.Popen(
-            command,
+        proc = await asyncio.create_subprocess_exec(
+            *command,
             cwd=str(workdir),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
             env=proc_env,
         )
         try:
-            stdout, stderr = proc.communicate(
-                timeout=None if timeout_seconds == 0 else timeout_seconds
+            stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                proc.communicate(),
+                timeout=None if timeout_seconds == 0 else timeout_seconds,
             )
-        except subprocess.TimeoutExpired:
+            stdout = stdout_bytes.decode("utf-8")
+            stderr = stderr_bytes.decode("utf-8")
+        except asyncio.TimeoutError:
             proc.kill()
-            stdout, stderr = proc.communicate()
-            return {
-                "stdout": stdout,
-                "stderr": stderr + "\n[TIMEOUT]",
-                "exit_code": str(proc.returncode),
-                "execution_strategy": execution_strategy,
-                "elapsed_seconds": time.time() - start,
-            }
+            await proc.wait()
+            return RunScriptResult(
+                stdout="",
+                stderr="[TIMEOUT]",
+                exit_code=-1,
+                execution_strategy=execution_strategy,
+                elapsed_seconds=time.time() - start,
+            )
     finally:
         if script_content:
-            # Clean up temp script file for sync mode
+            # Clean up temp script file
             if script_path_local.exists():
                 try:
                     script_path_local.unlink()
@@ -502,14 +501,15 @@ def py_run_script_in_dir(
     return RunScriptResult(
         stdout=stdout,
         stderr=stderr,
-        exit_code=proc.returncode,
+        exit_code=proc.returncode or 0,
         execution_strategy=execution_strategy,
         elapsed_seconds=time.time() - start,
     )
 
 
-@mcp.tool(tags=["execution", "dependencies", "sync"])
-def py_run_script_with_dependencies(
+@mcp.tool(tags=["execution", "dependencies"])
+@smart_async(default_timeout=20.0)
+async def py_run_script_with_dependencies(
     script_content: str | None = None,
     script_path: Path | None = None,
     python_version: str = "3.12",
@@ -519,11 +519,13 @@ def py_run_script_with_dependencies(
     auto_parse_imports: bool = True,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
-) -> RunWithDepsResult:
+    async_mode: bool = False,
+    job_label: str | None = None,
+) -> RunWithDepsResult | dict[str, Any]:
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
 
-    This is the synchronous variant. For asynchronous/background execution use py_run_script_with_dependencies_async.
+    Uses smart async: completes synchronously if under 20s, switches to background if longer.
 
     Parameters:
         script_content: Inline code (mutually exclusive with script_path).
@@ -536,16 +538,15 @@ def py_run_script_with_dependencies(
                            to dependency list (best-effort heuristic; does not guarantee install success).
         env_vars: Optional dictionary of environment variables to set for the script.
         env_file: Optional path to .env file to load environment variables from.
+        async_mode: If True, launch in background immediately (default: False).
+        job_label: Optional label for job tracking.
 
-    Returns (RunWithDepsResult):
-        Extends RunScriptResult with:
-          resolved_dependencies: list[str]
-          python_version_used: str
+    Returns:
+        RunWithDepsResult if completed synchronously, or job metadata if switched to background.
 
     Errors:
         FileNotFoundError: script_path missing.
         ValueError: Exclusivity violated.
-        Timeout: Same semantics as run_script_in_dir.
 
     Notes:
         - Uses 'uv run --with <dep>' for each dependency.
@@ -641,21 +642,24 @@ def py_run_script_with_dependencies(
 
     start = time.time()
     try:
-        proc = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+        proc = await asyncio.create_subprocess_exec(
+            *command,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
             env=proc_env,
         )
         try:
-            stdout, stderr = proc.communicate(
-                timeout=None if timeout_seconds == 0 else timeout_seconds
+            stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                proc.communicate(),
+                timeout=None if timeout_seconds == 0 else timeout_seconds,
             )
-        except subprocess.TimeoutExpired:
+            stdout = stdout_bytes.decode("utf-8")
+            stderr = stderr_bytes.decode("utf-8")
+        except asyncio.TimeoutError:
             proc.kill()
-            stdout, stderr = proc.communicate()
-            stderr += "\n[TIMEOUT]"
+            await proc.wait()
+            stdout = ""
+            stderr = "[TIMEOUT]"
     finally:
         if script_content and spath.exists():
             try:
@@ -666,298 +670,11 @@ def py_run_script_with_dependencies(
     return RunWithDepsResult(
         stdout=stdout,
         stderr=stderr,
-        exit_code=proc.returncode,
+        exit_code=proc.returncode or 0,
         execution_strategy="uv-run",
         elapsed_seconds=time.time() - start,
         resolved_dependencies=resolved_dependencies,
         python_version_used=python_version,
-    )
-
-
-@mcp.tool(tags=["execution", "async", "stream"])
-def py_run_script_in_dir_async(
-    directory: Path,
-    script_path: Path | None = None,
-    script_content: str | None = None,
-    args: list[str] | None = None,
-    use_uv: bool = True,
-    python_version: str | None = None,
-    stream: bool = False,
-    env_vars: dict[str, str] | None = None,
-    env_file: Path | None = None,
-) -> AsyncJobStart:
-    """
-    Asynchronously execute a Python script (existing file or inline content) inside a target directory. (Tool name: py_run_script_in_dir_async)
-
-    Streaming:
-        If stream=True, incremental stdout/stderr snapshots can be polled via resource job-stream://{job_id}
-        or consolidated output via get_job_output.
-
-    Parameters:
-        directory: Base directory; must exist.
-        script_path: Absolute or relative path to a script within directory (mutually exclusive with script_content).
-        script_content: Inline Python source (mutually exclusive with script_path). A temporary file is created.
-        args: Optional argument list appended after the script path.
-        use_uv: When True uses 'uv run'; otherwise system 'python'.
-        python_version: Exact minor (e.g. '3.12') honored only when use_uv=True.
-        stream: Enable periodic harvesting of stdout/stderr.
-        env_vars: Optional dictionary of environment variables to set for the script.
-        env_file: Optional path to .env file to load environment variables from.
-
-    Returns (AsyncJobStart):
-        job_id: Identifier to use with get_job_output / job-stream resource.
-        status: Always 'started'.
-        execution_strategy: 'uv-run' or 'system-python'.
-
-    Errors:
-        FileNotFoundError: directory or script_path missing.
-        ValueError: Neither or both of script_path and script_content provided.
-
-    Notes:
-        - No timeout applied at launch; external tooling (future) may enforce or kill.
-        - Temporary inline file is retained until job finalization (to allow inspection if needed).
-    """
-    workdir = Path(directory).expanduser().resolve()
-    if not workdir.is_dir():
-        raise FileNotFoundError(f"Directory not found: {workdir}")
-
-    if script_content:
-        inline_dir = workdir / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = inline_dir / tmp_name
-        script_path_local.write_text(script_content)
-    else:
-        if not script_path:
-            raise ValueError(
-                "Either 'script_path' or 'script_content' must be provided."
-            )
-        candidate = script_path.expanduser()
-        if not candidate.is_absolute():
-            candidate = (workdir / candidate).resolve()
-        script_path_local = candidate.resolve()
-        if not script_path_local.is_file():
-            raise FileNotFoundError(f"Script file not found: {script_path_local}")
-
-    command: list[str]
-    execution_strategy = "system-python"
-    if use_uv:
-        command = ["uv", "run"]
-        if python_version:
-            command += ["--python", python_version]
-        execution_strategy = "uv-run"
-    else:
-        command = ["python"]
-    command.append(str(script_path_local))
-    if args:
-        command.extend(args)
-
-    # Build environment
-    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
-
-    # Launch async
-    proc = subprocess.Popen(
-        command,
-        cwd=str(workdir),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        env=proc_env,
-    )
-    job_id = uuid.uuid4().hex
-    rec = JobRecord(
-        job_id=job_id,
-        command=command,
-        start_time=time.time(),
-        process=proc,
-        directory=workdir,
-        script_path=script_path_local,
-        stream=stream,
-        is_inline_temp=bool(script_content),
-    )
-    JOBS[job_id] = rec
-    logger.info(
-        "py_run_script_in_dir_async started job_id=%s strategy=%s cwd=%s stream=%s",
-        job_id,
-        execution_strategy,
-        workdir,
-        stream,
-    )
-    if stream:
-        asyncio.get_event_loop().create_task(_poll_stream(job_id))
-        logger.info("Streaming poller launched for job_id=%s", job_id)
-
-    return AsyncJobStart(
-        job_id=job_id,
-        status="started",
-        execution_strategy=execution_strategy,
-    )
-
-
-@mcp.tool(tags=["execution", "dependencies", "async", "stream"])
-def py_run_script_with_dependencies_async(
-    script_content: str | None = None,
-    script_path: Path | None = None,
-    python_version: str = "3.12",
-    dependencies: list[str] | None = None,
-    args: list[str] | None = None,
-    stream: bool = False,
-    auto_parse_imports: bool = True,
-    env_vars: dict[str, str] | None = None,
-    env_file: Path | None = None,
-) -> AsyncDepsJobStart:
-    """
-    Asynchronously execute inline code or an existing script in a transient uv environment with dependencies. (Tool name: py_run_script_with_dependencies_async)
-
-    Mutual Exclusivity:
-        Provide exactly one of script_content or script_path.
-
-    Streaming:
-        When stream=True, incremental output available via job-stream://{job_id}.
-
-    Parameters:
-        script_content: Inline Python source.
-        script_path: Existing script path.
-        python_version: Exact minor version (e.g. '3.12').
-        dependencies: List of package specifiers (PEP 440).
-        args: Optional CLI arguments.
-        stream: Enable periodic harvesting of stdout/stderr.
-        auto_parse_imports: When True, parse script source for import statements and append missing top-level modules
-                            to dependency list (heuristic; applies skip list of common stdlib modules).
-        env_vars: Optional dictionary of environment variables to set for the script.
-        env_file: Optional path to .env file to load environment variables from.
-
-    Returns (AsyncDepsJobStart):
-        job_id, status, python_version_used, resolved_dependencies.
-
-    Errors:
-        FileNotFoundError: script_path missing.
-        ValueError: Exclusivity violated.
-
-    Notes:
-        - Uses 'uv run --with <dep>' for each dependency (explicit + inferred).
-        - Auto-import parsing heuristics:
-            * Extracts top-level package from lines matching ^(from|import) <name>
-            * Skip list filters common stdlib modules
-            * Does not resolve version pins automatically
-        - Future enhancement: environment caching to reduce cold start latency.
-    """
-    if not script_content and not script_path:
-        raise ValueError("Provide either 'script_content' or 'script_path'.")
-    if script_content and script_path:
-        raise ValueError("Provide only one of 'script_content' or 'script_path'.")
-
-    if script_path:
-        spath = Path(script_path).expanduser().resolve()
-        if not spath.is_file():
-            raise FileNotFoundError(f"Script not found: {spath}")
-        source_text = spath.read_text()
-    else:
-        inline_dir = Path.cwd() / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        spath = (inline_dir / f"inline_dep_{uuid.uuid4().hex}.py").resolve()
-        spath.write_text(script_content or "")
-        source_text = script_content or ""
-
-    resolved_dependencies = dependencies[:] if dependencies else []
-
-    if auto_parse_imports:
-        import re
-
-        lines = source_text.splitlines()
-        detected: set[str] = set()
-        pattern = re.compile(r"^(?:from|import)\s+([a-zA-Z0-9_\.]+)")
-        for line in lines:
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            m = pattern.match(line)
-            if not m:
-                continue
-            raw = m.group(1)
-            top = raw.split(".")[0]
-            detected.add(top)
-        skip = {
-            "sys",
-            "os",
-            "re",
-            "time",
-            "uuid",
-            "json",
-            "math",
-            "pathlib",
-            "subprocess",
-            "typing",
-            "dataclasses",
-            "logging",
-            "asyncio",
-            "shutil",
-            "itertools",
-            "functools",
-            "collections",
-            "statistics",
-            "pprint",
-            "enum",
-        }
-        for pkg in sorted(detected):
-            if pkg in skip:
-                continue
-            if pkg not in resolved_dependencies:
-                resolved_dependencies.append(pkg)
-        # Logging auto-import detection for async dependency execution
-        logger.info(
-            "auto_parse_imports async detected=%s final_deps=%s",
-            sorted(detected),
-            resolved_dependencies,
-        )
-
-    command: list[str] = ["uv", "run", "--python", python_version]
-    for dep in resolved_dependencies:
-        command += ["--with", dep]
-    command.append(str(spath))
-    if args:
-        command.extend(args)
-
-    # Build environment
-    proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
-
-    # Launch async
-    proc = subprocess.Popen(
-        command,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        env=proc_env,
-    )
-    job_id = uuid.uuid4().hex
-    rec = JobRecord(
-        job_id=job_id,
-        command=command,
-        start_time=time.time(),
-        process=proc,
-        directory=Path(".").resolve(),
-        script_path=spath,
-        stream=stream,
-        is_inline_temp=bool(script_content),
-    )
-    JOBS[job_id] = rec
-    logger.info(
-        "py_run_script_with_dependencies_async started job_id=%s python=%s deps=%s stream=%s auto_parse_imports=%s",
-        job_id,
-        python_version,
-        resolved_dependencies,
-        stream,
-        auto_parse_imports,
-    )
-    if stream:
-        asyncio.get_event_loop().create_task(_poll_stream(job_id))
-        logger.info("Streaming poller launched for job_id=%s", job_id)
-
-    return AsyncDepsJobStart(
-        job_id=job_id,
-        status="started",
-        python_version_used=python_version,
-        resolved_dependencies=resolved_dependencies,
     )
 
 
@@ -1123,8 +840,9 @@ def py_cleanup_jobs(
     }
 
 
-@mcp.tool(tags=["benchmark", "performance", "sync"])
-def py_benchmark_script(
+@mcp.tool(tags=["benchmark", "performance"])
+@smart_async(default_timeout=20.0)
+async def py_benchmark_script(
     script_content: str | None = None,
     script_path: Path | None = None,
     python_version: str = "3.12",
@@ -1134,9 +852,13 @@ def py_benchmark_script(
     sample_interval: float = 0.05,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
-) -> BenchmarkResult:
+    async_mode: bool = False,
+    job_label: str | None = None,
+) -> BenchmarkResult | dict[str, Any]:
     """
     Execute code or script with dependency resolution (uv) while collecting basic benchmark metrics.
+
+    Uses smart async: completes synchronously if under 20s, switches to background if longer.
 
     (py_benchmark_script) Metrics:
         - wall_time_seconds
@@ -1148,6 +870,8 @@ def py_benchmark_script(
         sample_interval: Polling interval for memory usage sampling.
         env_vars: Optional dictionary of environment variables to set for the script.
         env_file: Optional path to .env file to load environment variables from.
+        async_mode: If True, launch in background immediately (default: False).
+        job_label: Optional label for job tracking.
     """
     # Use internal helper to start process manually (avoid calling decorated tool object)
     if not script_content and not script_path:
@@ -1412,16 +1136,21 @@ def py_save_script(
     return {"written": "true", "path": str(target), "message": "Script saved"}
 
 
-@mcp.tool(tags=["scripts", "run", "sync"])
-def py_run_saved_script(
+@mcp.tool(tags=["scripts", "run"])
+@smart_async(default_timeout=20.0)
+async def py_run_saved_script(
     script_name: str,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
-) -> RunScriptResult:
+    async_mode: bool = False,
+    job_label: str | None = None,
+) -> RunScriptResult | dict[str, Any]:
     """
     Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
+
+    Uses smart async: completes synchronously if under 20s, switches to background if longer.
 
     Parameters:
         script_name: Name of the script in the scripts/ folder
@@ -1429,6 +1158,8 @@ def py_run_saved_script(
         timeout_seconds: Max wall time; 0 disables timeout (unbounded)
         env_vars: Optional dictionary of environment variables to set for the script
         env_file: Optional path to .env file to load environment variables from
+        async_mode: If True, launch in background immediately (default: False).
+        job_label: Optional label for job tracking.
     """
     scripts_dir = Path.cwd() / "scripts"
     name = Path(script_name).name
@@ -1444,28 +1175,31 @@ def py_run_saved_script(
     proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
 
     start = time.time()
+    proc = await asyncio.create_subprocess_exec(
+        *command,
+        cwd=str(scripts_dir),
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+        env=proc_env,
+    )
     try:
-        proc = subprocess.Popen(
-            command,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            env=proc_env,
+        stdout_bytes, stderr_bytes = await asyncio.wait_for(
+            proc.communicate(),
+            timeout=None if timeout_seconds == 0 else timeout_seconds,
         )
-        try:
-            stdout, stderr = proc.communicate(
-                timeout=None if timeout_seconds == 0 else timeout_seconds
-            )
-        except subprocess.TimeoutExpired:
-            proc.kill()
-            stdout, stderr = proc.communicate()
-            stderr += "\n[TIMEOUT]"
+        stdout = stdout_bytes.decode("utf-8")
+        stderr = stderr_bytes.decode("utf-8")
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        stdout = ""
+        stderr = "[TIMEOUT]"
     except Exception as e:
         raise RuntimeError(f"Execution failed: {e}")  # noqa: TRY003
     return RunScriptResult(
         stdout=stdout,
         stderr=stderr,
-        exit_code=proc.returncode,
+        exit_code=proc.returncode or 0,
         execution_strategy="uv-run",
         elapsed_seconds=time.time() - start,
     )
