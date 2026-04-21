@@ -32,6 +32,8 @@ from .smart_async import (
     smart_async,
 )
 
+from .markdown import maybe_render_markdown
+
 # Configure logging (file + stderr console)
 LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
 logging.basicConfig(
@@ -502,10 +504,11 @@ async def py_run_script_in_dir(
     timeout_seconds: int = 300,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
+    markdown_output: bool = True,
     async_mode: bool = False,
     job_label: str | None = None,
     auto_install_deps: bool = True,
-) -> RunScriptResult | dict[str, Any]:
+) -> RunScriptResult | dict[str, Any] | str:
     """
     Execute a Python script (existing file or inline content) inside a target directory using uv or system Python.
 
@@ -708,10 +711,11 @@ async def py_run_script_with_dependencies(
     auto_parse_imports: bool = True,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
+    markdown_output: bool = True,
     async_mode: bool = False,
     job_label: str | None = None,
     ignore_project_requirements: bool = True,
-) -> RunWithDepsResult | dict[str, Any]:
+) -> RunWithDepsResult | dict[str, Any] | str:
     """
     Execute transient inline code or an existing script inside an ephemeral uv environment with explicit dependencies.
 
@@ -836,7 +840,7 @@ async def py_run_script_with_dependencies(
 
 
 @mcp.tool(tags=["jobs", "introspection"])
-def py_list_running_jobs() -> list[dict[str, str]]:
+def py_list_running_jobs(markdown_output: bool = True) -> list[dict[str, str]] | str:
     """
     List currently registered jobs (running or finished but not yet cleaned).
 
@@ -867,11 +871,15 @@ def py_list_running_jobs() -> list[dict[str, str]]:
                 "stderr_chunks": str(len(rec.stderr_chunks)),
             }
         )
-    return out
+    return maybe_render_markdown(
+        out, markdown_output=markdown_output, title="py_list_running_jobs"
+    )
 
 
 @mcp.tool(tags=["jobs", "introspection"])
-def py_get_job_output(job_id: str) -> dict[str, str]:
+def py_get_job_output(
+    job_id: str, markdown_output: bool = True
+) -> dict[str, str] | str:
     """
     Retrieve (and finalize if completed) a job's output.
 
@@ -898,19 +906,23 @@ def py_get_job_output(job_id: str) -> dict[str, str]:
         # Final capture
         _finalize_capture(rec)
 
-    return {
-        "status": "running" if running else "finished",
-        "stdout": "".join(rec.stdout_chunks),
-        "stderr": "".join(rec.stderr_chunks),
-        "exit_code": str(rec.process.returncode)
-        if rec.process.returncode is not None
-        else "None",
-        "elapsed_seconds": f"{time.time() - rec.start_time:.2f}",
-    }
+    return maybe_render_markdown(
+        {
+            "status": "running" if running else "finished",
+            "stdout": "".join(rec.stdout_chunks),
+            "stderr": "".join(rec.stderr_chunks),
+            "exit_code": str(rec.process.returncode)
+            if rec.process.returncode is not None
+            else "None",
+            "elapsed_seconds": f"{time.time() - rec.start_time:.2f}",
+        },
+        markdown_output=markdown_output,
+        title="py_get_job_output",
+    )
 
 
 @mcp.tool(tags=["jobs", "control"])
-def py_kill_job(job_id: str) -> dict[str, str]:
+def py_kill_job(job_id: str, markdown_output: bool = True) -> dict[str, str] | str:
     """
     Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
 
@@ -941,18 +953,23 @@ def py_kill_job(job_id: str) -> dict[str, str]:
         if rec.finalized_elapsed is not None
         else (time.time() - rec.start_time),
     )
-    return {
-        "job_id": job_id,
-        "status": status,
-        "exit_code": str(rec.process.returncode),
-    }
+    return maybe_render_markdown(
+        {
+            "job_id": job_id,
+            "status": status,
+            "exit_code": str(rec.process.returncode),
+        },
+        markdown_output=markdown_output,
+        title="py_kill_job",
+    )
 
 
 @mcp.tool(tags=["jobs", "maintenance"])
 def py_cleanup_jobs(
     remove_inline: bool = True,
     only_finished: bool = True,
-) -> dict[str, int]:
+    markdown_output: bool = True,
+) -> dict[str, int] | str:
     """
     Remove jobs from the registry and optionally delete their temporary inline script files.
 
@@ -990,11 +1007,15 @@ def py_cleanup_jobs(
                 pass
         del JOBS[jid]
         removed += 1
-    return {
-        "removed": removed,
-        "remaining": len(JOBS),
-        "inline_deleted": inline_deleted,
-    }
+    return maybe_render_markdown(
+        {
+            "removed": removed,
+            "remaining": len(JOBS),
+            "inline_deleted": inline_deleted,
+        },
+        markdown_output=markdown_output,
+        title="py_cleanup_jobs",
+    )
 
 
 @mcp.tool(tags=["benchmark", "performance"])
@@ -1009,9 +1030,10 @@ async def py_benchmark_script(
     sample_interval: float = 0.05,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
+    markdown_output: bool = True,
     async_mode: bool = False,
     job_label: str | None = None,
-) -> BenchmarkResult | dict[str, Any]:
+) -> BenchmarkResult | dict[str, Any] | str:
     """
     Execute code or script with dependency resolution (uv) while collecting basic benchmark metrics.
 
@@ -1294,7 +1316,8 @@ def py_save_script(
     dependencies: list[str] | None = None,
     requires_python: str | None = None,
     overwrite: bool = False,
-) -> dict[str, str]:
+    markdown_output: bool = True,
+) -> dict[str, str] | str:
     """
     Save a Python script under the 'scripts/' folder.
 
@@ -1319,11 +1342,15 @@ def py_save_script(
     target = scripts_dir / base
 
     if target.exists() and not overwrite:
-        return {
-            "written": "false",
-            "path": str(target),
-            "message": "File exists; set overwrite=True to replace",
-        }
+        return maybe_render_markdown(
+            {
+                "written": "false",
+                "path": str(target),
+                "message": "File exists; set overwrite=True to replace",
+            },
+            markdown_output=markdown_output,
+            title="py_save_script",
+        )
 
     head_present = source.lstrip().startswith("# /// script")
     header_lines: list[str] = []
@@ -1341,7 +1368,11 @@ def py_save_script(
 
     final_text = ("\n".join(header_lines) + source) if header_lines else source
     target.write_text(final_text, encoding="utf-8")
-    return {"written": "true", "path": str(target), "message": "Script saved"}
+    return maybe_render_markdown(
+        {"written": "true", "path": str(target), "message": "Script saved"},
+        markdown_output=markdown_output,
+        title="py_save_script",
+    )
 
 
 @mcp.tool(tags=["scripts", "run"])
@@ -1352,10 +1383,11 @@ async def py_run_saved_script(
     timeout_seconds: int = 300,
     env_vars: dict[str, str] | None = None,
     env_file: Path | None = None,
+    markdown_output: bool = True,
     async_mode: bool = False,
     job_label: str | None = None,
     auto_install_deps: bool = True,
-) -> RunScriptResult | dict[str, Any]:
+) -> RunScriptResult | dict[str, Any] | str:
     """
     Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
 
@@ -1439,14 +1471,16 @@ async def py_run_saved_script(
 
 
 @mcp.tool(tags=["scripts", "introspection"])
-def py_list_scripts() -> list[dict[str, str]]:
+def py_list_scripts(markdown_output: bool = True) -> list[dict[str, str]] | str:
     """
     List scripts in 'scripts/' and show their name, path, top docstring preview, and script header metadata.
     """
     scripts_dir = Path.cwd() / "scripts"
     out: list[dict[str, str]] = []
     if not scripts_dir.is_dir():
-        return out
+        return maybe_render_markdown(
+            out, markdown_output=markdown_output, title="py_list_scripts"
+        )
 
     for p in sorted(scripts_dir.glob("*.py")):
         text = p.read_text(encoding="utf-8", errors="replace")
@@ -1505,7 +1539,9 @@ def py_list_scripts() -> list[dict[str, str]]:
                 else "",
             }
         )
-    return out
+    return maybe_render_markdown(
+        out, markdown_output=markdown_output, title="py_list_scripts"
+    )
 
 
 # ---------------------------
@@ -1514,7 +1550,9 @@ def py_list_scripts() -> list[dict[str, str]]:
 
 
 @mcp.tool(tags=["jobs", "async"])
-def py_job_status(job_id: str, incremental: bool = True) -> dict[str, Any]:
+def py_job_status(
+    job_id: str, incremental: bool = True, markdown_output: bool = True
+) -> dict[str, Any] | str:
     """
     Get status and progress of a background job.
 
@@ -1529,11 +1567,19 @@ def py_job_status(job_id: str, incremental: bool = True) -> dict[str, Any]:
         - result: Job result if completed
         - error: Error message if failed
     """
-    return get_job_status(job_id, incremental=incremental)
+    return maybe_render_markdown(
+        get_job_status(job_id, incremental=incremental),
+        markdown_output=markdown_output,
+        title="py_job_status",
+    )
 
 
 @mcp.tool(tags=["jobs", "async"])
-def py_list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str, Any]:
+def py_list_jobs(
+    status_filter: str | None = None,
+    limit: int = 50,
+    markdown_output: bool = True,
+) -> dict[str, Any] | str:
     """
     List background jobs with optional filtering.
 
@@ -1544,11 +1590,15 @@ def py_list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str,
     Returns:
         List of jobs with metadata and total count
     """
-    return list_jobs(status_filter=status_filter, limit=limit)
+    return maybe_render_markdown(
+        list_jobs(status_filter=status_filter, limit=limit),
+        markdown_output=markdown_output,
+        title="py_list_jobs",
+    )
 
 
 @mcp.tool(tags=["jobs", "async"])
-def py_cancel_job(job_id: str) -> dict[str, Any]:
+def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] | str:
     """
     Cancel a running background job.
 
@@ -1558,7 +1608,9 @@ def py_cancel_job(job_id: str) -> dict[str, Any]:
     Returns:
         Cancellation status
     """
-    return cancel_job(job_id)
+    return maybe_render_markdown(
+        cancel_job(job_id), markdown_output=markdown_output, title="py_cancel_job"
+    )
 
 
 @mcp.tool(tags=["jobs", "async"])
@@ -1566,7 +1618,8 @@ def py_prune_jobs(
     keep_completed: bool = True,
     keep_failed: bool = True,
     max_age_hours: int = 24,
-) -> dict[str, Any]:
+    markdown_output: bool = True,
+) -> dict[str, Any] | str:
     """
     Prune old jobs from the job registry.
 
@@ -1578,10 +1631,14 @@ def py_prune_jobs(
     Returns:
         Number of jobs removed and remaining
     """
-    return prune_jobs(
-        keep_completed=keep_completed,
-        keep_failed=keep_failed,
-        max_age_hours=max_age_hours,
+    return maybe_render_markdown(
+        prune_jobs(
+            keep_completed=keep_completed,
+            keep_failed=keep_failed,
+            max_age_hours=max_age_hours,
+        ),
+        markdown_output=markdown_output,
+        title="py_prune_jobs",
     )
 
 

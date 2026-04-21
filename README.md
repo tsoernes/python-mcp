@@ -4,6 +4,7 @@ An MCP (Model Context Protocol) server for executing Python scripts and inline c
 - uv-managed transient environments
 - explicit dependency resolution
 - environment variable support (dict or .env file)
+- markdown-first MCP tool responses (`markdown_output=True` by default; set `markdown_output=False` for structured payloads)
 - **smart async pattern** - automatic timeout switching to background
 - synchronous or asynchronous (background) execution
 - optional streaming of stdout/stderr

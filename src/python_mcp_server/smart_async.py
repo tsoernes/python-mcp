@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import contextvars
+import inspect
 import json
 import logging
 import os
@@ -24,6 +25,8 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
+from .markdown import maybe_render_markdown
 
 logger = logging.getLogger(__name__)
 
@@ -376,11 +379,22 @@ def smart_async(
     import functools
 
     def _decorator(func):
+        signature = inspect.signature(func)
+
         @functools.wraps(func)
         async def _wrapper(*args, **kwargs):
-            # Extract control parameters
-            async_mode = kwargs.pop("async_mode", False)
-            job_label = kwargs.pop("job_label", None)
+            bound = signature.bind_partial(*args, **kwargs)
+            bound.apply_defaults()
+
+            # Extract control parameters while still honoring function defaults.
+            async_mode = bound.arguments.get("async_mode", False)
+            job_label = bound.arguments.get("job_label", None)
+            markdown_output = bound.arguments.get("markdown_output", False)
+
+            call_kwargs = dict(kwargs)
+            call_kwargs.pop("async_mode", None)
+            call_kwargs.pop("job_label", None)
+            call_kwargs.pop("markdown_output", None)
 
             label = job_label or func.__name__
             try:
@@ -389,14 +403,21 @@ def smart_async(
                 timeout_seconds = default_timeout
 
             if async_mode:
-                return _launch_background_job(
+                result = _launch_background_job(
                     label=label,
-                    coro_factory=lambda: func(*args, **kwargs),
+                    coro_factory=lambda: func(*args, **call_kwargs),
                 )
-            return await _run_with_time_budget(
+                return maybe_render_markdown(
+                    result, markdown_output=markdown_output, title=label
+                )
+
+            result = await _run_with_time_budget(
                 label=label,
                 timeout_seconds=timeout_seconds,
-                coro_factory=lambda: func(*args, **kwargs),
+                coro_factory=lambda: func(*args, **call_kwargs),
+            )
+            return maybe_render_markdown(
+                result, markdown_output=markdown_output, title=label
             )
 
         return _wrapper
