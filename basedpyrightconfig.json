@@ -1,0 +1,10 @@
+{
+  "exclude": [
+    "**/__pycache__",
+    "**/.venv",
+    "inline_scripts/**",
+    "**/inline_scripts/**",
+    ".repo_summarize_mcp_logs/**",
+    "**/.repo_summarize_mcp_logs/**"
+  ]
+}

@@ -1,3 +1,4 @@
+# pyright: reportAny=false, reportExplicitAny=false, reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportUnknownLambdaType=false, reportMissingParameterType=false, reportUnusedCallResult=false, reportUnusedFunction=false, reportUnusedParameter=false, reportDeprecated=false, reportOptionalMemberAccess=false, reportUnnecessaryComparison=false
 from __future__ import annotations
 
 import asyncio
@@ -6,12 +7,11 @@ import os
 import shutil
 import subprocess
 import sys
-import textwrap
 import time
 import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, List, Literal, Optional
+from typing import Any, Literal
 
 import psutil
 from dotenv import dotenv_values
@@ -20,11 +20,7 @@ from pydantic import BaseModel, Field
 
 # Import smart_async components
 from .smart_async import (
-    STATE as ASYNC_STATE,
-)
-from .smart_async import (
     cancel_job,
-    create_progress_callback,
     get_job_status,
     initialize_state,
     list_jobs,
@@ -36,6 +32,9 @@ from .markdown import maybe_render_markdown
 
 # Configure logging (file + stderr console)
 LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s %(message)s",
@@ -47,7 +46,7 @@ logging.basicConfig(
 logger = logging.getLogger("python_mcp_server")
 logger.info("Logger initialized; log file at %s", LOG_PATH)
 
-mcp = FastMCP(name="Python Script Executor")
+mcp = FastMCP(name="python_executor_mcp")
 
 
 # Simple in-memory job registry
@@ -56,16 +55,16 @@ class JobRecord:
     job_id: str
     command: list[str]
     start_time: float
-    process: subprocess.Popen
+    process: subprocess.Popen[str]
     directory: Path
     stdout_chunks: list[str] = field(default_factory=list)
     stderr_chunks: list[str] = field(default_factory=list)
     finished: bool = False
-    exit_code: Optional[int] = None
+    exit_code: int | None = None
     benchmark: dict[str, float] | None = None
-    script_path: Optional[Path] = None
+    script_path: Path | None = None
     stream: bool = False
-    finalized_elapsed: Optional[float] = None  # Frozen elapsed time set at finalization
+    finalized_elapsed: float | None = None  # Frozen elapsed time set at finalization
     is_inline_temp: bool = (
         False  # Mark if script_path points to a temp inline file for cleanup
     )
@@ -95,7 +94,7 @@ class AsyncJobStart(BaseModel):
 
 
 class RunWithDepsResult(RunScriptResult):
-    resolved_dependencies: List[str] = Field(
+    resolved_dependencies: list[str] = Field(
         description="Dependencies requested (after normalization)."
     )
     python_version_used: str = Field(
@@ -117,13 +116,37 @@ class AsyncDepsJobStart(BaseModel):
     python_version_used: str = Field(
         description="Interpreter version used (exact minor)."
     )
-    resolved_dependencies: List[str] = Field(
+    resolved_dependencies: list[str] = Field(
         description="Dependencies requested (after normalization)."
     )
 
 
 JOBS: dict[str, JobRecord] = {}
 STREAM_POLL_INTERVAL = 0.2  # seconds
+
+
+def _get_repo_scripts_dir() -> Path:
+    """Return the scripts directory anchored to this repository, not the caller cwd."""
+    return SCRIPTS_DIR
+
+
+def _has_inline_uv_script_metadata(source_text: str) -> bool:
+    """Detect a uv inline script metadata block near the top of a script."""
+    lines = source_text.splitlines()
+    idx = 0
+
+    while idx < len(lines) and not lines[idx].strip():
+        idx += 1
+
+    if idx < len(lines) and lines[idx].startswith("#!"):
+        idx += 1
+        while idx < len(lines) and not lines[idx].strip():
+            idx += 1
+
+    if idx >= len(lines):
+        return False
+
+    return lines[idx].strip() == "# /// script"
 
 
 def _ensure_python_version(version: str) -> bool:
@@ -360,6 +383,7 @@ def _exec_script_in_dir_sync(
         tmp_name = f"inline_{uuid.uuid4().hex}.py"
         script_path_local = inline_dir / tmp_name
         script_path_local.write_text(script_content)
+        source_text = script_content
         is_inline = True
     else:
         if not script_path:
@@ -372,20 +396,27 @@ def _exec_script_in_dir_sync(
         script_path_local = candidate.resolve()
         if not script_path_local.is_file():
             raise FileNotFoundError(f"Script file not found: {script_path_local}")
+        source_text = script_path_local.read_text()
         is_inline = False
+    has_inline_uv_script_metadata = use_uv and _has_inline_uv_script_metadata(source_text)
     command: list[str]
     execution_strategy = "system-python"
     if use_uv:
         command = ["uv", "run"]
-        # Infer python version from pyproject.toml if not explicitly provided.
-        if not python_version:
-            python_version = _infer_python_version_from_pyproject(workdir)
-        if python_version:
-            command += ["--python", python_version]
+        if has_inline_uv_script_metadata:
+            if python_version:
+                command += ["--python", python_version]
+            command += ["--script", str(script_path_local)]
+        else:
+            # Infer python version from pyproject.toml if not explicitly provided.
+            if not python_version:
+                python_version = _infer_python_version_from_pyproject(workdir)
+            if python_version:
+                command += ["--python", python_version]
+            command.append(str(script_path_local))
         execution_strategy = "uv-run"
     else:
-        command = ["python"]
-    command.append(str(script_path_local))
+        command = ["python", str(script_path_local)]
     if args:
         command.extend(args)
     # Build environment
@@ -492,7 +523,7 @@ def _exec_with_dependencies_sync(
     )
 
 
-@mcp.tool(tags=["execution"])
+@mcp.tool(tags={"execution"})
 @smart_async(default_timeout=20.0)
 async def py_run_script_in_dir(
     directory: Path,
@@ -519,14 +550,14 @@ async def py_run_script_in_dir(
         script_path: Absolute or relative path to script within directory. Mutually exclusive with script_content.
         script_content: Inline Python source. When provided, a temporary file is created (script_path must be None).
         args: Optional argument list appended after the script path.
-        use_uv: When True use 'uv run'; otherwise system 'python'.
-        python_version: Exact minor version (e.g. '3.12') – honored only when use_uv=True.
+        use_uv: When True use 'uv run' (or 'uv run --script' when inline uv metadata is detected); otherwise system 'python'.
+        python_version: Exact minor version (e.g. '3.13') – honored only when use_uv=True.
         timeout_seconds: Max wall time for subprocess; 0 disables timeout (unbounded).
         env_vars: Optional dictionary of environment variables to set for the script.
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
-        auto_install_deps: If True, auto-detect and install missing dependencies (default: True).
+        auto_install_deps: If True, auto-detect and install missing dependencies when no inline uv metadata is present (default: True).
 
     Returns:
         RunScriptResult if completed synchronously, or job metadata if switched to background.
@@ -541,6 +572,7 @@ async def py_run_script_in_dir(
     Notes:
         - No sandboxing; full filesystem/network access (per project requirements).
         - Temporary inline file removed after completion.
+        - Inline uv script metadata headers are detected automatically and executed with 'uv run --script'.
     """
 
     workdir = Path(directory).expanduser().resolve()
@@ -568,9 +600,11 @@ async def py_run_script_in_dir(
             raise FileNotFoundError(f"Script file not found: {script_path_local}")
         source_text = script_path_local.read_text()
 
-    # Auto-detect dependencies if enabled
+    has_inline_uv_script_metadata = use_uv and _has_inline_uv_script_metadata(source_text)
+
+    # Auto-detect dependencies if enabled and the script does not already declare uv metadata
     detected_deps: list[str] = []
-    if auto_install_deps and use_uv:
+    if auto_install_deps and use_uv and not has_inline_uv_script_metadata:
         detected_deps = _parse_imports(source_text)
         if detected_deps:
             logger.info(f"Auto-detected dependencies: {detected_deps}")
@@ -580,27 +614,37 @@ async def py_run_script_in_dir(
     if use_uv:
         command = ["uv", "run"]
 
-        # Use --isolated to ignore pyproject.toml when running standalone scripts with auto-deps
-        if detected_deps:
-            command.append("--isolated")
+        if has_inline_uv_script_metadata:
+            logger.info(
+                "Detected inline uv script metadata; running with uv --script: %s",
+                script_path_local,
+            )
+            if python_version:
+                _ensure_python_version(python_version)
+                command += ["--python", python_version]
+            command += ["--script", str(script_path_local)]
+        else:
+            # Use --isolated to ignore pyproject.toml when running standalone scripts with auto-deps
+            if detected_deps:
+                command.append("--isolated")
 
-        if not python_version:
-            python_version = _infer_python_version_from_pyproject(workdir)
+            if not python_version:
+                python_version = _infer_python_version_from_pyproject(workdir)
 
-        # If we have a version requirement, ensure it's installed
-        if python_version:
-            _ensure_python_version(python_version)
-            command += ["--python", python_version]
+            # If we have a version requirement, ensure it's installed
+            if python_version:
+                _ensure_python_version(python_version)
+                command += ["--python", python_version]
 
-        # Add auto-detected dependencies
-        for dep in detected_deps:
-            command += ["--with", dep]
+            # Add auto-detected dependencies
+            for dep in detected_deps:
+                command += ["--with", dep]
+
+            command.append(str(script_path_local))
 
         execution_strategy = "uv-run"
     else:
-        command = ["python"]
-
-    command.append(str(script_path_local))
+        command = ["python", str(script_path_local)]
     if args:
         command.extend(args)
 
@@ -626,26 +670,31 @@ async def py_run_script_in_dir(
 
         # If we have a job context (background job), read line by line for streaming
         if current_job_id.get() and output_callback:
+            stdout_stream = proc.stdout
+            stderr_stream = proc.stderr
+            if stdout_stream is None or stderr_stream is None:
+                raise RuntimeError("Subprocess streams were not initialized")
+
             stdout_lines = []
             stderr_lines = []
 
-            async def read_stdout():
+            async def read_stdout() -> None:
                 while True:
-                    line = await proc.stdout.readline()
+                    line = await stdout_stream.readline()
                     if not line:
                         break
                     text = line.decode("utf-8")
                     stdout_lines.append(text)
-                    output_callback(stdout=text, stderr="")
+                    output_callback(text, "")
 
-            async def read_stderr():
+            async def read_stderr() -> None:
                 while True:
-                    line = await proc.stderr.readline()
+                    line = await stderr_stream.readline()
                     if not line:
                         break
                     text = line.decode("utf-8")
                     stderr_lines.append(text)
-                    output_callback(stdout="", stderr=text)
+                    output_callback("", text)
 
             try:
                 # Read both streams concurrently with timeout
@@ -679,7 +728,7 @@ async def py_run_script_in_dir(
                     execution_strategy=execution_strategy,
                     elapsed_seconds=time.time() - start,
                 )
-                return result.model_dump()
+                return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_in_dir")
     finally:
         if script_content:
             # Clean up temp script file
@@ -696,15 +745,15 @@ async def py_run_script_in_dir(
         execution_strategy=execution_strategy,
         elapsed_seconds=time.time() - start,
     )
-    return result.model_dump()
+    return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_in_dir")
 
 
-@mcp.tool(tags=["execution", "dependencies"])
+@mcp.tool(tags={"execution", "dependencies"})
 @smart_async(default_timeout=20.0)
 async def py_run_script_with_dependencies(
     script_content: str | None = None,
     script_path: Path | None = None,
-    python_version: str = "3.12",
+    python_version: str = "3.13",
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
@@ -724,7 +773,7 @@ async def py_run_script_with_dependencies(
     Parameters:
         script_content: Inline code (mutually exclusive with script_path).
         script_path: Existing script file path.
-        python_version: Exact minor version (e.g. '3.12').
+        python_version: Exact minor version (e.g. '3.13').
         dependencies: List[str] | None - explicit package specifiers (PEP 440). May be supplemented automatically.
         args: Optional CLI arguments.
         timeout_seconds: 0 disables timeout.
@@ -836,10 +885,10 @@ async def py_run_script_with_dependencies(
         resolved_dependencies=resolved_dependencies,
         python_version_used=python_version,
     )
-    return result.model_dump()
+    return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_with_dependencies")
 
 
-@mcp.tool(tags=["jobs", "introspection"])
+@mcp.tool(tags={"jobs", "introspection"})
 def py_list_running_jobs(markdown_output: bool = True) -> list[dict[str, str]] | str:
     """
     List currently registered jobs (running or finished but not yet cleaned).
@@ -876,7 +925,7 @@ def py_list_running_jobs(markdown_output: bool = True) -> list[dict[str, str]] |
     )
 
 
-@mcp.tool(tags=["jobs", "introspection"])
+@mcp.tool(tags={"jobs", "introspection"})
 def py_get_job_output(
     job_id: str, markdown_output: bool = True
 ) -> dict[str, str] | str:
@@ -921,7 +970,7 @@ def py_get_job_output(
     )
 
 
-@mcp.tool(tags=["jobs", "control"])
+@mcp.tool(tags={"jobs", "control"})
 def py_kill_job(job_id: str, markdown_output: bool = True) -> dict[str, str] | str:
     """
     Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
@@ -964,7 +1013,7 @@ def py_kill_job(job_id: str, markdown_output: bool = True) -> dict[str, str] | s
     )
 
 
-@mcp.tool(tags=["jobs", "maintenance"])
+@mcp.tool(tags={"jobs", "maintenance"})
 def py_cleanup_jobs(
     remove_inline: bool = True,
     only_finished: bool = True,
@@ -1018,12 +1067,12 @@ def py_cleanup_jobs(
     )
 
 
-@mcp.tool(tags=["benchmark", "performance"])
+@mcp.tool(tags={"benchmark", "performance"})
 @smart_async(default_timeout=20.0)
 async def py_benchmark_script(
     script_content: str | None = None,
     script_path: Path | None = None,
-    python_version: str = "3.12",
+    python_version: str = "3.13",
     dependencies: list[str] | None = None,
     args: list[str] | None = None,
     timeout_seconds: int = 300,
@@ -1142,7 +1191,7 @@ async def py_benchmark_script(
         cpu_time_seconds=cpu,
         peak_rss_mb=peak_rss / (1024 * 1024),
     )
-    return result.model_dump()
+    return maybe_render_markdown(result, markdown_output=markdown_output, title="py_benchmark_script")
 
 
 async def _poll_stream(job_id: str) -> None:
@@ -1309,7 +1358,7 @@ def main() -> None:
         raise
 
 
-@mcp.tool(tags=["scripts", "save"])
+@mcp.tool(tags={"scripts", "save"})
 def py_save_script(
     script_name: str,
     source: str,
@@ -1319,7 +1368,7 @@ def py_save_script(
     markdown_output: bool = True,
 ) -> dict[str, str] | str:
     """
-    Save a Python script under the 'scripts/' folder.
+    Save a Python script under this repository's 'scripts/' folder.
 
     Guidance:
     - Prefer saving useful snippets and reusable automation scripts here.
@@ -1329,10 +1378,10 @@ def py_save_script(
     Header format example:
         # /// script
         # dependencies = ["requests<3", "rich"]
-        # requires-python = ">=3.12"
+        # requires-python = ">=3.13"
         # ///
     """
-    scripts_dir = Path.cwd() / "scripts"
+    scripts_dir = _get_repo_scripts_dir()
     scripts_dir.mkdir(parents=True, exist_ok=True)
 
     # Prevent path traversal; ensure .py suffix.
@@ -1375,7 +1424,7 @@ def py_save_script(
     )
 
 
-@mcp.tool(tags=["scripts", "run"])
+@mcp.tool(tags={"scripts", "run"})
 @smart_async(default_timeout=20.0)
 async def py_run_saved_script(
     script_name: str,
@@ -1389,7 +1438,7 @@ async def py_run_saved_script(
     auto_install_deps: bool = True,
 ) -> RunScriptResult | dict[str, Any] | str:
     """
-    Run a saved script from the 'scripts/' folder via 'uv run --script', which respects the TOML script header.
+    Run a saved script from this repository's 'scripts/' folder via 'uv run --script', which respects the TOML script header.
 
     Uses smart async: completes synchronously if under 20s, switches to background if longer.
 
@@ -1403,35 +1452,42 @@ async def py_run_saved_script(
         job_label: Optional label for job tracking.
         auto_install_deps: If True, auto-detect and install missing dependencies (default: True).
     """
-    scripts_dir = Path.cwd() / "scripts"
+    scripts_dir = _get_repo_scripts_dir()
     name = Path(script_name).name
     spath = scripts_dir / (name if name.endswith(".py") else f"{name}.py")
     if not spath.is_file():
         raise FileNotFoundError(f"Script not found: {spath}")
 
-    # Auto-detect dependencies if enabled and no header exists
+    source_text = spath.read_text()
+    has_inline_uv_script_metadata = _has_inline_uv_script_metadata(source_text)
+
+    # Auto-detect dependencies if enabled and the script does not already declare uv metadata
     detected_deps: list[str] = []
-    if auto_install_deps:
-        source_text = spath.read_text()
-        # Check if script has TOML header
-        if not source_text.startswith("# /// script"):
-            detected_deps = _parse_imports(source_text)
-            if detected_deps:
-                logger.info(
-                    f"Auto-detected dependencies for {script_name}: {detected_deps}"
-                )
+    if auto_install_deps and not has_inline_uv_script_metadata:
+        detected_deps = _parse_imports(source_text)
+        if detected_deps:
+            logger.info(
+                f"Auto-detected dependencies for {script_name}: {detected_deps}"
+            )
 
     command: list[str] = ["uv", "run"]
 
-    # If auto-detected deps, use isolated mode to avoid pyproject.toml conflicts
-    if detected_deps:
-        command.append("--isolated")
+    if has_inline_uv_script_metadata:
+        logger.info(
+            "Detected inline uv script metadata for saved script; running with uv --script: %s",
+            spath,
+        )
+        command += ["--script", str(spath)]
+    else:
+        # If auto-detected deps, use isolated mode to avoid pyproject.toml conflicts
+        if detected_deps:
+            command.append("--isolated")
 
-    # Add auto-detected dependencies
-    for dep in detected_deps:
-        command += ["--with", dep]
+        # Add auto-detected dependencies
+        for dep in detected_deps:
+            command += ["--with", dep]
 
-    command += ["--script", str(spath)]
+        command.append(str(spath))
     if args:
         command.extend(args)
 
@@ -1467,15 +1523,15 @@ async def py_run_saved_script(
         execution_strategy="uv-run",
         elapsed_seconds=time.time() - start,
     )
-    return result.model_dump()
+    return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_saved_script")
 
 
-@mcp.tool(tags=["scripts", "introspection"])
+@mcp.tool(tags={"scripts", "introspection"})
 def py_list_scripts(markdown_output: bool = True) -> list[dict[str, str]] | str:
     """
-    List scripts in 'scripts/' and show their name, path, top docstring preview, and script header metadata.
+    List scripts in this repository's 'scripts/' directory and show their name, path, top docstring preview, and script header metadata.
     """
-    scripts_dir = Path.cwd() / "scripts"
+    scripts_dir = _get_repo_scripts_dir()
     out: list[dict[str, str]] = []
     if not scripts_dir.is_dir():
         return maybe_render_markdown(
@@ -1549,7 +1605,7 @@ def py_list_scripts(markdown_output: bool = True) -> list[dict[str, str]] | str:
 # ---------------------------
 
 
-@mcp.tool(tags=["jobs", "async"])
+@mcp.tool(tags={"jobs", "async"})
 def py_job_status(
     job_id: str, incremental: bool = True, markdown_output: bool = True
 ) -> dict[str, Any] | str:
@@ -1574,7 +1630,7 @@ def py_job_status(
     )
 
 
-@mcp.tool(tags=["jobs", "async"])
+@mcp.tool(tags={"jobs", "async"})
 def py_list_jobs(
     status_filter: str | None = None,
     limit: int = 50,
@@ -1597,7 +1653,7 @@ def py_list_jobs(
     )
 
 
-@mcp.tool(tags=["jobs", "async"])
+@mcp.tool(tags={"jobs", "async"})
 def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] | str:
     """
     Cancel a running background job.
@@ -1613,7 +1669,7 @@ def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] |
     )
 
 
-@mcp.tool(tags=["jobs", "async"])
+@mcp.tool(tags={"jobs", "async"})
 def py_prune_jobs(
     keep_completed: bool = True,
     keep_failed: bool = True,

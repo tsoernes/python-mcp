@@ -1,9 +1,13 @@
+# pyright: reportAny=false, reportExplicitAny=false, reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnusedCallResult=false, reportUnusedImport=false, reportUnusedVariable=false, reportUnusedParameter=false, reportPrivateUsage=false, reportDeprecated=false, reportOptionalMemberAccess=false, reportUnnecessaryIsInstance=false, reportUnreachable=false, reportImplicitStringConcatenation=false, reportAssignmentType=false, reportMissingImports=false, reportMissingTypeArgument=false, reportMissingModuleSource=false, reportArgumentType=false, reportUnannotatedClassAttribute=false
 from __future__ import annotations
 
 import json
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any
+
+
+_SCRIPT_RESULT_KEYS = {"stdout", "stderr", "exit_code", "execution_strategy", "elapsed_seconds"}
 
 
 def _json_ready(value: Any) -> Any:
@@ -21,17 +25,100 @@ def _json_ready(value: Any) -> Any:
     return value
 
 
+def _fence(text: str, language: str = "text") -> str:
+    """Return text in a Markdown fence, extending the fence if text contains backticks."""
+    fence = "````" if "```" in text else "```"
+    return f"{fence}{language}\n{text}\n{fence}"
+
+
+def _looks_like_script_result(data: dict[str, Any]) -> bool:
+    return (
+        _SCRIPT_RESULT_KEYS.issubset(data.keys())
+        and isinstance(data.get("stdout"), str)
+        and isinstance(data.get("stderr"), str)
+    )
+
+
+def _render_script_result(data: dict[str, Any], heading_level: int = 2) -> str:
+    """Render Python execution results with readable stdout/stderr sections."""
+    h = "#" * heading_level
+    lines = [
+        f"- exit_code: `{data.get('exit_code')}`",
+        f"- execution_strategy: `{data.get('execution_strategy')}`",
+        f"- elapsed_seconds: `{data.get('elapsed_seconds')}`",
+    ]
+
+    if "python_version_used" in data:
+        lines.append(f"- python_version_used: `{data.get('python_version_used')}`")
+    if "resolved_dependencies" in data:
+        deps = data.get("resolved_dependencies") or []
+        if deps:
+            lines.append("- resolved_dependencies: " + ", ".join(f"`{dep}`" for dep in deps))
+        else:
+            lines.append("- resolved_dependencies: none")
+
+    stdout = data.get("stdout", "")
+    stderr = data.get("stderr", "")
+
+    sections = [f"{h} Summary", "\n".join(lines), f"{h} stdout", _fence(stdout or "", "text")]
+    if stderr:
+        sections.extend([f"{h} stderr", _fence(stderr, "text")])
+    return "\n\n".join(sections)
+
+
+def _looks_like_job_status(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("job"), dict)
+
+
+def _render_job_status(data: dict[str, Any]) -> str:
+    """Render py_job_status output naturally, including nested script results."""
+    job = data.get("job")
+    if not isinstance(job, dict):
+        return _fence(json.dumps(data, indent=2, ensure_ascii=False, default=str), "json")
+
+    lines = [
+        f"- id: `{job.get('id')}`",
+        f"- status: `{job.get('status')}`",
+    ]
+    if job.get("label"):
+        lines.append(f"- label: `{job.get('label')}`")
+    if job.get("error"):
+        lines.append(f"- error: `{job.get('error')}`")
+    if job.get("progress"):
+        lines.append(f"- progress: `{job.get('progress')}`")
+
+    sections = ["## Job", "\n".join(lines)]
+    result = job.get("result")
+    if isinstance(result, dict) and _looks_like_script_result(result):
+        sections.extend(["## Result", _render_script_result(result, heading_level=3)])
+    elif result is not None:
+        sections.extend(["## Result", _fence(json.dumps(result, indent=2, ensure_ascii=False, default=str), "json")])
+
+    if data.get("incremental"):
+        sections.append("_Incremental output returned._")
+    return "\n\n".join(sections)
+
+
 def render_markdown_response(value: Any, title: str | None = None) -> str:
-    """Render a tool response as markdown, defaulting to fenced JSON."""
+    """Render a tool response as markdown.
+
+    Script execution results are rendered with natural stdout/stderr sections so
+    large textual output stays readable instead of becoming JSON-escaped.
+    Other structured responses still use fenced JSON.
+    """
     data = _json_ready(value)
 
     if isinstance(data, str):
         if "\n" in data:
-            body = f"```text\n{data}\n```"
+            body = _fence(data, "text")
         else:
             body = data
+    elif isinstance(data, dict) and _looks_like_script_result(data):
+        body = _render_script_result(data)
+    elif isinstance(data, dict) and _looks_like_job_status(data):
+        body = _render_job_status(data)
     else:
-        body = f"```json\n{json.dumps(data, indent=2, ensure_ascii=False, default=str)}\n```"
+        body = _fence(json.dumps(data, indent=2, ensure_ascii=False, default=str), "json")
 
     if title:
         return f"# {title}\n\n{body}"

@@ -1,3 +1,4 @@
+# pyright: reportAny=false, reportExplicitAny=false, reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownParameterType=false, reportUnknownLambdaType=false, reportMissingParameterType=false, reportUnusedCallResult=false, reportUnusedParameter=false
 """
 Smart async decorator for MCP tools with intelligent timeout handling.
 
@@ -20,8 +21,8 @@ import json
 import logging
 import os
 import uuid
-from collections.abc import Awaitable, Callable
-from dataclasses import asdict, dataclass, field
+from collections.abc import Callable, Coroutine
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -48,7 +49,7 @@ class JobMeta:
     completed_at: str | None = None
     error: str | None = None
     result: Any | None = None
-    task: asyncio.Task | None = None
+    task: asyncio.Task[Any] | None = None
     progress: dict[str, Any] | None = (
         None  # {"current": int, "total": int, "message": str}
     )
@@ -137,6 +138,11 @@ def _load_jobs() -> None:
         logger.warning(f"Failed to load jobs: {e}")
 
 
+def _is_live_local_job(job: JobMeta | None) -> bool:
+    """Return True when a job is still backed by a live in-process asyncio task."""
+    return job is not None and job.task is not None and not job.task.done()
+
+
 def _refresh_jobs_from_disk() -> None:
     """
     Refresh jobs from disk to sync with other processes.
@@ -154,8 +160,27 @@ def _refresh_jobs_from_disk() -> None:
         data = json.loads(jobs_path.read_text())
         for job_data in data:
             job_id = job_data["id"]
-            # Always update from disk to get latest state (handles status changes, completions, etc.)
-            STATE.jobs[job_id] = JobMeta(**job_data)
+            existing = STATE.jobs.get(job_id)
+
+            # Preserve in-process jobs that are still running. Replacing them would
+            # detach the live asyncio task from STATE.jobs and break progress/status updates.
+            if _is_live_local_job(existing):
+                continue
+
+            if existing is None:
+                STATE.jobs[job_id] = JobMeta(**job_data)
+                continue
+
+            existing.label = job_data.get("label", existing.label)
+            existing.status = job_data.get("status", existing.status)
+            existing.created_at = job_data.get("created_at", existing.created_at)
+            existing.started_at = job_data.get("started_at")
+            existing.completed_at = job_data.get("completed_at")
+            existing.error = job_data.get("error")
+            existing.result = job_data.get("result")
+            existing.progress = job_data.get("progress")
+            existing.partial_stdout = job_data.get("partial_stdout", "")
+            existing.partial_stderr = job_data.get("partial_stderr", "")
         logger.debug(f"Refreshed {len(data)} jobs from disk")
     except Exception as e:
         logger.warning(f"Failed to refresh jobs from disk: {e}")
@@ -195,7 +220,7 @@ def _job_public(job: JobMeta, include_partial: bool = True) -> dict[str, Any]:
     Returns:
         Public job representation
     """
-    response = {
+    response: dict[str, Any] = {
         "id": job.id,
         "label": job.label,
         "status": job.status,
@@ -216,7 +241,7 @@ def _job_public(job: JobMeta, include_partial: bool = True) -> dict[str, Any]:
 
 
 def _launch_background_job(
-    label: str, coro_factory: Callable[[], Awaitable[Any]]
+    label: str, coro_factory: Callable[[], Coroutine[Any, Any, Any]]
 ) -> dict[str, Any]:
     """
     Launch a background job and return job_id immediately.
@@ -275,7 +300,7 @@ def _launch_background_job(
 
 
 async def _run_with_time_budget(
-    label: str, timeout_seconds: float, coro_factory: Callable[[], Awaitable[Any]]
+    label: str, timeout_seconds: float, coro_factory: Callable[[], Coroutine[Any, Any, Any]]
 ) -> Any:
     """
     Run a coroutine with a time budget. If it exceeds the budget, launch as background job.
@@ -457,7 +482,7 @@ def get_job_status(job_id: str, incremental: bool = False) -> dict[str, Any]:
 
         response["job"]["new_stdout"] = new_stdout
         response["job"]["new_stderr"] = new_stderr
-        response["incremental"] = True
+        response = {**response, "incremental": True}
 
     return response
 

@@ -1,4 +1,4 @@
-# Python Script Executor MCP Server
+# python_executor_mcp (Python Script Executor)
 
 An MCP (Model Context Protocol) server for executing Python scripts and inline code with:
 - uv-managed transient environments
@@ -54,7 +54,7 @@ uv sync
 StdIO transport is explicitly selected (default for MCP console integrations):
 
 ```
-uv run python-mcp-server
+uv run python-executor-mcp
 ```
 
 Or with the module:
@@ -63,12 +63,18 @@ Or with the module:
 uv run python -m python_mcp_server
 ```
 
+Compatibility alias:
+
+```
+uv run python-mcp-server
+```
+
 If invoking from an editor (e.g., Zed) and needing a fixed working directory, create a launcher script:
 
 ```
 #!/usr/bin/env sh
 cd /home/torstein.sornes/code/python-mcp
-exec uv run python-mcp-server
+exec uv run python-executor-mcp
 ```
 
 ---

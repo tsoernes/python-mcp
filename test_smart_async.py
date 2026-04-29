@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportAny=false, reportExplicitAny=false, reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnusedParameter=false, reportUnusedVariable=false
 """
 Test suite for smart async decorator and job management.
 
@@ -14,13 +15,14 @@ This test suite validates:
 
 import asyncio
 import sys
+import tempfile
 from pathlib import Path
+from typing import Any
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from python_mcp_server.smart_async import (
-    STATE,
     cancel_job,
     create_progress_callback,
     get_job_status,
@@ -37,7 +39,7 @@ async def fast_tool(
     duration: float = 0.5,
     async_mode: bool = False,
     job_label: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Fast tool that completes within timeout."""
     await asyncio.sleep(duration)
     return {"status": "completed", "duration": duration}
@@ -48,7 +50,7 @@ async def slow_tool(
     duration: float = 5.0,
     async_mode: bool = False,
     job_label: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Slow tool that exceeds timeout."""
     await asyncio.sleep(duration)
     return {"status": "completed", "duration": duration}
@@ -59,7 +61,7 @@ async def progress_tool(
     items: int = 10,
     async_mode: bool = False,
     job_label: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Tool with progress tracking."""
     progress_callback = create_progress_callback()
 
@@ -76,7 +78,7 @@ async def progress_tool(
 async def failing_tool(
     async_mode: bool = False,
     job_label: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Tool that raises an exception."""
     await asyncio.sleep(0.1)
     raise ValueError("Intentional test failure")
@@ -316,8 +318,9 @@ async def main():
     print("SMART ASYNC TEST SUITE")
     print("=" * 70 + "\n")
 
-    # Initialize state
-    initialize_state()
+    # Initialize isolated state for this test run
+    temp_dir = tempfile.TemporaryDirectory()
+    initialize_state(Path(temp_dir.name))
 
     try:
         await test_fast_sync_completion()
@@ -339,6 +342,8 @@ async def main():
 
         traceback.print_exc()
         return 1
+    finally:
+        temp_dir.cleanup()
 
 
 if __name__ == "__main__":
