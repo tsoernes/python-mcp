@@ -99,6 +99,28 @@ def _render_job_status(data: dict[str, Any]) -> str:
     return "\n\n".join(sections)
 
 
+def _looks_like_script_view(data: dict[str, Any]) -> bool:
+    return isinstance(data.get("source"), str) and isinstance(data.get("path"), str)
+
+
+def _render_script_view(data: dict[str, Any]) -> str:
+    lines = [
+        f"- name: `{data.get('name')}`",
+        f"- kind: `{data.get('kind')}`",
+        f"- path: `{data.get('path')}`",
+    ]
+    if data.get("docstring"):
+        lines.append(f"- docstring: {data.get('docstring')}")
+    if data.get("header"):
+        lines.append(f"- header: `{data.get('header')}`")
+
+    sections = ["## Script", "\n".join(lines), "## Source", _fence(str(data.get("source", "")), "python")]
+    metadata = data.get("metadata")
+    if metadata:
+        sections.extend(["## Metadata", _fence(json.dumps(metadata, indent=2, ensure_ascii=False, default=str), "json")])
+    return "\n\n".join(sections)
+
+
 def render_markdown_response(value: Any, title: str | None = None) -> str:
     """Render a tool response as markdown.
 
@@ -117,6 +139,8 @@ def render_markdown_response(value: Any, title: str | None = None) -> str:
         body = _render_script_result(data)
     elif isinstance(data, dict) and _looks_like_job_status(data):
         body = _render_job_status(data)
+    elif isinstance(data, dict) and _looks_like_script_view(data):
+        body = _render_script_view(data)
     else:
         body = _fence(json.dumps(data, indent=2, ensure_ascii=False, default=str), "json")
 

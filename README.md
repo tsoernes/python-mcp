@@ -89,7 +89,7 @@ Execute a Python script (existing file or inline content) inside a target direct
 Parameters:
 - directory: Path (must exist)
 - script_path: Path | None (absolute or relative to directory; mutually exclusive with script_content)
-- script_content: str | None (inline source; mutually exclusive with script_path)
+- script_content: str | None (inline source; mutually exclusive with script_path; autosaved under this repo's `autosaved_scripts/` with a JSON params sidecar)
 - args: list[str] | None
 - use_uv: bool (True uses `uv run`)
 - python_version: str | None (exact minor; honored only if use_uv=True)
@@ -112,7 +112,7 @@ Returns (RunScriptResult):
 Execute inline code or an existing script in a transient uv environment with explicit dependencies.
 
 Parameters:
-- script_content OR script_path (mutually exclusive)
+- script_content OR script_path (mutually exclusive; inline `script_content` is autosaved under this repo's `autosaved_scripts/` with a JSON params sidecar)
 - python_version: str (exact minor)
 - dependencies: list[str] | None (PEP 440 specifiers)
 - args: list[str] | None
@@ -133,11 +133,15 @@ Returns (RunWithDepsResult):
 }
 ```
 
+#### saved script introspection
+- `py_list_scripts(include_autosaved=False)`: lists manually saved scripts from this repo's `scripts/`; set `include_autosaved=True` to also show autosaved inline scripts.
+- `py_view_script(script_name, autosaved=False)`: views a manual script by default; set `autosaved=True` to view autosaved inline scripts and their metadata sidecars.
+
 #### benchmark_script (tags: benchmark, performance, sync)
 Execute code or script with dependency resolution while collecting metrics.
 
 Parameters:
-- script_content OR script_path
+- script_content OR script_path (inline `script_content` is autosaved under this repo's `autosaved_scripts/` with a JSON params sidecar)
 - python_version: str
 - dependencies: list[str] | None
 - args: list[str] | None
@@ -610,7 +614,7 @@ Future enhancements (planned):
 - Cold uv runs with many dependencies can add latency due to resolution; consider caching future ephemeral environments.
 - STREAM_POLL_INTERVAL currently 0.2s (balance between responsiveness and CPU overhead).
 - psutil sampling interval configurable (sample_interval in benchmark_script).
-- Inline scripts create transient files; sync mode cleans them immediately, async mode retains until finalization.
+- Inline `script_content` is persisted in this repository's `autosaved_scripts/` directory with a `.json` sidecar containing the MCP tool parameters; the directory is ignored by git.
 
 ---
 

@@ -1,5 +1,6 @@
-# Ignore generated inline temp scripts
+# Ignore generated inline/autosaved scripts
 inline_scripts/
+autosaved_scripts/
 
 # Ensure scripts directory remains tracked (explicit unignore in case of broad ignores elsewhere)
 !scripts/

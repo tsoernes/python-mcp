@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import logging
 import os
 import shutil
@@ -10,6 +12,7 @@ import sys
 import time
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
 
@@ -34,6 +37,7 @@ from .markdown import maybe_render_markdown
 LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
+AUTOSAVED_SCRIPTS_DIR = REPO_ROOT / "autosaved_scripts"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -128,6 +132,58 @@ STREAM_POLL_INTERVAL = 0.2  # seconds
 def _get_repo_scripts_dir() -> Path:
     """Return the scripts directory anchored to this repository, not the caller cwd."""
     return SCRIPTS_DIR
+
+
+def _get_repo_autosaved_scripts_dir() -> Path:
+    """Return the repo-anchored directory for autosaved inline scripts."""
+    return AUTOSAVED_SCRIPTS_DIR
+
+
+def _json_safe(value: Any) -> Any:
+    """Convert tool params to JSON-safe metadata values."""
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple, set)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value
+    return str(value)
+
+
+def _autosave_inline_script(
+    tool_name: str,
+    source_text: str,
+    params: dict[str, Any],
+) -> Path:
+    """Persist inline script_content and MCP tool params under autosaved_scripts/."""
+    autosave_dir = _get_repo_autosaved_scripts_dir()
+    autosave_dir.mkdir(parents=True, exist_ok=True)
+
+    now = datetime.now(timezone.utc)
+    timestamp = now.strftime("%Y%m%dT%H%M%S%fZ")
+    safe_tool = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in tool_name)
+    stem = f"{timestamp}_{safe_tool}_{uuid.uuid4().hex[:8]}"
+    script_path = autosave_dir / f"{stem}.py"
+    metadata_path = autosave_dir / f"{stem}.json"
+
+    script_path.write_text(source_text, encoding="utf-8")
+    source_bytes = source_text.encode("utf-8")
+    metadata = {
+        "name": script_path.name,
+        "path": str(script_path),
+        "metadata_path": str(metadata_path),
+        "created_at": now.isoformat(),
+        "tool": tool_name,
+        "params": _json_safe({k: v for k, v in params.items() if k != "script_content"}),
+        "script_content_saved_to": str(script_path),
+        "source_sha256": hashlib.sha256(source_bytes).hexdigest(),
+        "source_bytes": len(source_bytes),
+    }
+    metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False), encoding="utf-8")
+    logger.info("Autosaved inline script for %s at %s", tool_name, script_path)
+    return script_path
 
 
 def _has_inline_uv_script_metadata(source_text: str) -> bool:
@@ -378,13 +434,23 @@ def _exec_script_in_dir_sync(
     if not workdir.is_dir():
         raise FileNotFoundError(f"Directory not found: {workdir}")
     if script_content:
-        inline_dir = workdir / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = inline_dir / tmp_name
-        script_path_local.write_text(script_content)
         source_text = script_content
-        is_inline = True
+        script_path_local = _autosave_inline_script(
+            "_exec_script_in_dir_sync",
+            source_text,
+            {
+                "directory": workdir,
+                "script_path": script_path,
+                "script_content": script_content,
+                "args": args,
+                "use_uv": use_uv,
+                "python_version": python_version,
+                "timeout_seconds": timeout_seconds,
+                "env_vars": env_vars,
+                "env_file": env_file,
+            },
+        )
+        is_inline = False
     else:
         if not script_path:
             raise ValueError(
@@ -473,16 +539,34 @@ def _exec_with_dependencies_sync(
         spath = Path(script_path).expanduser().resolve()
         if not spath.is_file():
             raise FileNotFoundError(f"Script not found: {spath}")
+        source_text = spath.read_text()
         is_inline = False
     else:
-        spath = Path(f"inline_dep_{uuid.uuid4().hex}.py").resolve()
-        spath.write_text(script_content or "")
-        is_inline = True
+        source_text = script_content or ""
+        spath = _autosave_inline_script(
+            "_exec_with_dependencies_sync",
+            source_text,
+            {
+                "script_content": script_content,
+                "script_path": script_path,
+                "python_version": python_version,
+                "dependencies": dependencies,
+                "args": args,
+                "timeout_seconds": timeout_seconds,
+                "env_vars": env_vars,
+                "env_file": env_file,
+            },
+        )
+        is_inline = False
+    has_inline_uv_script_metadata = _has_inline_uv_script_metadata(source_text)
     command: list[str] = ["uv", "run", "--python", python_version]
     resolved_dependencies = dependencies[:] if dependencies else []
     for dep in resolved_dependencies:
         command += ["--with", dep]
-    command.append(str(spath))
+    if has_inline_uv_script_metadata:
+        command += ["--script", str(spath)]
+    else:
+        command.append(str(spath))
     if args:
         command.extend(args)
 
@@ -548,7 +632,7 @@ async def py_run_script_in_dir(
     Parameters:
         directory: Base directory; must exist.
         script_path: Absolute or relative path to script within directory. Mutually exclusive with script_content.
-        script_content: Inline Python source. When provided, a temporary file is created (script_path must be None).
+        script_content: Inline Python source. When provided, it is autosaved under this repo's autosaved_scripts/ directory (script_path must be None).
         args: Optional argument list appended after the script path.
         use_uv: When True use 'uv run' (or 'uv run --script' when inline uv metadata is detected); otherwise system 'python'.
         python_version: Exact minor version (e.g. '3.13') – honored only when use_uv=True.
@@ -571,7 +655,7 @@ async def py_run_script_in_dir(
 
     Notes:
         - No sandboxing; full filesystem/network access (per project requirements).
-        - Temporary inline file removed after completion.
+        - Inline script_content is autosaved persistently under this repo's autosaved_scripts/ directory with a JSON params sidecar.
         - Inline uv script metadata headers are detected automatically and executed with 'uv run --script'.
     """
 
@@ -580,12 +664,26 @@ async def py_run_script_in_dir(
         raise FileNotFoundError(f"Directory not found: {workdir}")
 
     if script_content:
-        inline_dir = workdir / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        tmp_name = f"inline_{uuid.uuid4().hex}.py"
-        script_path_local = inline_dir / tmp_name
-        script_path_local.write_text(script_content)
         source_text = script_content
+        script_path_local = _autosave_inline_script(
+            "py_run_script_in_dir",
+            source_text,
+            {
+                "directory": workdir,
+                "script_path": script_path,
+                "script_content": script_content,
+                "args": args,
+                "use_uv": use_uv,
+                "python_version": python_version,
+                "timeout_seconds": timeout_seconds,
+                "env_vars": env_vars,
+                "env_file": env_file,
+                "markdown_output": markdown_output,
+                "async_mode": async_mode,
+                "job_label": job_label,
+                "auto_install_deps": auto_install_deps,
+            },
+        )
     else:
         if not script_path:
             raise ValueError(
@@ -730,13 +828,7 @@ async def py_run_script_in_dir(
                 )
                 return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_in_dir")
     finally:
-        if script_content:
-            # Clean up temp script file
-            if script_path_local.exists():
-                try:
-                    script_path_local.unlink()
-                except Exception:
-                    pass
+        pass
 
     result = RunScriptResult(
         stdout=stdout,
@@ -796,6 +888,8 @@ async def py_run_script_with_dependencies(
         - Uses 'uv run --with <dep>' for each dependency.
         - Auto-import parsing is heuristic: it treats 'from pkg.sub import X' and 'import pkg.sub' both as 'pkg'.
         - Built-in / stdlib modules are not filtered exhaustively; a small skip list is applied.
+        - Inline script_content is autosaved persistently under this repo's autosaved_scripts/ directory with a JSON params sidecar.
+        - Inline uv script metadata headers are detected automatically and executed with 'uv run --script'.
         - Future: environment caching keyed by hash(deps+python_version).
     """
 
@@ -810,16 +904,34 @@ async def py_run_script_with_dependencies(
             raise FileNotFoundError(f"Script not found: {spath}")
         source_text = spath.read_text()
     else:
-        inline_dir = Path.cwd() / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        spath = (inline_dir / f"inline_dep_{uuid.uuid4().hex}.py").resolve()
         source_text = script_content or ""
-        spath.write_text(source_text)
+        spath = _autosave_inline_script(
+            "py_run_script_with_dependencies",
+            source_text,
+            {
+                "script_content": script_content,
+                "script_path": script_path,
+                "python_version": python_version,
+                "dependencies": dependencies,
+                "args": args,
+                "timeout_seconds": timeout_seconds,
+                "auto_parse_imports": auto_parse_imports,
+                "env_vars": env_vars,
+                "env_file": env_file,
+                "markdown_output": markdown_output,
+                "async_mode": async_mode,
+                "job_label": job_label,
+                "ignore_project_requirements": ignore_project_requirements,
+            },
+        )
 
-    # Build initial dependency list
+    has_inline_uv_script_metadata = _has_inline_uv_script_metadata(source_text)
+
+    # Build initial dependency list. Inline uv script metadata is authoritative, so
+    # avoid heuristic import parsing that can add incorrect package names.
     resolved_dependencies = dependencies[:] if dependencies else []
 
-    if auto_parse_imports:
+    if auto_parse_imports and not has_inline_uv_script_metadata:
         detected = _parse_imports(source_text)
         for pkg in detected:
             if pkg not in resolved_dependencies:
@@ -832,8 +944,9 @@ async def py_run_script_with_dependencies(
 
     command: list[str] = ["uv", "run"]
 
-    # Use --isolated to ignore pyproject.toml requirements when running standalone scripts
-    if ignore_project_requirements:
+    # Use --isolated to ignore pyproject.toml requirements when running standalone scripts.
+    # For inline uv script metadata, --script already uses the script metadata environment.
+    if ignore_project_requirements and not has_inline_uv_script_metadata:
         command.append("--isolated")
 
     # Ensure Python version is installed
@@ -842,7 +955,14 @@ async def py_run_script_with_dependencies(
     command += ["--python", python_version]
     for dep in resolved_dependencies:
         command += ["--with", dep]
-    command.append(str(spath))
+    if has_inline_uv_script_metadata:
+        logger.info(
+            "Detected inline uv script metadata; running with uv --script: %s",
+            spath,
+        )
+        command += ["--script", str(spath)]
+    else:
+        command.append(str(spath))
     if args:
         command.extend(args)
 
@@ -870,11 +990,7 @@ async def py_run_script_with_dependencies(
             stdout = ""
             stderr = "[TIMEOUT]"
     finally:
-        if script_content and spath.exists():
-            try:
-                spath.unlink()
-            except Exception:
-                pass
+        pass
 
     result = RunWithDepsResult(
         stdout=stdout,
@@ -1020,21 +1136,21 @@ def py_cleanup_jobs(
     markdown_output: bool = True,
 ) -> dict[str, int] | str:
     """
-    Remove jobs from the registry and optionally delete their temporary inline script files.
+    Remove jobs from the registry and optionally delete legacy temporary inline script files.
 
     Parameters:
-        remove_inline: When True, delete temp inline script files created from script_content.
+        remove_inline: When True, delete legacy temp inline script files created by older versions.
         only_finished: When True, only remove finished jobs; when False remove all jobs.
 
     Returns:
         {
           "removed": int,          # Number of jobs removed
           "remaining": int,        # Jobs still in registry
-          "inline_deleted": int    # Temp inline script files deleted
+          "inline_deleted": int    # Legacy temp inline script files deleted
         }
 
     Notes:
-        - Inline temp scripts are marked via JobRecord.is_inline_temp.
+        - New inline script_content autosaves are persistent and are not deleted here.
         - Safe to call repeatedly; missing files ignored.
     """
     removed = 0
@@ -1100,6 +1216,8 @@ async def py_benchmark_script(
         env_file: Optional path to .env file to load environment variables from.
         async_mode: If True, launch in background immediately (default: False).
         job_label: Optional label for job tracking.
+        Inline script_content is autosaved persistently under this repo's autosaved_scripts/ directory with a JSON params sidecar.
+        Inline uv script metadata headers are detected automatically and executed with 'uv run --script'.
     """
     # Use internal helper to start process manually (avoid calling decorated tool object)
     if not script_content and not script_path:
@@ -1110,21 +1228,45 @@ async def py_benchmark_script(
         spath = Path(script_path).expanduser().resolve()
         if not spath.is_file():
             raise FileNotFoundError(f"Script not found: {spath}")
+        source_text = spath.read_text()
         is_inline = False
     else:
-        inline_dir = Path.cwd() / "inline_scripts"
-        inline_dir.mkdir(parents=True, exist_ok=True)
-        spath = (inline_dir / f"inline_bench_{uuid.uuid4().hex}.py").resolve()
-        spath.write_text(script_content or "")
-        is_inline = True
+        source_text = script_content or ""
+        spath = _autosave_inline_script(
+            "py_benchmark_script",
+            source_text,
+            {
+                "script_content": script_content,
+                "script_path": script_path,
+                "python_version": python_version,
+                "dependencies": dependencies,
+                "args": args,
+                "timeout_seconds": timeout_seconds,
+                "sample_interval": sample_interval,
+                "env_vars": env_vars,
+                "env_file": env_file,
+                "markdown_output": markdown_output,
+                "async_mode": async_mode,
+                "job_label": job_label,
+            },
+        )
+        is_inline = False
     # Ensure Python version is installed
     _ensure_python_version(python_version)
 
+    has_inline_uv_script_metadata = _has_inline_uv_script_metadata(source_text)
     command: list[str] = ["uv", "run", "--python", python_version]
     resolved_dependencies = dependencies[:] if dependencies else []
     for dep in resolved_dependencies:
         command += ["--with", dep]
-    command.append(str(spath))
+    if has_inline_uv_script_metadata:
+        logger.info(
+            "Detected inline uv script metadata for benchmark; running with uv --script: %s",
+            spath,
+        )
+        command += ["--script", str(spath)]
+    else:
+        command.append(str(spath))
     if args:
         command.extend(args)
 
@@ -1171,9 +1313,12 @@ async def py_benchmark_script(
     if proc.stderr:
         for line in proc.stderr.readlines():
             stderr_chunks.append(line)
-    end_cpu = ps_proc.cpu_times()
     wall = time.time() - start_time
-    cpu = (end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system)
+    try:
+        end_cpu = ps_proc.cpu_times()
+        cpu = (end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system)
+    except psutil.Error:
+        cpu = 0.0
     if is_inline and spath.exists():
         try:
             spath.unlink()
@@ -1358,6 +1503,98 @@ def main() -> None:
         raise
 
 
+def _read_script_metadata(script_path: Path) -> tuple[str, dict[str, str]]:
+    """Return top docstring preview and uv script header metadata for a script."""
+    text = script_path.read_text(encoding="utf-8", errors="replace")
+
+    doc = ""
+    stripped = text.lstrip()
+    if stripped.startswith('"""') or stripped.startswith("'''"):
+        quote = stripped[:3]
+        end = stripped.find(quote, 3)
+        if end != -1:
+            doc = stripped[3:end].strip()
+
+    header_meta: dict[str, str] = {}
+    lines = text.splitlines()
+    start_idx: int | None = None
+    end_idx: int | None = None
+    for idx, line in enumerate(lines):
+        if line.startswith("# /// script"):
+            start_idx = idx
+            break
+    if start_idx is not None:
+        for idx in range(start_idx + 1, len(lines)):
+            if lines[idx].startswith("# ///"):
+                end_idx = idx
+                break
+        body_lines: list[str] = []
+        for idx in range(start_idx + 1, (end_idx or start_idx + 1)):
+            line = lines[idx]
+            if line.startswith("#"):
+                body_lines.append(line.lstrip("# ").rstrip())
+        toml_text = "\n".join(body_lines)
+        if toml_text:
+            try:
+                import tomllib
+
+                data = tomllib.loads(toml_text)
+                if "requires-python" in data:
+                    header_meta["requires-python"] = str(data.get("requires-python"))
+                if "dependencies" in data:
+                    deps = data.get("dependencies") or []
+                    header_meta["dependencies"] = ", ".join(deps)
+            except Exception:
+                header_meta["parse_error"] = "true"
+
+    return doc[:300], header_meta
+
+
+def _load_autosave_metadata(script_path: Path) -> dict[str, Any]:
+    """Load metadata sidecar for an autosaved script if present."""
+    metadata_path = script_path.with_suffix(".json")
+    if not metadata_path.is_file():
+        return {}
+    try:
+        loaded = json.loads(metadata_path.read_text(encoding="utf-8"))
+        return loaded if isinstance(loaded, dict) else {}
+    except Exception:
+        return {"metadata_parse_error": "true"}
+
+
+def _script_list_entry(script_path: Path, kind: str) -> dict[str, str]:
+    """Build a compact script listing entry."""
+    doc, header_meta = _read_script_metadata(script_path)
+    entry = {
+        "name": script_path.name,
+        "kind": kind,
+        "path": str(script_path),
+        "docstring": doc,
+        "header": "; ".join(f"{k}={v}" for k, v in header_meta.items())
+        if header_meta
+        else "",
+    }
+    if kind == "autosaved":
+        metadata = _load_autosave_metadata(script_path)
+        entry["tool"] = str(metadata.get("tool", ""))
+        entry["created_at"] = str(metadata.get("created_at", ""))
+        entry["metadata_path"] = str(metadata.get("metadata_path", script_path.with_suffix(".json")))
+    return entry
+
+
+def _resolve_listed_script(script_name: str, autosaved: bool) -> Path:
+    """Resolve a manual or autosaved script by basename without allowing traversal."""
+    base = Path(script_name).name
+    if not base.endswith(".py"):
+        base += ".py"
+    root = _get_repo_autosaved_scripts_dir() if autosaved else _get_repo_scripts_dir()
+    path = root / base
+    if not path.is_file():
+        label = "autosaved" if autosaved else "saved"
+        raise FileNotFoundError(f"{label.title()} script not found: {path}")
+    return path
+
+
 @mcp.tool(tags={"scripts", "save"})
 def py_save_script(
     script_name: str,
@@ -1527,76 +1764,67 @@ async def py_run_saved_script(
 
 
 @mcp.tool(tags={"scripts", "introspection"})
-def py_list_scripts(markdown_output: bool = True) -> list[dict[str, str]] | str:
+def py_list_scripts(
+    include_autosaved: bool = False,
+    markdown_output: bool = True,
+) -> list[dict[str, str]] | str:
     """
-    List scripts in this repository's 'scripts/' directory and show their name, path, top docstring preview, and script header metadata.
+    List manually saved scripts in this repository's 'scripts/' directory.
+
+    Args:
+        include_autosaved: When True, also include autosaved inline scripts from autosaved_scripts/.
+        markdown_output: Return a markdown-rendered response when True.
     """
-    scripts_dir = _get_repo_scripts_dir()
     out: list[dict[str, str]] = []
-    if not scripts_dir.is_dir():
-        return maybe_render_markdown(
-            out, markdown_output=markdown_output, title="py_list_scripts"
-        )
 
-    for p in sorted(scripts_dir.glob("*.py")):
-        text = p.read_text(encoding="utf-8", errors="replace")
+    scripts_dir = _get_repo_scripts_dir()
+    if scripts_dir.is_dir():
+        out.extend(_script_list_entry(path, "manual") for path in sorted(scripts_dir.glob("*.py")))
 
-        # Extract top docstring preview (first triple-quoted block at file start).
-        doc = ""
-        t = text.lstrip()
-        if t.startswith('"""') or t.startswith("'''"):
-            q = t[:3]
-            end = t.find(q, 3)
-            if end != -1:
-                doc = t[3:end].strip()
+    if include_autosaved:
+        autosaved_dir = _get_repo_autosaved_scripts_dir()
+        if autosaved_dir.is_dir():
+            out.extend(
+                _script_list_entry(path, "autosaved")
+                for path in sorted(autosaved_dir.glob("*.py"), reverse=True)
+            )
 
-        # Extract uv script header metadata
-        header_meta: dict[str, str] = {}
-        lines = text.splitlines()
-        start_idx: int | None = None
-        end_idx: int | None = None
-        for i, line in enumerate(lines):
-            if line.startswith("# /// script"):
-                start_idx = i
-                break
-        if start_idx is not None:
-            for j in range(start_idx + 1, len(lines)):
-                if lines[j].startswith("# ///"):
-                    end_idx = j
-                    break
-            body_lines: list[str] = []
-            for k in range(start_idx + 1, (end_idx or start_idx + 1)):
-                line = lines[k]
-                if line.startswith("#"):
-                    body_lines.append(line.lstrip("# ").rstrip())
-            toml_text = "\n".join(body_lines)
-            if toml_text:
-                try:
-                    import tomllib
-
-                    data = tomllib.loads(toml_text)
-                    if "requires-python" in data:
-                        header_meta["requires-python"] = str(
-                            data.get("requires-python")
-                        )
-                    if "dependencies" in data:
-                        deps = data.get("dependencies") or []
-                        header_meta["dependencies"] = ", ".join(deps)
-                except Exception:
-                    header_meta["parse_error"] = "true"
-
-        out.append(
-            {
-                "name": p.name,
-                "path": str(p),
-                "docstring": doc[:300],
-                "header": "; ".join(f"{k}={v}" for k, v in header_meta.items())
-                if header_meta
-                else "",
-            }
-        )
     return maybe_render_markdown(
         out, markdown_output=markdown_output, title="py_list_scripts"
+    )
+
+
+@mcp.tool(tags={"scripts", "introspection"})
+def py_view_script(
+    script_name: str,
+    autosaved: bool = False,
+    include_metadata: bool = True,
+    markdown_output: bool = True,
+) -> dict[str, Any] | str:
+    """
+    View a manually saved script, or an autosaved inline script when autosaved=True.
+
+    Args:
+        script_name: Basename of the script to view. '.py' is optional.
+        autosaved: When True, look in this repo's autosaved_scripts/ folder instead of scripts/.
+        include_metadata: Include autosave metadata sidecar when viewing autosaved scripts.
+        markdown_output: Return a markdown-rendered response when True.
+    """
+    path = _resolve_listed_script(script_name, autosaved=autosaved)
+    content = path.read_text(encoding="utf-8", errors="replace")
+    doc, header_meta = _read_script_metadata(path)
+    result: dict[str, Any] = {
+        "name": path.name,
+        "kind": "autosaved" if autosaved else "manual",
+        "path": str(path),
+        "docstring": doc,
+        "header": header_meta,
+        "source": content,
+    }
+    if autosaved and include_metadata:
+        result["metadata"] = _load_autosave_metadata(path)
+    return maybe_render_markdown(
+        result, markdown_output=markdown_output, title="py_view_script"
     )
 
 

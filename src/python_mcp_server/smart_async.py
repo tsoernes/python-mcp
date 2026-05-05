@@ -419,7 +419,11 @@ def smart_async(
             call_kwargs = dict(kwargs)
             call_kwargs.pop("async_mode", None)
             call_kwargs.pop("job_label", None)
-            call_kwargs.pop("markdown_output", None)
+            # Avoid double-rendering markdown. Smart-async renders exactly once after
+            # the synchronous/background decision, so underlying tools that support
+            # markdown_output should return structured data to the wrapper.
+            if "markdown_output" in signature.parameters:
+                call_kwargs["markdown_output"] = False
 
             label = job_label or func.__name__
             try:
