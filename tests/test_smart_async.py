@@ -14,13 +14,24 @@ This test suite validates:
 """
 
 import asyncio
+import re
 import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+UUID_RE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+
+
+def assert_readable_job_id(job_id: str) -> None:
+    """Validate that public job IDs are readable Docker-style names, not UUIDs."""
+    assert job_id
+    assert "-" in job_id
+    assert not UUID_RE.fullmatch(job_id)
+
 
 from python_mcp_server.smart_async import (
     cancel_job,
@@ -125,6 +136,7 @@ async def test_slow_timeout_switching():
 
     # Wait for job to complete
     job_id = result["job_id"]
+    assert_readable_job_id(job_id)
     for _ in range(10):
         await asyncio.sleep(1)
         status = get_job_status(job_id)
@@ -162,6 +174,7 @@ async def test_explicit_async_mode():
 
     # Wait for completion
     job_id = result["job_id"]
+    assert_readable_job_id(job_id)
     await asyncio.sleep(1)
 
     status = get_job_status(job_id)
@@ -179,6 +192,7 @@ async def test_progress_tracking():
 
     result = await progress_tool(items=10, async_mode=True, job_label="Progress test")
     job_id = result["job_id"]
+    assert_readable_job_id(job_id)
 
     print(f"Job launched: {job_id}")
 
@@ -205,6 +219,41 @@ async def test_progress_tracking():
     assert final_status["job"]["result"]["items"] == 10
 
     print("✅ PASSED: Progress tracking works\n")
+
+
+async def test_timeout_progress_tracking():
+    """Test 4b: Progress remains visible after automatic timeout backgrounding."""
+    print("=" * 70)
+    print("TEST 4b: Timeout Progress Tracking")
+    print("=" * 70)
+
+    result = await progress_tool(items=30)
+    assert "job_id" in result
+    job_id = result["job_id"]
+    assert_readable_job_id(job_id)
+
+    print(f"Job launched after timeout: {job_id}")
+
+    progress_seen = False
+    for _ in range(20):
+        await asyncio.sleep(0.2)
+        status = get_job_status(job_id)
+        progress = status["job"].get("progress")
+        if progress:
+            print(
+                f"  Progress: {progress['current']}/{progress['total']} - {progress.get('message', '')}"
+            )
+            progress_seen = True
+        if status["job"]["status"] == "completed":
+            break
+
+    assert progress_seen, "Progress updates should be visible after timeout backgrounding"
+
+    final_status = get_job_status(job_id)
+    assert final_status["job"]["status"] == "completed"
+    assert final_status["job"]["result"]["items"] == 30
+
+    print("✅ PASSED: Timeout progress tracking works\n")
 
 
 async def test_job_cancellation():
@@ -327,6 +376,7 @@ async def main():
         await test_slow_timeout_switching()
         await test_explicit_async_mode()
         await test_progress_tracking()
+        await test_timeout_progress_tracking()
         await test_job_cancellation()
         await test_job_listing()
         await test_error_handling()

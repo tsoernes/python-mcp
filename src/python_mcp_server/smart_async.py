@@ -20,13 +20,13 @@ import inspect
 import json
 import logging
 import os
-import uuid
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from .ids import generate_readable_id
 from .markdown import maybe_render_markdown
 
 logger = logging.getLogger(__name__)
@@ -69,6 +69,24 @@ class AppState:
 
 # Global state instance
 STATE = AppState()
+RESERVED_JOB_IDS: set[str] = set()
+
+
+def _reserved_or_registered_job_ids() -> set[str]:
+    """Return job IDs that are already registered or reserved for live tasks."""
+    return set(STATE.jobs) | RESERVED_JOB_IDS
+
+
+def _reserve_job_id() -> str:
+    """Reserve a readable unique job ID until it is registered or released."""
+    job_id = generate_readable_id(_reserved_or_registered_job_ids())
+    RESERVED_JOB_IDS.add(job_id)
+    return job_id
+
+
+def _release_reserved_job_id(job_id: str) -> None:
+    """Release a previously reserved job ID if it was never registered."""
+    RESERVED_JOB_IDS.discard(job_id)
 
 
 def initialize_state(persistence_dir: Path | None = None) -> None:
@@ -253,7 +271,7 @@ def _launch_background_job(
     Returns:
         Job metadata with job_id and status
     """
-    job_id = str(uuid.uuid4())
+    job_id = _reserve_job_id()
     job = JobMeta(
         id=job_id,
         label=label,
@@ -261,6 +279,7 @@ def _launch_background_job(
         created_at=datetime.now().isoformat(),
     )
     STATE.jobs[job_id] = job
+    _release_reserved_job_id(job_id)
 
     async def _run_job():
         # Set job_id in context for progress tracking
@@ -316,18 +335,26 @@ async def _run_with_time_budget(
     Returns:
         Either the direct result (if completed in time) or job metadata (if switched to background)
     """
-    coro = coro_factory()
-    task = asyncio.create_task(coro)
+    job_id = _reserve_job_id()
+    try:
+        coro = coro_factory()
+    except Exception:
+        _release_reserved_job_id(job_id)
+        raise
+    token = current_job_id.set(job_id)
+    try:
+        task = asyncio.create_task(coro)
+    finally:
+        current_job_id.reset(token)
     shielded = asyncio.shield(task)
 
     try:
-        return await asyncio.wait_for(shielded, timeout=timeout_seconds)
+        result = await asyncio.wait_for(shielded, timeout=timeout_seconds)
     except asyncio.TimeoutError:
         logger.info(
             f"Task '{label}' exceeded {timeout_seconds}s budget, switching to background"
         )
-        # Task continues running; wrap it in a job
-        job_id = str(uuid.uuid4())
+        # Task continues running; wrap it in a job using the ID already present in its context.
         job = JobMeta(
             id=job_id,
             label=label,
@@ -336,6 +363,7 @@ async def _run_with_time_budget(
             started_at=datetime.now().isoformat(),
         )
         STATE.jobs[job_id] = job
+        _release_reserved_job_id(job_id)
         job.task = task
 
         async def _finalize():
@@ -369,6 +397,12 @@ async def _run_with_time_budget(
             "status": "running",
             "message": f"Task exceeded {timeout_seconds}s time budget; running in background",
         }
+    except BaseException:
+        _release_reserved_job_id(job_id)
+        raise
+    else:
+        _release_reserved_job_id(job_id)
+        return result
 
 
 def smart_async(

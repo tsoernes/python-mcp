@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import sys
 import time
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -31,6 +30,7 @@ from .smart_async import (
     smart_async,
 )
 
+from .ids import generate_readable_id
 from .markdown import maybe_render_markdown
 
 # Configure logging (file + stderr console)
@@ -88,7 +88,7 @@ class RunScriptResult(BaseModel):
 
 
 class AsyncJobStart(BaseModel):
-    job_id: str = Field(description="Opaque job identifier.")
+    job_id: str = Field(description="Readable job identifier.")
     status: Literal["started"] = Field(
         description="Always 'started' for a newly created job."
     )
@@ -113,7 +113,7 @@ class BenchmarkResult(RunWithDepsResult):
 
 
 class AsyncDepsJobStart(BaseModel):
-    job_id: str = Field(description="Opaque job identifier.")
+    job_id: str = Field(description="Readable job identifier.")
     status: Literal["started"] = Field(
         description="Always 'started' for a newly created job."
     )
@@ -164,7 +164,13 @@ def _autosave_inline_script(
     now = datetime.now(timezone.utc)
     timestamp = now.strftime("%Y%m%dT%H%M%S%fZ")
     safe_tool = "".join(ch if ch.isalnum() or ch in {"_", "-"} else "_" for ch in tool_name)
-    stem = f"{timestamp}_{safe_tool}_{uuid.uuid4().hex[:8]}"
+    stem_prefix = f"{timestamp}_{safe_tool}_"
+    existing_suffixes = {
+        candidate.stem.removeprefix(stem_prefix)
+        for candidate in autosave_dir.glob(f"{stem_prefix}*.py")
+    }
+    readable_suffix = generate_readable_id(existing_suffixes)
+    stem = f"{stem_prefix}{readable_suffix}"
     script_path = autosave_dir / f"{stem}.py"
     metadata_path = autosave_dir / f"{stem}.json"
 
@@ -1049,7 +1055,7 @@ def py_get_job_output(
     Retrieve (and finalize if completed) a job's output.
 
     Parameters:
-        job_id: Identifier returned from async execution.
+        job_id: Readable job identifier returned from async execution.
 
     Returns:
         {
@@ -1092,7 +1098,7 @@ def py_kill_job(job_id: str, markdown_output: bool = True) -> dict[str, str] | s
     Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
 
     Parameters:
-        job_id: Job identifier.
+        job_id: Readable job identifier.
     """
     rec = JOBS.get(job_id)
     if not rec:
@@ -1887,7 +1893,7 @@ def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] |
     Cancel a running background job.
 
     Args:
-        job_id: Job identifier to cancel
+        job_id: Readable job identifier to cancel
 
     Returns:
         Cancellation status
