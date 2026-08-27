@@ -12,3 +12,6 @@ lex_fridman_transcripts/text/
 lex_fridman_transcripts/transcript_state.db
 lex_fridman_transcripts/downloader.log
 downloader.out
+
+# Local script credentials
+scripts/.env
