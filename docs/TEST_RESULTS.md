@@ -405,3 +405,6 @@ The smart async refactoring is **production-ready**. All tests pass, performance
 **Reviewed by:** Test automation  
 **Approved for:** Production deployment  
 **Next Review:** After 1 week of production use
+# Historical test report
+
+> This report records results from earlier revisions. It is not a statement of current test coverage or current MCP tool availability. See `tests/` and [the current job management contract](JOB_MANAGEMENT.md) for the current state.

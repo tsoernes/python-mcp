@@ -10,7 +10,6 @@ import shutil
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal
@@ -53,27 +52,6 @@ logger.info("Logger initialized; log file at %s", LOG_PATH)
 mcp = FastMCP(name="python_executor_mcp")
 
 
-# Simple in-memory job registry
-@dataclass
-class JobRecord:
-    job_id: str
-    command: list[str]
-    start_time: float
-    process: subprocess.Popen[str]
-    directory: Path
-    stdout_chunks: list[str] = field(default_factory=list)
-    stderr_chunks: list[str] = field(default_factory=list)
-    finished: bool = False
-    exit_code: int | None = None
-    benchmark: dict[str, float] | None = None
-    script_path: Path | None = None
-    stream: bool = False
-    finalized_elapsed: float | None = None  # Frozen elapsed time set at finalization
-    is_inline_temp: bool = (
-        False  # Mark if script_path points to a temp inline file for cleanup
-    )
-
-
 # ---------------------------
 # Pydantic output models
 # ---------------------------
@@ -85,16 +63,6 @@ class RunScriptResult(BaseModel):
         description="Interpreter strategy chosen."
     )
     elapsed_seconds: float = Field(description="Wall time in seconds.")
-
-
-class AsyncJobStart(BaseModel):
-    job_id: str = Field(description="Readable job identifier.")
-    status: Literal["started"] = Field(
-        description="Always 'started' for a newly created job."
-    )
-    execution_strategy: Literal["uv-run", "system-python"] = Field(
-        description="Interpreter strategy chosen."
-    )
 
 
 class RunWithDepsResult(RunScriptResult):
@@ -110,23 +78,6 @@ class BenchmarkResult(RunWithDepsResult):
     wall_time_seconds: float = Field(description="Wall clock time.")
     cpu_time_seconds: float = Field(description="User+system CPU time.")
     peak_rss_mb: float = Field(description="Peak resident memory usage in MB.")
-
-
-class AsyncDepsJobStart(BaseModel):
-    job_id: str = Field(description="Readable job identifier.")
-    status: Literal["started"] = Field(
-        description="Always 'started' for a newly created job."
-    )
-    python_version_used: str = Field(
-        description="Interpreter version used (exact minor)."
-    )
-    resolved_dependencies: list[str] = Field(
-        description="Dependencies requested (after normalization)."
-    )
-
-
-JOBS: dict[str, JobRecord] = {}
-STREAM_POLL_INTERVAL = 0.2  # seconds
 
 
 def _get_repo_scripts_dir() -> Path:
@@ -1010,185 +961,6 @@ async def py_run_script_with_dependencies(
     return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_with_dependencies")
 
 
-@mcp.tool(tags={"jobs", "introspection"})
-def py_list_running_jobs(markdown_output: bool = True) -> list[dict[str, str]] | str:
-    """
-    List currently registered jobs (running or finished but not yet cleaned).
-
-    Returns:
-        List of dicts containing: job_id, running (bool str), exit_code (may be None), pid, elapsed_seconds.
-        If streaming is enabled, includes partial stdout/stderr lengths.
-    """
-    now = time.time()
-    out: list[dict[str, str]] = []
-    for jid, rec in JOBS.items():
-        running = not rec.finished and rec.process.poll() is None
-        elapsed = now - rec.start_time
-        exit_code = (
-            str(rec.process.returncode) if rec.process.poll() is not None else ("None")
-        )
-        if running and rec.stream:
-            # Update chunks before reporting (non-blocking read)
-            _nonblocking_capture(rec)
-        out.append(
-            {
-                "job_id": jid,
-                "running": str(running),
-                "exit_code": exit_code,
-                "pid": str(rec.process.pid),
-                "elapsed_seconds": f"{elapsed:.2f}",
-                "stream": str(rec.stream),
-                "stdout_chunks": str(len(rec.stdout_chunks)),
-                "stderr_chunks": str(len(rec.stderr_chunks)),
-            }
-        )
-    return maybe_render_markdown(
-        out, markdown_output=markdown_output, title="py_list_running_jobs"
-    )
-
-
-@mcp.tool(tags={"jobs", "introspection"})
-def py_get_job_output(
-    job_id: str, markdown_output: bool = True
-) -> dict[str, str] | str:
-    """
-    Retrieve (and finalize if completed) a job's output.
-
-    Parameters:
-        job_id: Readable job identifier returned from async execution.
-
-    Returns:
-        {
-          status: running|finished,
-          stdout: concatenated (may be partial if running),
-          stderr: concatenated,
-          exit_code: int or None,
-          elapsed_seconds: float
-        }
-    """
-    rec = JOBS.get(job_id)
-    if not rec:
-        raise ValueError(f"No such job: {job_id}")
-    if rec.stream:
-        _nonblocking_capture(rec)
-
-    running = rec.process.poll() is None
-    if not running and not rec.finished:
-        # Final capture
-        _finalize_capture(rec)
-
-    return maybe_render_markdown(
-        {
-            "status": "running" if running else "finished",
-            "stdout": "".join(rec.stdout_chunks),
-            "stderr": "".join(rec.stderr_chunks),
-            "exit_code": str(rec.process.returncode)
-            if rec.process.returncode is not None
-            else "None",
-            "elapsed_seconds": f"{time.time() - rec.start_time:.2f}",
-        },
-        markdown_output=markdown_output,
-        title="py_get_job_output",
-    )
-
-
-@mcp.tool(tags={"jobs", "control"})
-def py_kill_job(job_id: str, markdown_output: bool = True) -> dict[str, str] | str:
-    """
-    Terminate a running job. If already finished, returns status 'already-finished' without modifying output.
-
-    Parameters:
-        job_id: Readable job identifier.
-    """
-    rec = JOBS.get(job_id)
-    if not rec:
-        logger.warning("kill_job requested for missing job_id=%s", job_id)
-        raise ValueError(f"No such job: {job_id}")
-    if rec.process.poll() is None:
-        logger.info("Killing running job_id=%s pid=%s", job_id, rec.process.pid)
-        rec.process.kill()
-        time.sleep(0.05)
-        _finalize_capture(rec)
-        status = "killed"
-    else:
-        # Already finished
-        if not rec.finished:
-            _finalize_capture(rec)
-        status = "already-finished"
-    logger.info(
-        "Job kill request processed job_id=%s status=%s exit_code=%s frozen_elapsed=%.2fs",
-        job_id,
-        status,
-        rec.process.returncode,
-        rec.finalized_elapsed
-        if rec.finalized_elapsed is not None
-        else (time.time() - rec.start_time),
-    )
-    return maybe_render_markdown(
-        {
-            "job_id": job_id,
-            "status": status,
-            "exit_code": str(rec.process.returncode),
-        },
-        markdown_output=markdown_output,
-        title="py_kill_job",
-    )
-
-
-@mcp.tool(tags={"jobs", "maintenance"})
-def py_cleanup_jobs(
-    remove_inline: bool = True,
-    only_finished: bool = True,
-    markdown_output: bool = True,
-) -> dict[str, int] | str:
-    """
-    Remove jobs from the registry and optionally delete legacy temporary inline script files.
-
-    Parameters:
-        remove_inline: When True, delete legacy temp inline script files created by older versions.
-        only_finished: When True, only remove finished jobs; when False remove all jobs.
-
-    Returns:
-        {
-          "removed": int,          # Number of jobs removed
-          "remaining": int,        # Jobs still in registry
-          "inline_deleted": int    # Legacy temp inline script files deleted
-        }
-
-    Notes:
-        - New inline script_content autosaves are persistent and are not deleted here.
-        - Safe to call repeatedly; missing files ignored.
-    """
-    removed = 0
-    inline_deleted = 0
-    for jid in list(JOBS.keys()):
-        rec = JOBS[jid]
-        if only_finished and not rec.finished:
-            continue
-        if (
-            remove_inline
-            and rec.is_inline_temp
-            and rec.script_path
-            and rec.script_path.exists()
-        ):
-            try:
-                rec.script_path.unlink()
-                inline_deleted += 1
-            except Exception:
-                pass
-        del JOBS[jid]
-        removed += 1
-    return maybe_render_markdown(
-        {
-            "removed": removed,
-            "remaining": len(JOBS),
-            "inline_deleted": inline_deleted,
-        },
-        markdown_output=markdown_output,
-        title="py_cleanup_jobs",
-    )
-
-
 @mcp.tool(tags={"benchmark", "performance"})
 @smart_async(default_timeout=20.0)
 async def py_benchmark_script(
@@ -1343,92 +1115,6 @@ async def py_benchmark_script(
         peak_rss_mb=peak_rss / (1024 * 1024),
     )
     return maybe_render_markdown(result, markdown_output=markdown_output, title="py_benchmark_script")
-
-
-async def _poll_stream(job_id: str) -> None:
-    """
-    Background coroutine that periodically harvests stdout/stderr for a streaming job.
-    """
-    rec = JOBS.get(job_id)
-    if not rec:
-        return
-    while rec.process.poll() is None:
-        _nonblocking_capture(rec)
-        await asyncio.sleep(STREAM_POLL_INTERVAL)
-    _finalize_capture(rec)
-
-
-def _nonblocking_capture(rec: JobRecord) -> None:
-    """
-    Read available data without blocking and append to chunks.
-    """
-    proc = rec.process
-    if proc.stdout:
-        while True:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            rec.stdout_chunks.append(line)
-    if proc.stderr:
-        while True:
-            line = proc.stderr.readline()
-            if not line:
-                break
-            rec.stderr_chunks.append(line)
-
-
-def _finalize_capture(rec: JobRecord) -> None:
-    """
-    Capture any remaining output and mark job finished. Freeze elapsed time.
-    """
-    if rec.finished:
-        return
-    _nonblocking_capture(rec)
-    rec.exit_code = rec.process.returncode
-    rec.finished = True
-    rec.finalized_elapsed = time.time() - rec.start_time
-    logger.info(
-        "Job finalized job_id=%s exit_code=%s frozen_elapsed=%.2fs stdout_len=%d stderr_len=%d",
-        rec.job_id,
-        rec.exit_code,
-        rec.finalized_elapsed,
-        sum(len(c) for c in rec.stdout_chunks),
-        sum(len(c) for c in rec.stderr_chunks),
-    )
-
-
-@mcp.resource("job-stream://{job_id}")
-def get_job_output_stream(job_id: str) -> str:
-    """
-    Incremental retrieval of a job's current stdout/stderr snapshot as a single concatenated text blob.
-    Intended for polling; returns a streaming-friendly chunk WITHOUT marking the job finished.
-
-    Format:
-        ---STDOUT---
-        <current stdout>
-        ---STDERR---
-        <current stderr>
-
-    If the job was started with streaming enabled, this will harvest any new output before returning.
-    It does not finalize or remove the job even if the underlying process has exited, allowing
-    repeated polling until an external cleanup step is performed.
-
-    Returns:
-        A text block separating stdout and stderr for easy parsing.
-    """
-    rec = JOBS.get(job_id)
-    if not rec:
-        return f"[error] job not found: {job_id}"
-    if rec.stream:
-        _nonblocking_capture(rec)
-
-    # Do not finalize capture here; allow caller to decide lifecycle.
-    return (
-        "---STDOUT---\n"
-        + "".join(rec.stdout_chunks)
-        + "\n---STDERR---\n"
-        + "".join(rec.stderr_chunks)
-    )
 
 
 def main() -> None:

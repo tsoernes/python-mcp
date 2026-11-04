@@ -26,6 +26,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from pydantic_core import to_jsonable_python
+
 from .ids import generate_readable_id
 from .markdown import maybe_render_markdown
 
@@ -291,6 +293,7 @@ def _launch_background_job(
 
         try:
             result = await coro_factory()
+            result = to_jsonable_python(result)
             job.status = "completed"
             job.result = result
             job.completed_at = datetime.now().isoformat()
@@ -369,6 +372,7 @@ async def _run_with_time_budget(
         async def _finalize():
             try:
                 result = await task
+                result = to_jsonable_python(result)
                 job.status = "completed"
                 job.result = result
                 job.completed_at = datetime.now().isoformat()

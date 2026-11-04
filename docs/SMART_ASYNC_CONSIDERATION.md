@@ -1,5 +1,7 @@
 # Smart Async Pattern Implementation
 
+> **Historical design note.** This file records the initial implementation decision and is not authoritative for the current tool registry. See [the current job management contract](JOB_MANAGEMENT.md).
+
 ## Current Status: ✅ IMPLEMENTED
 
 This project **now uses** the smart async pattern described in the `mcp-builder` skill.

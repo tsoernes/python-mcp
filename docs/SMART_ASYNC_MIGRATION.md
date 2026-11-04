@@ -1,5 +1,7 @@
 # Smart Async Migration Guide
 
+> **Historical migration note.** This document records the earlier transition to smart-async and contains examples of tools and parameters from that period. It is not the current tool reference. See [the current job management contract](JOB_MANAGEMENT.md) and [usage guide](SMART_ASYNC_USAGE.md) for registered tools and supported behavior.
+
 ## Overview
 
 The python-mcp server has been refactored to use the `@smart_async` decorator pattern across all long-running tools, replacing the previous dual sync/async architecture with a unified intelligent async approach.

@@ -1,5 +1,7 @@
 # Smart Async Pattern Implementation - Complete Summary
 
+> **Historical implementation summary.** This snapshot was written during the initial implementation and includes outdated tool names and claims. It is retained for history only; see [the current job management contract](JOB_MANAGEMENT.md) and [usage guide](SMART_ASYNC_USAGE.md).
+
 ## 🎉 Implementation Status: COMPLETE
 
 **Date:** 2025-12-11  

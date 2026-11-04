@@ -21,15 +21,15 @@ uv run python examples/env_vars_demo.py
 **Key Takeaways:**
 - Environment variables can be passed via `env_vars` dict or loaded from `env_file`
 - Override precedence: process env < env_file < env_vars (dict has highest priority)
-- Works with all execution tools (sync, async, with dependencies, benchmarking)
+- Works with the execution tools, whether they finish inline or switch to a background job
 - Supports standard .env file format with comments and quotes
 
 ## Environment Variable Features
 
 All execution tools support environment variables:
 
-- `py_run_script_in_dir` (sync & async)
-- `py_run_script_with_dependencies` (sync & async)
+- `py_run_script_in_dir` (inline or smart-async background execution)
+- `py_run_script_with_dependencies` (inline or smart-async background execution)
 - `py_benchmark_script`
 - `py_run_saved_script`
 
@@ -73,7 +73,7 @@ NO_QUOTES=also_work
 
 When adding new examples:
 
-1. Create a descriptive filename (e.g., `async_streaming_demo.py`)
+1. Create a descriptive filename (e.g., `smart_async_job_demo.py`)
 2. Include docstrings explaining what the example demonstrates
 3. Add error handling and clear output
 4. Update this README with a description
@@ -82,4 +82,5 @@ When adding new examples:
 ## See Also
 
 - [Main README](../README.md) - Complete server documentation
-- [Test Suite](../test_env_vars.py) - Comprehensive tests for env var support
+- [Environment-variable test script](../tests/test_env_vars.py)
+- [Current job API contract](../docs/JOB_MANAGEMENT.md)
