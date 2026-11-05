@@ -5,6 +5,7 @@ After=network.target
 [Service]
 Type=exec
 WorkingDirectory=%h/code/python-mcp
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
 Environment=PYTHON_MCP_HTTP_HOST=127.0.0.1
 Environment=PYTHON_MCP_HTTP_PORT=8794
 Environment=PYTHON_MCP_HTTP_PATH=/mcp

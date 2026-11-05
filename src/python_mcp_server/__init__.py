@@ -449,7 +449,7 @@ def _exec_script_in_dir_sync(
             command.append(str(script_path_local))
         execution_strategy = "uv-run"
     else:
-        command = ["python", str(script_path_local)]
+        command = [sys.executable, str(script_path_local)]
     if args:
         command.extend(args)
     # Build environment
@@ -709,7 +709,7 @@ async def py_run_script_in_dir(
 
         execution_strategy = "uv-run"
     else:
-        command = ["python", str(script_path_local)]
+        command = [sys.executable, str(script_path_local)]
     if args:
         command.extend(args)
 
