@@ -2,6 +2,7 @@
   "exclude": [
     "**/__pycache__",
     "**/.venv",
+    "**/.venv-*",
     "inline_scripts/**",
     "**/inline_scripts/**",
     ".repo_summarize_mcp_logs/**",

@@ -1,0 +1,26 @@
+[Unit]
+Description=Shared local Python MCP server for Codex
+After=network.target
+
+[Service]
+Type=exec
+WorkingDirectory=%h/code/python-mcp
+Environment=PYTHON_MCP_HTTP_HOST=127.0.0.1
+Environment=PYTHON_MCP_HTTP_PORT=8794
+Environment=PYTHON_MCP_HTTP_PATH=/mcp
+Environment=PYTHON_MCP_HTTP_TOKEN_FILE=%h/.config/shared-mcp/python-mcp.token
+Environment=PYTHON_MCP_STATE_DIR=%h/.local/state/python-mcp-server
+Environment=PYTHON_MCP_LOG_PATH=/dev/null
+Environment=PYTHONUNBUFFERED=1
+ExecStart=%h/code/python-mcp/.venv-daemon/bin/python-mcp-server-daemon
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=15
+UMask=0077
+NoNewPrivileges=true
+StandardOutput=journal
+StandardError=journal
+MemoryAccounting=true
+
+[Install]
+WantedBy=default.target

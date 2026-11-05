@@ -150,7 +150,7 @@ async def main() -> int:
         # Test 7: Cancel job
         print("📝 Test 7: Job Cancellation")
         if not get_job_status(job_id_slow)["job"]["status"] in ("completed", "failed"):
-            cancel_result = cancel_job(job_id_slow)
+            cancel_result = await cancel_job(job_id_slow)
             print(f"   Cancelled: {cancel_result}")
             print("   ✅ Job cancellation works\n")
         else:

@@ -31,9 +31,19 @@ from .smart_async import (
 
 from .ids import generate_readable_id
 from .markdown import maybe_render_markdown
+from .process_control import (
+    communicate_with_timeout,
+    subprocess_session_kwargs,
+    terminate_subprocess_tree,
+)
 
 # Configure logging (file + stderr console)
-LOG_PATH = Path(__file__).resolve().parent / "python_mcp_server.log"
+LOG_PATH = Path(
+    os.getenv(
+        "PYTHON_MCP_LOG_PATH",
+        str(Path(__file__).resolve().parent / "python_mcp_server.log"),
+    )
+)
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 AUTOSAVED_SCRIPTS_DIR = REPO_ROOT / "autosaved_scripts"
@@ -472,7 +482,7 @@ def _exec_script_in_dir_sync(
     return RunScriptResult(
         stdout=stdout,
         stderr=stderr,
-        exit_code=proc.returncode,
+        exit_code=proc.returncode if proc.returncode is not None else -1,
         execution_strategy=execution_strategy,
         elapsed_seconds=time.time() - start,
     )
@@ -714,6 +724,7 @@ async def py_run_script_in_dir(
 
     output_callback = create_output_callback()
 
+    proc: asyncio.subprocess.Process | None = None
     try:
         proc = await asyncio.create_subprocess_exec(
             *command,
@@ -721,6 +732,7 @@ async def py_run_script_in_dir(
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             env=proc_env,
+            **subprocess_session_kwargs(),
         )
 
         # If we have a job context (background job), read line by line for streaming
@@ -751,31 +763,36 @@ async def py_run_script_in_dir(
                     stderr_lines.append(text)
                     output_callback("", text)
 
+            async def collect_streams() -> None:
+                await asyncio.gather(read_stdout(), read_stderr(), proc.wait())
+
+            collection = asyncio.create_task(collect_streams())
             try:
-                # Read both streams concurrently with timeout
                 await asyncio.wait_for(
-                    asyncio.gather(read_stdout(), read_stderr(), proc.wait()),
+                    asyncio.shield(collection),
                     timeout=None if timeout_seconds == 0 else timeout_seconds,
                 )
                 stdout = "".join(stdout_lines)
                 stderr = "".join(stderr_lines)
             except asyncio.TimeoutError:
-                proc.kill()
-                await proc.wait()
+                await terminate_subprocess_tree(proc)
+                await asyncio.gather(collection, return_exceptions=True)
                 stdout = "".join(stdout_lines)
                 stderr = "".join(stderr_lines) + "\n[TIMEOUT]"
+            except asyncio.CancelledError:
+                await terminate_subprocess_tree(proc)
+                await asyncio.gather(collection, return_exceptions=True)
+                raise
         else:
             # Non-streaming: wait for completion
             try:
-                stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                    proc.communicate(),
-                    timeout=None if timeout_seconds == 0 else timeout_seconds,
+                stdout_bytes, stderr_bytes = await communicate_with_timeout(
+                    proc,
+                    timeout_seconds=None if timeout_seconds == 0 else timeout_seconds,
                 )
                 stdout = stdout_bytes.decode("utf-8")
                 stderr = stderr_bytes.decode("utf-8")
             except asyncio.TimeoutError:
-                proc.kill()
-                await proc.wait()
                 result = RunScriptResult(
                     stdout="",
                     stderr="[TIMEOUT]",
@@ -784,8 +801,9 @@ async def py_run_script_in_dir(
                     elapsed_seconds=time.time() - start,
                 )
                 return maybe_render_markdown(result, markdown_output=markdown_output, title="py_run_script_in_dir")
-    finally:
-        pass
+    except asyncio.CancelledError:
+        # The streaming/communicate paths above already cleaned up the tree.
+        raise
 
     result = RunScriptResult(
         stdout=stdout,
@@ -927,27 +945,28 @@ async def py_run_script_with_dependencies(
     proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
 
     start = time.time()
+    proc: asyncio.subprocess.Process | None = None
     try:
         proc = await asyncio.create_subprocess_exec(
             *command,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             env=proc_env,
+            **subprocess_session_kwargs(),
         )
         try:
-            stdout_bytes, stderr_bytes = await asyncio.wait_for(
-                proc.communicate(),
-                timeout=None if timeout_seconds == 0 else timeout_seconds,
+            stdout_bytes, stderr_bytes = await communicate_with_timeout(
+                proc,
+                timeout_seconds=None if timeout_seconds == 0 else timeout_seconds,
             )
             stdout = stdout_bytes.decode("utf-8")
             stderr = stderr_bytes.decode("utf-8")
         except asyncio.TimeoutError:
-            proc.kill()
-            await proc.wait()
             stdout = ""
             stderr = "[TIMEOUT]"
-    finally:
-        pass
+    except asyncio.CancelledError:
+        # communicate_with_timeout already cleaned up the process tree.
+        raise
 
     result = RunWithDepsResult(
         stdout=stdout,
@@ -1051,52 +1070,78 @@ async def py_benchmark_script(
     # Build environment
     proc_env = _build_process_env(env_vars=env_vars, env_file=env_file)
 
-    proc = subprocess.Popen(
-        command,
+    proc = await asyncio.create_subprocess_exec(
+        *command,
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-        bufsize=1,
+        stderr=asyncio.subprocess.PIPE,
         env=proc_env,
+        **subprocess_session_kwargs(),
     )
-    start_time = time.time()
-    ps_proc = psutil.Process(proc.pid)
+    start_time = time.monotonic()
+    try:
+        ps_proc: psutil.Process | None = psutil.Process(proc.pid)
+        start_cpu = ps_proc.cpu_times()
+    except psutil.Error:
+        ps_proc = None
+        start_cpu = None
     peak_rss = 0
-    start_cpu = ps_proc.cpu_times()
     stdout_chunks: list[str] = []
     stderr_chunks: list[str] = []
-    while proc.poll() is None:
-        try:
-            rss = ps_proc.memory_info().rss
-            if rss > peak_rss:
-                peak_rss = rss
-        except psutil.Error:
-            break
-        # Non-blocking reads
-        if proc.stdout:
-            line = proc.stdout.readline()
-            while line:
-                stdout_chunks.append(line)
-                line = proc.stdout.readline()
-        if proc.stderr:
-            line = proc.stderr.readline()
-            while line:
-                stderr_chunks.append(line)
-                line = proc.stderr.readline()
-        time.sleep(sample_interval)
-    # Capture any trailing output
-    if proc.stdout:
-        for line in proc.stdout.readlines():
-            stdout_chunks.append(line)
-    if proc.stderr:
-        for line in proc.stderr.readlines():
-            stderr_chunks.append(line)
-    wall = time.time() - start_time
+
+    async def read_stream(
+        stream: asyncio.StreamReader | None, output: list[str]
+    ) -> None:
+        if stream is None:
+            return
+        while line := await stream.readline():
+            output.append(line.decode("utf-8", errors="replace"))
+
+    async def monitor_process() -> None:
+        nonlocal peak_rss
+        while proc.returncode is None:
+            if ps_proc is not None:
+                try:
+                    peak_rss = max(peak_rss, ps_proc.memory_info().rss)
+                except psutil.Error:
+                    pass
+            await asyncio.sleep(max(sample_interval, 0.01))
+
+    async def collect_benchmark() -> None:
+        await asyncio.gather(
+            read_stream(proc.stdout, stdout_chunks),
+            read_stream(proc.stderr, stderr_chunks),
+            proc.wait(),
+            monitor_process(),
+        )
+
+    collection = asyncio.create_task(collect_benchmark())
+    timed_out = False
     try:
-        end_cpu = ps_proc.cpu_times()
-        cpu = (end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system)
+        await asyncio.wait_for(
+            asyncio.shield(collection),
+            timeout=None if timeout_seconds == 0 else timeout_seconds,
+        )
+    except asyncio.TimeoutError:
+        timed_out = True
+        await terminate_subprocess_tree(proc)
+        _ = await asyncio.gather(collection, return_exceptions=True)
+    except asyncio.CancelledError:
+        await terminate_subprocess_tree(proc)
+        _ = await asyncio.gather(collection, return_exceptions=True)
+        raise
+
+    wall = time.monotonic() - start_time
+    try:
+        end_cpu = ps_proc.cpu_times() if ps_proc is not None else None
+        cpu = (
+            (end_cpu.user - start_cpu.user) + (end_cpu.system - start_cpu.system)
+            if end_cpu is not None and start_cpu is not None
+            else 0.0
+        )
     except psutil.Error:
         cpu = 0.0
+    if timed_out:
+        stderr_chunks.append("\n[TIMEOUT]")
     if is_inline and spath.exists():
         try:
             spath.unlink()
@@ -1105,7 +1150,7 @@ async def py_benchmark_script(
     result = BenchmarkResult(
         stdout="".join(stdout_chunks),
         stderr="".join(stderr_chunks),
-        exit_code=proc.returncode,
+        exit_code=proc.returncode if proc.returncode is not None else -1,
         execution_strategy="uv-run",
         elapsed_seconds=wall,
         resolved_dependencies=resolved_dependencies,
@@ -1430,19 +1475,21 @@ async def py_run_saved_script(
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         env=proc_env,
+        **subprocess_session_kwargs(),
     )
     try:
-        stdout_bytes, stderr_bytes = await asyncio.wait_for(
-            proc.communicate(),
-            timeout=None if timeout_seconds == 0 else timeout_seconds,
+        stdout_bytes, stderr_bytes = await communicate_with_timeout(
+            proc,
+            timeout_seconds=None if timeout_seconds == 0 else timeout_seconds,
         )
         stdout = stdout_bytes.decode("utf-8")
         stderr = stderr_bytes.decode("utf-8")
     except asyncio.TimeoutError:
-        proc.kill()
-        await proc.wait()
         stdout = ""
         stderr = "[TIMEOUT]"
+    except asyncio.CancelledError:
+        # communicate_with_timeout already cleaned up the process tree.
+        raise
     except Exception as e:
         raise RuntimeError(f"Execution failed: {e}")  # noqa: TRY003
     result = RunScriptResult(
@@ -1574,7 +1621,7 @@ def py_list_jobs(
 
 
 @mcp.tool(tags={"jobs", "async"})
-def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] | str:
+async def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] | str:
     """
     Cancel a running background job.
 
@@ -1584,8 +1631,9 @@ def py_cancel_job(job_id: str, markdown_output: bool = True) -> dict[str, Any] |
     Returns:
         Cancellation status
     """
+    result = await cancel_job(job_id)
     return maybe_render_markdown(
-        cancel_job(job_id), markdown_output=markdown_output, title="py_cancel_job"
+        result, markdown_output=markdown_output, title="py_cancel_job"
     )
 
 

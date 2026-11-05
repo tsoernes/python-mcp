@@ -272,7 +272,7 @@ async def test_job_cancellation():
 
     # Wait a bit then cancel
     await asyncio.sleep(0.5)
-    cancel_result = cancel_job(job_id)
+    cancel_result = await cancel_job(job_id)
 
     print(f"Cancel result: {cancel_result}")
     assert cancel_result["status"] == "cancelled"

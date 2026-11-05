@@ -23,6 +23,52 @@ uv run python -m python_mcp_server
 uv run python-mcp-server
 ```
 
+## Shared Codex daemon (Linux)
+
+For multiple local Codex instances to share one MCP process, use the authenticated
+Streamable HTTP daemon. Stdio remains available for other clients and fallback.
+The daemon binds only to `127.0.0.1:8794/mcp`; it is a single process because
+job execution tasks are process-local.
+
+Create an isolated environment so updating daemon dependencies does not replace
+packages currently loaded by stdio MCP sessions:
+
+```fish
+cd /home/torstein.sornes/code/python-mcp
+set -lx UV_PROJECT_ENVIRONMENT .venv-daemon
+uv sync
+install -d -m 700 ~/.config/shared-mcp
+umask 077; openssl rand -hex 32 > ~/.config/shared-mcp/python-mcp.token
+install -Dm 644 deploy/systemd/user/python-mcp-server.service ~/.config/systemd/user/python-mcp-server.service
+systemctl --user daemon-reload
+systemctl --user enable --now python-mcp-server.service
+```
+
+The service's user-local unit sends logs to the user journal and stores job state
+under `~/.local/state/python-mcp-server`. Its bearer token stays in the private
+`~/.config/shared-mcp/python-mcp.token` file and is never placed in Codex config
+or the repository. The helper referenced by Codex reads that file and emits an
+HTTP authorization header on demand. Do not expose this service beyond loopback:
+execution tools run with the server user's filesystem and network permissions.
+
+Configure the existing Codex `python-mcp` entry as a local HTTP server:
+
+```toml
+[mcp_servers."python-mcp"]
+url = "http://127.0.0.1:8794/mcp"
+http_headers_helper = "/home/torstein.sornes/code/python-mcp/scripts/python_mcp_http_auth_header.py"
+tool_timeout_sec = 600.0
+```
+
+Keep any existing per-tool approval settings under that table. Codex needs to
+reload its MCP configuration before existing sessions switch from stdio to the
+shared daemon. Check daemon health with
+`systemctl --user status python-mcp-server.service` and its logs with
+`journalctl --user -u python-mcp-server.service`.
+
+To update the isolated environment after changing dependencies, run
+`UV_PROJECT_ENVIRONMENT=.venv-daemon uv sync` and restart the user service.
+
 ## Registered tools
 
 Tool names below are the names exposed to MCP clients, including Codex. The live MCP schemas are authoritative for parameters.

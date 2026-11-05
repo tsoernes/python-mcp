@@ -20,6 +20,7 @@ import inspect
 import json
 import logging
 import os
+import tempfile
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -52,6 +53,7 @@ class JobMeta:
     error: str | None = None
     result: Any | None = None
     task: asyncio.Task[Any] | None = None
+    monitor_task: asyncio.Task[Any] | None = None
     progress: dict[str, Any] | None = (
         None  # {"current": int, "total": int, "message": str}
     )
@@ -127,7 +129,24 @@ def _save_jobs() -> None:
         for j in STATE.jobs.values()
     ]
 
-    jobs_path.write_text(json.dumps(serializable, indent=2))
+    # Publish a complete snapshot atomically. Multiple stdio MCP processes can
+    # read this registry concurrently; writing directly to jobs.json briefly
+    # truncates it and can make a job appear missing until the next refresh.
+    fd, temporary_path = tempfile.mkstemp(
+        dir=jobs_path.parent,
+        prefix=f".{jobs_path.name}.",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as temporary_file:
+            json.dump(serializable, temporary_file, indent=2)
+        os.replace(temporary_path, jobs_path)
+    except BaseException:
+        try:
+            os.unlink(temporary_path)
+        except FileNotFoundError:
+            pass
+        raise
     logger.debug(f"Saved {len(serializable)} jobs to {jobs_path}")
 
 
@@ -395,12 +414,20 @@ async def _run_with_time_budget(
             finally:
                 _save_jobs()
 
-        asyncio.create_task(_finalize())
+        job.monitor_task = asyncio.create_task(_finalize())
         return {
             "job_id": job_id,
             "status": "running",
             "message": f"Task exceeded {timeout_seconds}s time budget; running in background",
         }
+    except asyncio.CancelledError:
+        # A caller disconnecting before the timeout budget expires must not
+        # leave the shielded work running without a registered job ID.
+        if not task.done():
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+        _release_reserved_job_id(job_id)
+        raise
     except BaseException:
         _release_reserved_job_id(job_id)
         raise
@@ -557,7 +584,7 @@ def list_jobs(status_filter: str | None = None, limit: int = 50) -> dict[str, An
     return {"jobs": [_job_public(j) for j in jobs], "total": len(jobs)}
 
 
-def cancel_job(job_id: str) -> dict[str, Any]:
+async def cancel_job(job_id: str) -> dict[str, Any]:
     """
     Cancel a running job.
 
@@ -580,8 +607,28 @@ def cancel_job(job_id: str) -> dict[str, Any]:
             "job_id": job_id,
         }
 
-    if job.task and not job.task.done():
+    if job.task is None:
+        return {
+            "error": (
+                f"Job {job_id} is not owned by this server process; "
+                "it cannot be safely cancelled here"
+            ),
+            "job_id": job_id,
+        }
+
+    if job.task.done():
+        if job.monitor_task is not None and not job.monitor_task.done():
+            await asyncio.gather(job.monitor_task, return_exceptions=True)
+        if job.status not in ("pending", "running"):
+            return {
+                "error": f"Job {job_id} is not running (status: {job.status})",
+                "job_id": job_id,
+            }
+    else:
         job.task.cancel()
+        await asyncio.gather(job.task, return_exceptions=True)
+        if job.monitor_task is not None:
+            await asyncio.gather(job.monitor_task, return_exceptions=True)
 
     job.status = "cancelled"
     job.completed_at = datetime.now().isoformat()

@@ -2,9 +2,28 @@
 inline_scripts/
 autosaved_scripts/
 
+# Local virtual environments, caches, bytecode, logs, and credentials
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.basedpyright/
+.ruff_cache/
+.mypy_cache/
+.cache/
+*.log
+**/logs/
+**/*_logs/
+**/.env
+**/.env.*
+!**/.env.example
+
 # Ensure scripts directory remains tracked (explicit unignore in case of broad ignores elsewhere)
 !scripts/
 !scripts/**
+scripts/**/__pycache__/
+scripts/**/*.py[cod]
 
 # Lex Fridman transcript downloads
 lex_fridman_transcripts/json/
@@ -12,6 +31,3 @@ lex_fridman_transcripts/text/
 lex_fridman_transcripts/transcript_state.db
 lex_fridman_transcripts/downloader.log
 downloader.out
-
-# Local script credentials
-scripts/.env
