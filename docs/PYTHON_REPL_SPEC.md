@@ -14,22 +14,31 @@
 
 - Keep the existing shared HTTP Python MCP daemon and its script/job tools unchanged; add an independently launchable stdio MCP entrypoint.
 - Give each launched REPL MCP process its own persistent Python worker process and namespace. Do not expose one process-global namespace to the shared HTTP daemon.
-- Have `uv` create/reuse an environment for optional startup requirements without mutating the repository's project environment or lockfile.
-- Permit selecting an existing project venv as the REPL's base environment; startup dependencies should be layered without changing that venv.
+- Permit selecting an existing project venv as the REPL's base environment.
+- **Implementation choice:** Install dependencies requested by `python_repl_execute` into a private per-server-session overlay, rather than modifying the selected project venv or repository lockfiles.
 - Bound execution time/output, serialize operations on a kernel, and terminate/reap the worker on reset, shutdown, timeout or transport exit.
 
 ## Acceptance checks
 
 - A stdio client can initialize, list tools, execute multiple cells sharing state, reset state, and query REPL information.
 - The `python_repl_execute` tool accepts optional dependencies; they are passed to `uv` as individual arguments (no shell interpolation), without placing dependency requirements in the stdio-server startup args.
-- Both the default interpreter and an explicit project venv are supported; dependency installation must not silently alter the selected project venv.
+- Both the default interpreter and an explicit project venv are supported.
 - Separate MCP processes cannot see each other's REPL namespaces.
 - Failure, timeout, cancellation and server shutdown do not leave the worker process tree running.
 - Repository tests, `py_compile`, and basedpyright pass for the new code; the Codex entry is validated without restarting other Codex instances.
 
 ## Progress and verification
 
-- **2026-11-06:** Separate stdio FastMCP entrypoint, persistent per-process worker, uv startup requirements, explicit project-venv selection, lifecycle cleanup, usage/security documentation, and focused tests implemented.
+- **2026-11-06:** Separate stdio FastMCP entrypoint, persistent per-process worker, uv dependency support, explicit project-venv selection, lifecycle cleanup, usage/security documentation, and focused tests implemented. The original implementation accepted dependencies at server startup; see the later clarification and revision status below.
 - **2026-11-06:** Full unittest discovery passed (19 tests); `py_compile`, Ruff, and basedpyright passed. An exact `uv --no-project --python ...` stdio launch matching Codex configuration successfully listed tools and evaluated code inside `.venv-daemon`.
 - **2026-11-06:** Added the `python-repl` entry to `/home/torstein.sornes/.codex/config.toml` and TOML parsing passed. Codex loads MCP configuration at startup; existing Codex processes were not restarted, so they will see the entry after a restart/reload.
-- **2026-11-06 clarification:** The user clarified that dependencies belong on each `python_repl_execute` tool call, not on stdio-server startup. The committed implementation currently uses startup dependency flags; this is superseded and must be revised.
+- **2026-11-06 clarification:** The user clarified that dependencies belong on each
+  `python_repl_execute` tool call, not on stdio-server startup. Implemented the
+  optional `dependencies` list as additive session dependencies in a private uv
+  target overlay, preserving the selected project venv and existing REPL state.
+  Verification: 21 repository tests passed; the dependency install path was
+  exercised with a stub uv executable (no package was installed into the
+  workstation environment), and py_compile, Ruff, and basedpyright passed. A
+  fresh stdio launch exposed the updated input schema and passed execution,
+  persistence, venv-selection and reset smoke checks. The already-running Codex
+  MCP process must be reloaded/restarted to pick up the changed tool schema.

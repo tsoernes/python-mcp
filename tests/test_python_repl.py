@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
@@ -106,30 +107,37 @@ class WorkerProtocolTests(unittest.TestCase):
         self.assertTrue(result["output_truncated"])
         self.assertLessEqual(len(result["stdout"]), 2_100)
 
+    def test_dependency_overlay_becomes_importable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            module = Path(temp_dir) / "repl_dependency_probe.py"
+            _ = module.write_text("VALUE = 42\n")
+            added = self.request("add_dependency_path", dependency_path=temp_dir)
+            imported = self.request(
+                "execute",
+                code="import repl_dependency_probe\nrepl_dependency_probe.VALUE",
+            )
+        self.assertTrue(added["ok"])
+        self.assertEqual(imported["result"], "42")
+
 
 class UvCommandTests(unittest.TestCase):
-    def test_startup_dependencies_are_separate_uv_arguments(self) -> None:
+    def test_dependencies_are_not_server_startup_arguments(self) -> None:
         uv = shutil.which("uv")
         self.assertIsNotNone(uv)
-        settings = python_repl_mcp.parse_settings(
-            [
-                "--uv",
-                str(uv),
-                "--dependency",
-                "numpy>=2",
-                "--dependency",
-                "pandas==2.3.*",
-            ]
-        )
+        settings = python_repl_mcp.parse_settings(["--uv", str(uv)])
         command = python_repl_mcp.build_worker_command(settings)
         self.assertEqual(command[0], str(Path(str(uv)).resolve()))
-        with_indexes = [i for i, item in enumerate(command) if item == "--with"]
-        self.assertEqual(len(with_indexes), 2)
-        self.assertEqual(
-            [command[i + 1] for i in with_indexes], ["numpy>=2", "pandas==2.3.*"]
+        self.assertNotIn("--with", command)
+        self.assertNotIn("--dependency", command)
+        dependency_command = python_repl_mcp.build_dependency_command(
+            settings,
+            Path("/tmp/python-repl-overlay"),
+            ("numpy>=2", "pandas==2.3.*"),
         )
-        self.assertIn("--no-project", command)
-        self.assertIn("--", command)
+        self.assertEqual(dependency_command[:2], [str(Path(str(uv)).resolve()), "pip"])
+        self.assertEqual(dependency_command[-2:], ["numpy>=2", "pandas==2.3.*"])
+        self.assertIn("--target", dependency_command)
+        self.assertIn("--python", dependency_command)
 
     def test_project_venv_selects_its_interpreter_without_modifying_it(self) -> None:
         with __import__("tempfile").TemporaryDirectory() as temp_dir:
@@ -216,6 +224,95 @@ class StdioMcpIntegrationTests(unittest.IsolatedAsyncioTestCase):
         assert worker_pid is not None
         with self.assertRaises(ProcessLookupError):
             os.kill(worker_pid, 0)
+
+    async def test_execute_tool_adds_dependencies_without_losing_kernel_state(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            fake_uv = Path(temp_dir) / "fake-uv"
+            target_record = Path(temp_dir) / "dependency-target.txt"
+            _ = fake_uv.write_text(
+                f"""#!{sys.executable}
+import os, sys
+args = sys.argv[1:]
+if args[:2] == ['pip', 'install']:
+    if args[-1] == 'broken-package==1':
+        print('simulated resolver failure', file=sys.stderr)
+        raise SystemExit(1)
+    target = args[args.index('--target') + 1]
+    os.makedirs(target, exist_ok=True)
+    with open({str(target_record)!r}, 'w') as record:
+        record.write(target)
+    with open(os.path.join(target, 'repl_dynamic_fixture.py'), 'w') as f:
+        f.write('VALUE = 2\\n')
+    raise SystemExit(0)
+if args and args[0] == 'run':
+    python = args[args.index('--python') + 1]
+    worker_args = args[args.index('--') + 1:]
+    os.execv(python, [python, *worker_args[1:]])
+raise SystemExit('unexpected fake uv command: ' + repr(args))
+"""
+            )
+            fake_uv.chmod(0o700)
+            args = [
+                str(SERVER),
+                "--uv",
+                str(fake_uv),
+                "--project-venv",
+                str(REPO / ".venv-daemon"),
+            ]
+            client = Client(
+                StdioTransport(command=sys.executable, args=args, keep_alive=False)
+            )
+            async with client:
+                before = (
+                    await client.call_tool(
+                        "python_repl_execute", {"code": "saved_value = 40"}
+                    )
+                ).data
+                with_dependency = (
+                    await client.call_tool(
+                        "python_repl_execute",
+                        {
+                            "code": "import repl_dynamic_fixture\nsaved_value + repl_dynamic_fixture.VALUE",
+                            "dependencies": ["test-fixture==1"],
+                        },
+                    )
+                ).data
+                failed_install = (
+                    await client.call_tool(
+                        "python_repl_execute",
+                        {
+                            "code": "saved_value = -1",
+                            "dependencies": ["broken-package==1"],
+                        },
+                    )
+                ).data
+                later = (
+                    await client.call_tool(
+                        "python_repl_execute",
+                        {"code": "saved_value + repl_dynamic_fixture.VALUE"},
+                    )
+                ).data
+                info = (await client.call_tool("python_repl_info", {})).data
+                reset = (await client.call_tool("python_repl_reset", {})).data
+                after_reset = (
+                    await client.call_tool(
+                        "python_repl_execute",
+                        {
+                            "code": "import repl_dynamic_fixture\nrepl_dynamic_fixture.VALUE"
+                        },
+                    )
+                ).data
+            self.assertTrue(before["ok"])
+            self.assertEqual(with_dependency["result"], "42")
+            self.assertFalse(failed_install["ok"])
+            self.assertIn("simulated resolver failure", failed_install["error"])
+            self.assertEqual(later["result"], "42")
+            self.assertEqual(info["dependencies"], ["test-fixture==1"])
+            self.assertTrue(reset["ok"])
+            self.assertEqual(after_reset["result"], "2")
+            self.assertFalse(Path(target_record.read_text()).exists())
 
 
 if __name__ == "__main__":

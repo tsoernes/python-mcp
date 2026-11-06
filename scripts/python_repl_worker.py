@@ -7,6 +7,7 @@ import ast
 import asyncio
 import builtins
 import contextlib
+import importlib
 import inspect
 import io
 import json
@@ -14,6 +15,7 @@ import sys
 import time
 import traceback
 from collections.abc import Awaitable, Iterator
+from pathlib import Path
 from typing import Any, final, override
 
 
@@ -182,6 +184,29 @@ def serve(max_output_chars: int = 40_000, max_request_bytes: int = 1_000_000) ->
             if method == "execute" and isinstance(request.get("code"), str):
                 result = worker.execute(request["code"])
                 _send({"type": "response", "id": request_id, **result})
+            elif method == "add_dependency_path" and isinstance(
+                request.get("dependency_path"), str
+            ):
+                try:
+                    dependency_path = Path(request["dependency_path"]).resolve(
+                        strict=True
+                    )
+                    if not dependency_path.is_dir():
+                        raise ValueError("dependency path is not a directory")
+                    path_text = str(dependency_path)
+                    if path_text not in sys.path:
+                        sys.path.insert(0, path_text)
+                    importlib.invalidate_caches()
+                    _send({"type": "response", "id": request_id, "ok": True})
+                except (OSError, ValueError) as exc:
+                    _send(
+                        {
+                            "type": "response",
+                            "id": request_id,
+                            "ok": False,
+                            "error": f"Invalid dependency path: {exc}",
+                        }
+                    )
             elif method == "info":
                 _send(
                     {

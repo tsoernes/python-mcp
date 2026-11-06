@@ -12,6 +12,7 @@ import os
 import shutil
 import signal
 import sys
+import tempfile
 import time
 from collections import deque
 from dataclasses import dataclass
@@ -32,7 +33,6 @@ class ReplSettings:
     uv_executable: str
     base_python: str
     project_venv: str | None
-    dependencies: tuple[str, ...]
     cwd: str
     default_timeout_seconds: float
     max_timeout_seconds: float
@@ -76,14 +76,6 @@ def _python_in_venv(venv: Path) -> Path:
 def parse_settings(argv: list[str] | None = None) -> ReplSettings:
     parser = argparse.ArgumentParser(description=__doc__)
     _ = parser.add_argument(
-        "--dependency",
-        action="append",
-        default=[],
-        type=_dependency,
-        metavar="PEP508_REQUIREMENT",
-        help="dependency to add to the uv-managed kernel environment; repeat as needed",
-    )
-    _ = parser.add_argument(
         "--project-venv",
         type=Path,
         help="existing project venv to use as the kernel base; it is not modified",
@@ -106,8 +98,6 @@ def parse_settings(argv: list[str] | None = None) -> ReplSettings:
     )
     args = parser.parse_args(argv)
 
-    if len(args.dependency) > MAX_DEPENDENCIES:
-        parser.error(f"at most {MAX_DEPENDENCIES} --dependency options are allowed")
     if (
         not math.isfinite(args.default_timeout_seconds)
         or args.default_timeout_seconds <= 0
@@ -147,12 +137,10 @@ def parse_settings(argv: list[str] | None = None) -> ReplSettings:
     if not Path(cwd).is_dir():
         parser.error("--cwd must name a directory")
 
-    dependencies = tuple(dict.fromkeys(args.dependency))
     return ReplSettings(
         uv_executable=uv_executable,
         base_python=base_python,
         project_venv=project_venv,
-        dependencies=dependencies,
         cwd=cwd,
         default_timeout_seconds=args.default_timeout_seconds,
         max_timeout_seconds=args.max_timeout_seconds,
@@ -163,26 +151,34 @@ def parse_settings(argv: list[str] | None = None) -> ReplSettings:
 
 
 def build_worker_command(settings: ReplSettings) -> list[str]:
-    command = [
+    return [
         settings.uv_executable,
         "run",
         "--no-project",
         "--python",
         settings.base_python,
+        "--",
+        "python",
+        "-u",
+        str(WORKER_PATH),
+        "--max-output-chars",
+        str(settings.max_output_chars),
     ]
-    for dependency in settings.dependencies:
-        command.extend(("--with", dependency))
-    command.extend(
-        (
-            "--",
-            "python",
-            "-u",
-            str(WORKER_PATH),
-            "--max-output-chars",
-            str(settings.max_output_chars),
-        )
-    )
-    return command
+
+
+def build_dependency_command(
+    settings: ReplSettings, target: Path, dependencies: tuple[str, ...]
+) -> list[str]:
+    return [
+        settings.uv_executable,
+        "pip",
+        "install",
+        "--target",
+        str(target),
+        "--python",
+        settings.base_python,
+        *dependencies,
+    ]
 
 
 @final
@@ -198,6 +194,9 @@ class KernelManager:
         self._lock: asyncio.Lock = asyncio.Lock()
         self._stderr_lines: deque[str] = deque(maxlen=80)
         self._stderr_task: asyncio.Task[None] | None = None
+        self.dependencies: tuple[str, ...] = ()
+        self._dependency_root: Path | None = None
+        self._dependency_paths: list[Path] = []
 
     async def _collect_stderr(self, stream: asyncio.StreamReader) -> None:
         try:
@@ -212,6 +211,132 @@ class KernelManager:
     def _stderr_tail(self) -> str:
         return "\n".join(list(self._stderr_lines)[-12:])[-8_000:]
 
+    @staticmethod
+    async def _capture_install_stderr(
+        stream: asyncio.StreamReader, lines: deque[str]
+    ) -> None:
+        try:
+            while line := await stream.readline():
+                decoded = line.decode("utf-8", errors="replace").rstrip()
+                if len(decoded) > 2_000:
+                    decoded = decoded[:2_000] + "…"
+                lines.append(decoded)
+        except (asyncio.CancelledError, ValueError):
+            return
+
+    @staticmethod
+    async def _terminate_process(process: asyncio.subprocess.Process) -> None:
+        if os.name == "posix":
+            with contextlib.suppress(ProcessLookupError):
+                os.killpg(process.pid, signal.SIGTERM)
+            try:
+                await asyncio.wait_for(process.wait(), timeout=0.75)
+            except TimeoutError:
+                with contextlib.suppress(ProcessLookupError):
+                    os.killpg(process.pid, signal.SIGKILL)
+                _ = await process.wait()
+        else:
+            if process.returncode is None:
+                process.terminate()
+            try:
+                await asyncio.wait_for(process.wait(), timeout=0.75)
+            except TimeoutError:
+                process.kill()
+                _ = await process.wait()
+
+    async def _install_dependencies(self, requested: list[str] | None) -> None:
+        if not requested:
+            return
+        if len(requested) > MAX_DEPENDENCIES:
+            raise ValueError(
+                f"at most {MAX_DEPENDENCIES} dependencies may be passed per call"
+            )
+        try:
+            additions = tuple(dict.fromkeys(_dependency(item) for item in requested))
+        except argparse.ArgumentTypeError as exc:
+            raise ValueError(str(exc)) from exc
+        candidate = tuple(dict.fromkeys((*self.dependencies, *additions)))
+        if candidate == self.dependencies:
+            return
+        if len(candidate) > MAX_DEPENDENCIES:
+            raise ValueError(
+                f"this REPL session may add at most {MAX_DEPENDENCIES} dependencies"
+            )
+
+        if self._dependency_root is None:
+            self._dependency_root = Path(
+                tempfile.mkdtemp(prefix="python-repl-dependencies-")
+            )
+        target = self._dependency_root / f"overlay-{len(self._dependency_paths) + 1}"
+        command = build_dependency_command(self.settings, target, candidate)
+        env = os.environ.copy()
+        env["UV_NO_PROGRESS"] = "1"
+        env["UV_COLOR"] = "never"
+        kwargs: dict[str, Any] = {}
+        if os.name == "posix":
+            kwargs["start_new_session"] = True
+
+        process = await asyncio.create_subprocess_exec(
+            *command,
+            stdin=asyncio.subprocess.DEVNULL,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=self.settings.cwd,
+            env=env,
+            **kwargs,
+        )
+        assert process.stderr is not None
+        stderr_lines: deque[str] = deque(maxlen=32)
+        stderr_task = asyncio.create_task(
+            self._capture_install_stderr(process.stderr, stderr_lines)
+        )
+        try:
+            await asyncio.wait_for(
+                process.wait(), timeout=self.settings.startup_timeout_seconds
+            )
+        except TimeoutError:
+            await self._terminate_process(process)
+            stderr_task.cancel()
+            _ = await asyncio.gather(stderr_task, return_exceptions=True)
+            shutil.rmtree(target, ignore_errors=True)
+            raise RuntimeError(
+                f"uv dependency installation exceeded {self.settings.startup_timeout_seconds:g} seconds"
+            ) from None
+        except asyncio.CancelledError:
+            await self._terminate_process(process)
+            stderr_task.cancel()
+            _ = await asyncio.gather(stderr_task, return_exceptions=True)
+            shutil.rmtree(target, ignore_errors=True)
+            raise
+        await stderr_task
+        if process.returncode != 0:
+            detail = "\n".join(stderr_lines)[-8_000:]
+            shutil.rmtree(target, ignore_errors=True)
+            raise RuntimeError(
+                f"uv could not install dependencies (exit code {process.returncode})"
+                + (f":\n{detail}" if detail else "")
+            )
+
+        # If the kernel is already running, add the new overlay without restarting
+        # it so existing REPL variables and imports remain available.
+        self._dependency_paths.append(target)
+        try:
+            if self.process is not None and self.process.returncode is None:
+                response = await self._request(
+                    "add_dependency_path",
+                    dependency_path=str(target),
+                    timeout_seconds=self.settings.startup_timeout_seconds,
+                )
+                if not response.get("ok"):
+                    raise RuntimeError(
+                        str(response.get("error", "worker rejected dependency path"))
+                    )
+        except (Exception, asyncio.CancelledError):
+            self._dependency_paths.pop()
+            shutil.rmtree(target, ignore_errors=True)
+            raise
+        self.dependencies = candidate
+
     async def _ensure_started(self) -> asyncio.subprocess.Process:
         if self.process is not None and self.process.returncode is None:
             return self.process
@@ -221,6 +346,12 @@ class KernelManager:
         env["PYTHONUNBUFFERED"] = "1"
         env["UV_NO_PROGRESS"] = "1"
         env["UV_COLOR"] = "never"
+        if self._dependency_paths:
+            inherited_pythonpath = env.get("PYTHONPATH")
+            pythonpath = [str(self._dependency_paths[-1])]
+            if inherited_pythonpath:
+                pythonpath.append(inherited_pythonpath)
+            env["PYTHONPATH"] = os.pathsep.join(pythonpath)
         kwargs: dict[str, Any] = {}
         if os.name == "posix":
             kwargs["start_new_session"] = True
@@ -269,23 +400,7 @@ class KernelManager:
         self.worker_info = None
         self.started_at = None
         if process is not None:
-            if os.name == "posix":
-                with contextlib.suppress(ProcessLookupError):
-                    os.killpg(process.pid, signal.SIGTERM)
-                try:
-                    await asyncio.wait_for(process.wait(), timeout=0.75)
-                except TimeoutError:
-                    with contextlib.suppress(ProcessLookupError):
-                        os.killpg(process.pid, signal.SIGKILL)
-                    _ = await process.wait()
-            else:
-                if process.returncode is None:
-                    process.terminate()
-                try:
-                    await asyncio.wait_for(process.wait(), timeout=0.75)
-                except TimeoutError:
-                    process.kill()
-                    _ = await process.wait()
+            await self._terminate_process(process)
         stderr_task = self._stderr_task
         self._stderr_task = None
         if stderr_task is not None:
@@ -300,6 +415,7 @@ class KernelManager:
         method: str,
         *,
         code: str | None = None,
+        dependency_path: str | None = None,
         timeout_seconds: float,
     ) -> dict[str, Any]:
         process = await self._ensure_started()
@@ -310,6 +426,8 @@ class KernelManager:
         request: dict[str, Any] = {"id": request_id, "method": method}
         if code is not None:
             request["code"] = code
+        if dependency_path is not None:
+            request["dependency_path"] = dependency_path
         payload = json.dumps(request, ensure_ascii=False, separators=(",", ":"))
         process.stdin.write(payload.encode("utf-8") + b"\n")
         await process.stdin.drain()
@@ -327,17 +445,12 @@ class KernelManager:
             key: value for key, value in response.items() if key not in {"type", "id"}
         }
 
-    async def execute(self, code: str, timeout_seconds: float | None) -> dict[str, Any]:
-        if not code.strip():
-            return {
-                "ok": True,
-                "stdout": "",
-                "stderr": "",
-                "result": "",
-                "error": "",
-                "duration_seconds": 0.0,
-                "output_truncated": False,
-            }
+    async def execute(
+        self,
+        code: str,
+        timeout_seconds: float | None,
+        dependencies: list[str] | None = None,
+    ) -> dict[str, Any]:
         if len(code) > self.settings.max_code_chars:
             return {
                 "ok": False,
@@ -368,6 +481,30 @@ class KernelManager:
                 "output_truncated": False,
             }
         async with self._lock:
+            try:
+                await self._install_dependencies(dependencies)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:  # noqa: BLE001 - expose dependency resolution errors to the tool caller.
+                return {
+                    "ok": False,
+                    "stdout": "",
+                    "stderr": "",
+                    "result": "",
+                    "error": f"Dependency setup failed: {type(exc).__name__}: {exc}",
+                    "duration_seconds": 0.0,
+                    "output_truncated": False,
+                }
+            if not code.strip():
+                return {
+                    "ok": True,
+                    "stdout": "",
+                    "stderr": "",
+                    "result": "",
+                    "error": "",
+                    "duration_seconds": 0.0,
+                    "output_truncated": False,
+                }
             try:
                 return await self._request(
                     "execute", code=code, timeout_seconds=effective_timeout
@@ -409,7 +546,7 @@ class KernelManager:
         return {
             "ok": True,
             "reset": was_running,
-            "message": "REPL state cleared; the next execution starts a fresh worker with the same uv environment.",
+            "message": "REPL state cleared; the next execution starts a fresh worker with the same session dependency overlay.",
         }
 
     async def info(self) -> dict[str, Any]:
@@ -423,7 +560,7 @@ class KernelManager:
                 "worker": self.worker_info if running else None,
                 "project_venv": self.settings.project_venv,
                 "base_python": self.settings.base_python,
-                "dependencies": list(self.settings.dependencies),
+                "dependencies": list(self.dependencies),
                 "working_directory": self.settings.cwd,
                 "default_timeout_seconds": self.settings.default_timeout_seconds,
                 "max_timeout_seconds": self.settings.max_timeout_seconds,
@@ -432,6 +569,10 @@ class KernelManager:
     async def close(self) -> None:
         async with self._lock:
             await self._stop_worker()
+            if self._dependency_root is not None:
+                shutil.rmtree(self._dependency_root, ignore_errors=True)
+                self._dependency_root = None
+                self._dependency_paths.clear()
 
 
 def create_server(settings: ReplSettings) -> FastMCP:
@@ -450,14 +591,17 @@ def create_server(settings: ReplSettings) -> FastMCP:
     async def python_repl_execute(
         code: str,
         timeout_seconds: float | None = None,
+        dependencies: list[str] | None = None,
     ) -> dict[str, Any]:
         """Execute Python in this Codex process's persistent REPL namespace.
 
         The worker starts lazily. It is not sandboxed and has the filesystem and
         network permissions of the selected Python environment's user process.
-        The final expression's repr is returned in `result`.
+        Pass PEP 508 requirements in `dependencies` to install them into a
+        private session overlay before this cell runs. Added dependencies remain
+        available to later cells. The final expression's repr is returned in `result`.
         """
-        return await manager.execute(code, timeout_seconds)
+        return await manager.execute(code, timeout_seconds, dependencies)
 
     @server.tool(tags={"execution", "repl"})
     async def python_repl_reset() -> dict[str, Any]:
@@ -466,7 +610,7 @@ def create_server(settings: ReplSettings) -> FastMCP:
 
     @server.tool(tags={"repl", "introspection"})
     async def python_repl_info() -> dict[str, Any]:
-        """Return configured dependencies, working directory and worker status."""
+        """Return session dependencies, working directory and worker status."""
         return await manager.info()
 
     return server

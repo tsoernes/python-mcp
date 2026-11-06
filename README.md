@@ -106,8 +106,8 @@ The server no longer exposes the disconnected legacy job tools (`py_get_job_outp
 For iterative scratch work, the repository also provides a separate stdio MCP
 entrypoint at `scripts/python_repl_mcp.py`. Codex starts one server process per
 client; each server lazily starts its own persistent Python worker. See
-[`docs/PYTHON_REPL.md`](docs/PYTHON_REPL.md) for startup dependency and project
-venv options, Codex configuration, lifecycle, and security limits. This is
+[`docs/PYTHON_REPL.md`](docs/PYTHON_REPL.md) for execute-time dependency and
+project venv options, Codex configuration, lifecycle, and security limits. This is
 separate from the shared HTTP Python MCP daemon and does not change the existing
 script/job tools.
 
