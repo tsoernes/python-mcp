@@ -24,3 +24,9 @@
 - Separate MCP processes cannot see each other's REPL namespaces.
 - Failure, timeout, cancellation and server shutdown do not leave the worker process tree running.
 - Repository tests, `py_compile`, and basedpyright pass for the new code; the Codex entry is validated without restarting other Codex instances.
+
+## Progress and verification
+
+- **2026-11-06:** Separate stdio FastMCP entrypoint, persistent per-process worker, uv startup requirements, explicit project-venv selection, lifecycle cleanup, usage/security documentation, and focused tests implemented.
+- **2026-11-06:** Full unittest discovery passed (19 tests); `py_compile`, Ruff, and basedpyright passed. An exact `uv --no-project --python ...` stdio launch matching Codex configuration successfully listed tools and evaluated code inside `.venv-daemon`.
+- **2026-11-06:** Added the `python-repl` entry to `/home/torstein.sornes/.codex/config.toml` and TOML parsing passed. Codex loads MCP configuration at startup; existing Codex processes were not restarted, so they will see the entry after a restart/reload.

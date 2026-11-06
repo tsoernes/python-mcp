@@ -101,6 +101,16 @@ Use the same returned `job_id` for status, cancellation, and job-list verificati
 
 The server no longer exposes the disconnected legacy job tools (`py_get_job_output`, `py_list_running_jobs`, `py_kill_job`, `py_cleanup_jobs`) or the `job-stream://` resource. Use the smart-async lifecycle tools instead.
 
+## Optional persistent Python REPL
+
+For iterative scratch work, the repository also provides a separate stdio MCP
+entrypoint at `scripts/python_repl_mcp.py`. Codex starts one server process per
+client; each server lazily starts its own persistent Python worker. See
+[`docs/PYTHON_REPL.md`](docs/PYTHON_REPL.md) for startup dependency and project
+venv options, Codex configuration, lifecycle, and security limits. This is
+separate from the shared HTTP Python MCP daemon and does not change the existing
+script/job tools.
+
 ## Environment variables
 
 Execution tools accept an `env_vars` mapping and/or an `env_file`. Values supplied in `env_vars` override the same keys loaded from the file; the parent process environment is inherited unless overridden.
